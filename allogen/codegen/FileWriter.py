@@ -1,4 +1,5 @@
 from StreamWriter import *
+from StringWriter import *
 
 class FileWriter(StreamWriter):
 
@@ -9,4 +10,9 @@ class FileWriter(StreamWriter):
         self.file.write(str)
 
     def __del__(self):
+        """
+        Close the file in the destructor.
+        It is still necessary to check if it does so when the runtime/console
+        closes        
+        """
         self.file.close()
