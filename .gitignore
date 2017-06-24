@@ -2,3 +2,4 @@ obsolete.py
 *.pyc
 proto.py
 proto2.py
+.idea/

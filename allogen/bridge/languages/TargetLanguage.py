@@ -1,0 +1,2 @@
+class TargetLanguage:
+    pass
