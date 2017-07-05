@@ -25,3 +25,16 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+from StringSourceCodeWriter import *
+import sys
+
+
+class StreamSourceCodeWriter(SourceCodeWriter):
+    def __init__(self, stream=sys.stdout, **kwargs):
+        super(StreamSourceCodeWriter, self).__init__(**kwargs)
+        self.stream = stream
+
+    def raw_write(self, str):
+        self.stream.write(str)
+        return True

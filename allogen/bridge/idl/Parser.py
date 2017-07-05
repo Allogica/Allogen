@@ -119,7 +119,7 @@ method_list = (
 
 full_method_list = (
     ZeroOrMore(constructor_prototype)('constructors') +
-    Optional(destructor_prototype('destructor')) +
+    Optional(destructor_prototype)('destructor') +
     InterfaceDict(ZeroOrMore(method_prototype), param='name')('methods')
 )
 
@@ -166,20 +166,15 @@ definitions = InterfaceDict(ZeroOrMore(
 syntax = Each(
     ZeroOrMore(import_decl)('imports') +
     definitions('definitions') +
-    InterfaceDict(ZeroOrMore(
+    (InterfaceDict(ZeroOrMore(
         interface | cls | namespace
-    ), param='name')
+    ), param='name'))('content')
 )
 
 with open('sample/sample.i') as f:
     c = f.read()
 
-parsed = syntax.parseString(c, parseAll=True)
-print parsed.dump()
-
-class ParsedOutput:
-    def __init__(self):
-        pass
+from allogen.bridge.idl.Objects import *
 
 
 class Parser:
@@ -187,4 +182,130 @@ class Parser:
         pass
 
     def parse(self, str):
+        idl = IDL()
+        parsed = syntax.parseString(str, parseAll=True)
+        print parsed.dump()
+
+        return IDL(
+            declarations=map(self.parse_declaration, parsed.content),
+            imports=map(self.parse_include, parsed.imports),
+            definitions=map(self.parse_definition, parsed.definitions)
+        )
+
+        # for decl in parsed.content:
+        #     self.parse_declaration(decl, idl)
+
         pass
+
+    def parse_definition(self, decl):
+        return IDLDefinition(
+            name=decl.name,
+            value=decl.value
+        )
+
+    def parse_import(self, decl):
+        return IDLImport(
+            path=decl.path
+        )
+
+    def parse_include(self, decl):
+        return IDLInclude(
+            path=decl.path
+        )
+
+    def parse_declaration(self, decl):
+        if decl.type == 'namespace':
+            return self.parse_namespace(decl)
+        elif decl.type == 'class':
+            return self.parse_class(decl)
+
+    def parse_namespace(self, decl):
+        return IDLNamespace(
+            name=decl.name,
+            contents=map(self.parse_declaration, decl.content),
+            annotations=self.parse_annotations(decl),
+            description=decl.documentation
+        )
+
+    def parse_class(self, decl):
+        return IDLClass(
+            name=decl.name,
+            annotations=self.parse_annotations(decl),
+            description=decl.documentation,
+            implements=decl.implements,
+            extends=decl.extends,
+            methods=map(self.parse_constructor, decl.constructors) +
+                    map(self.parse_destructor, decl.destructor) +
+                    map(self.parse_method, decl.methods)
+        )
+
+    def parse_constructor(self, decl):
+        return IDLConstructor(
+            name=decl.name,
+            body=decl.body,
+            annotations=self.parse_annotations(decl),
+            arguments=self.parse_arguments(decl)
+        )
+
+    def parse_destructor(self, decl):
+        return IDLDestructor(
+            name=decl.name,
+            body=decl.body,
+            annotations=self.parse_annotations(decl),
+            arguments=self.parse_arguments(decl)
+        )
+
+    def parse_method(self, decl):
+        return IDLMethod(
+            name=decl.name,
+            ret=self.parse_typename(decl['return']),
+            body=decl.body,
+            annotations=self.parse_annotations(decl),
+            arguments=self.parse_arguments(decl)
+        )
+
+    def parse_arguments(self, decl):
+        return map(
+            lambda arg: IDLMethodArgument(
+                name=arg.name,
+                type=self.parse_typename(arg.type),
+                default_value=arg.default_value,
+                annotations=self.parse_annotations(arg)
+            ),
+            decl.arguments
+        )
+
+    def parse_typename(self, decl):
+        return IDLTypename(
+            name=decl.typename,
+            optional='optional' in decl
+        )
+
+    def parse_annotations(self, decl):
+        # return map(
+        #     lambda annotation: IDLAnnotation(
+        #         name=annotation.name,
+        #         attributes=map(
+        #             lambda attr:
+        #         )
+        #     ),
+        #     decl.arguments
+        # )
+
+        annotations = list()
+        for annotation in decl.annotations:
+            a = IDLAnnotation(
+                name=annotation.name
+            )
+            for e in annotation:
+                if 'value' in e:
+                    a.attributes[e.name] = e.value
+            annotations.append(a)
+
+        return annotations
+
+
+p = Parser()
+
+from pprint import pprint
+print p.parse(c)

@@ -25,3 +25,12 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+from allogen.codegen.languages import *
+from allogen.codegen.StreamSourceCodeWriter import *
+
+from allogen.codegen.sample.class_decl import ns
+
+generator = CSharpLanguage.CSharpLanguageSourceGenerator()
+writer = StreamSourceCodeWriter(generator=generator)
+writer(ns)

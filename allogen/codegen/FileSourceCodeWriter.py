@@ -25,3 +25,22 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+from SourceCodeWriter import *
+from StreamSourceCodeWriter import *
+
+
+class FileSourceCodeWriter(StreamSourceCodeWriter):
+    def __init__(self, fname, **kwargs):
+        super(FileSourceCodeWriter, self).__init__(
+            stream=open(fname, 'w'),
+            **kwargs
+        )
+
+    def __del__(self):
+        """
+        Close the file in the destructor.
+        It is still necessary to check if it does so when the runtime/console
+        closes        
+        """
+        self.stream.close()

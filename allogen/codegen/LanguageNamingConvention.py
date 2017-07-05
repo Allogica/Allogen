@@ -25,3 +25,25 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+class LanguageNamingConvention(object):
+    def __init__(self):
+        pass
+
+    def class_name(self, name):
+        return name
+
+    def enum_name(self, name):
+        return name
+
+    def enum_definition(self, name):
+        return name
+
+    def member_func_name(self, name):
+        return name
+
+    def member_var_name(self, name):
+        return name
+
+    def argument_name(self, name):
+        return name

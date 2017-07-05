@@ -25,3 +25,15 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+from SourceCodeWriter import *
+
+
+class StringSourceCodeWriter(SourceCodeWriter):
+    def __init__(self, **kwargs):
+        super(StringSourceCodeWriter, self).__init__(**kwargs)
+        self.buffer = ""
+
+    def raw_write(self, *args):
+        self.buffer += "".join(args)
+        return True

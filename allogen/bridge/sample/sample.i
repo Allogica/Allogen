@@ -24,10 +24,6 @@ namespace Allogen::Tests {
         }
     }
 
-    namespace Provider {
-        type OpenFileProviderOperationPromise -> OpenFileProviderOperation::Promise;
-    }
-
     /// Hello
     /// Again. Testing
     class FileManager {
