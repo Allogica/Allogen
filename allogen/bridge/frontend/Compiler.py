@@ -26,10 +26,46 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+from allogen.bridge.frontend.CompilerContext import CompilerContext
+import passes as p
+from bridge.idl.Parser import Parser
+
+
+class Compiler(object):
+    def __init__(self, passes=None):
+        self.passes = passes
+        if self.passes is None:
+            self.passes = [
+                p.IDLParsingPass.IDLParsingPass(),
+                p.ImportingPass.ImportingPass(),
+                p.TypenameMappingPass.TypenameMappingPass(),
+                p.CodegenConstructsCreationPass.CodegenConstructsCreationPass(),
+                p.BackendTargetCodegenPass.BackendTargetCodegenPass(),
+                p.BackendBridgeCodegenPass.BackendBridgeCodegenPass()
+            ]
+
+    def add_compiler_pass(self, compiler_pass):
+        self.passes.append(compiler_pass)
+
+    def compile_file(self, file, **kwargs):
+        with open(file) as f:
+            return self.compile_source(f.read(), file=file, **kwargs)
+
+    def compile_source(self, source, **kwargs):
+        context = CompilerContext()
+        context.__dict__.update(kwargs)
+
+        context.source = source
+
+        for compiler_pass in sorted(self.passes, key=lambda p: p.get_order()):
+            compiler_pass.run(context)
+
+    def list_products(self, file):
+        source = None
+        with open(file) as f:
+            source = f.read()
+
+        parser = Parser()
+        parsed = parser.parse(source)
+
+        return map(lambda c: c.name, parsed.get_classes())

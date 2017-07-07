@@ -42,6 +42,12 @@ import_decl = Group(
     Literal('import')('type') + QuotedString('"')('path') + optional_semicolon
 )
 
+include_decl = Group(Or([
+    Literal('#include')('quoted') + QuotedString('"')('path'),
+    Literal('#include')('angled') + QuotedString('<', endQuoteChar='>')('path'),
+]) + optional_semicolon
+)
+
 annotation = Group(
     Literal('@').suppress() + Word(cpp_ident)('name') + Optional(
         Literal('(') + InterfaceDict(delimitedList(Group(
@@ -89,8 +95,8 @@ method_prototype = Group(
         InterfaceDict(delimitedList(method_argument), param='name')('arguments')
     ) + Literal(')').suppress() +
     Optional(
-        cpp_inline_code
-    )('body') + optional_semicolon
+        cpp_inline_code('body')
+    ) + optional_semicolon
 )
 constructor_prototype = Group(
     documentation('documentation') +
@@ -164,15 +170,15 @@ definitions = InterfaceDict(ZeroOrMore(
 ), param='name')
 
 syntax = Each(
-    ZeroOrMore(import_decl)('imports') +
+    Each([
+        ZeroOrMore(import_decl)('imports'),
+        ZeroOrMore(include_decl)('includes'),
+    ]) +
     definitions('definitions') +
     (InterfaceDict(ZeroOrMore(
         interface | cls | namespace
     ), param='name'))('content')
 )
-
-with open('sample/sample.i') as f:
-    c = f.read()
 
 from allogen.bridge.idl.Objects import *
 
@@ -182,20 +188,13 @@ class Parser:
         pass
 
     def parse(self, str):
-        idl = IDL()
         parsed = syntax.parseString(str, parseAll=True)
-        print parsed.dump()
-
         return IDL(
             declarations=map(self.parse_declaration, parsed.content),
-            imports=map(self.parse_include, parsed.imports),
+            imports=map(self.parse_import, parsed.imports),
+            includes=map(self.parse_include, parsed.includes),
             definitions=map(self.parse_definition, parsed.definitions)
         )
-
-        # for decl in parsed.content:
-        #     self.parse_declaration(decl, idl)
-
-        pass
 
     def parse_definition(self, decl):
         return IDLDefinition(
@@ -210,7 +209,8 @@ class Parser:
 
     def parse_include(self, decl):
         return IDLInclude(
-            path=decl.path
+            path=decl.path,
+            angled=('angled' in decl)
         )
 
     def parse_declaration(self, decl):
@@ -234,9 +234,9 @@ class Parser:
             description=decl.documentation,
             implements=decl.implements,
             extends=decl.extends,
-            methods=map(self.parse_constructor, decl.constructors) +
-                    map(self.parse_destructor, decl.destructor) +
-                    map(self.parse_method, decl.methods)
+            constructors=map(self.parse_constructor, decl.constructors),
+            destructor=self.parse_destructor(decl.destructor),
+            methods=self.parse_methods(decl.methods)
         )
 
     def parse_constructor(self, decl):
@@ -244,7 +244,8 @@ class Parser:
             name=decl.name,
             body=decl.body,
             annotations=self.parse_annotations(decl),
-            arguments=self.parse_arguments(decl)
+            arguments=self.parse_arguments(decl),
+            description=decl.documentation
         )
 
     def parse_destructor(self, decl):
@@ -252,7 +253,8 @@ class Parser:
             name=decl.name,
             body=decl.body,
             annotations=self.parse_annotations(decl),
-            arguments=self.parse_arguments(decl)
+            arguments=self.parse_arguments(decl),
+            description=decl.documentation
         )
 
     def parse_method(self, decl):
@@ -261,8 +263,18 @@ class Parser:
             ret=self.parse_typename(decl['return']),
             body=decl.body,
             annotations=self.parse_annotations(decl),
-            arguments=self.parse_arguments(decl)
+            arguments=self.parse_arguments(decl),
+            description=decl.documentation
         )
+
+    def parse_methods(self, decl):
+        methods = {}
+        for mdecl in decl:
+            m = self.parse_method(mdecl)
+            if m.name not in methods:
+                methods[m.name] = []
+            methods[m.name].append(m)
+        return methods
 
     def parse_arguments(self, decl):
         return map(
@@ -270,7 +282,8 @@ class Parser:
                 name=arg.name,
                 type=self.parse_typename(arg.type),
                 default_value=arg.default_value,
-                annotations=self.parse_annotations(arg)
+                annotations=self.parse_annotations(arg),
+                description=arg.documentation
             ),
             decl.arguments
         )
@@ -303,9 +316,3 @@ class Parser:
             annotations.append(a)
 
         return annotations
-
-
-p = Parser()
-
-from pprint import pprint
-print p.parse(c)

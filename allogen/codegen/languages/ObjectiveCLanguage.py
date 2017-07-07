@@ -213,15 +213,13 @@ class ObjectiveCInterfaceLanguageSourceGenerator(ObjectiveCLanguageSourceGenerat
         if not super(ObjectiveCInterfaceLanguageSourceGenerator, self).clazz(writer, cls):
             return False
 
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, cls)
+        doc_nl = write_doxygen_like_documentation_block(writer, cls)
         writer(
             writer.tab,
             '@interface ', cls.name, writer.nl,
 
-            writer.indented(
-                writer.joined(
-                    [writer.nl], cls.members
-                )
+            writer.joined(
+                [writer.nl], cls.members
             ),
 
             writer.nl, writer.tab,
@@ -231,7 +229,7 @@ class ObjectiveCInterfaceLanguageSourceGenerator(ObjectiveCLanguageSourceGenerat
         )
 
     def member_var(self, writer, member):
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, member)
+        doc_ln = write_doxygen_like_documentation_block(writer, member)
         writer(
             writer.tab,
             '@property ',
@@ -241,7 +239,7 @@ class ObjectiveCInterfaceLanguageSourceGenerator(ObjectiveCLanguageSourceGenerat
         )
 
     def constructor(self, writer, const):
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, const)
+        doc_nl = write_doxygen_like_documentation_block(writer, const)
 
         const.name = 'init'
         const.ret = 'id'
@@ -256,12 +254,12 @@ class ObjectiveCInterfaceLanguageSourceGenerator(ObjectiveCLanguageSourceGenerat
         dest.name = 'dealloc'
         dest.ret = 'void'
 
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, dest)
+        doc_nl = write_doxygen_like_documentation_block(writer, dest)
         self._objc_method_signature(writer, dest)
         writer(doc_nl)
 
     def member_func(self, writer, member):
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, member)
+        doc_nl = write_doxygen_like_documentation_block(writer, member)
         self._objc_method_signature(writer, member)
         writer(
             doc_nl
@@ -276,7 +274,7 @@ class ObjectiveCInterfaceLanguageSourceGenerator(ObjectiveCLanguageSourceGenerat
         if not super(ObjectiveCInterfaceLanguageSourceGenerator, self).enum(writer, enum):
             return False
 
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, enum)
+        doc_ln = write_doxygen_like_documentation_block(writer, enum)
         writer(
             writer.tab,
             'typedef NS_ENUM(', (
@@ -294,7 +292,7 @@ class ObjectiveCInterfaceLanguageSourceGenerator(ObjectiveCLanguageSourceGenerat
         )
 
     def enum_def(self, writer, enum_def):
-        writeDoxygenLikeDocumentationBlock(writer, enum_def)
+        write_doxygen_like_documentation_block(writer, enum_def)
         writer(
             writer.tab,
             self._objc_enum_naming(enum_def.name),
@@ -324,7 +322,7 @@ class ObjectiveCImplementationLanguageSourceGenerator(ObjectiveCLanguageSourceGe
         if not super(ObjectiveCImplementationLanguageSourceGenerator, self).clazz(writer, cls):
             return False
 
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, cls)
+        doc_nl = write_doxygen_like_documentation_block(writer, cls)
         writer(
             writer.tab,
             '@implementation ', cls.name, writer.nl,

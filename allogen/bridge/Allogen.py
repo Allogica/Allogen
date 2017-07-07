@@ -26,4 +26,11 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import languages
+import backend
+
+class Allogen(object):
+    def __init__(self, idl):
+        self.idl = idl
+
+    def generate(self, language):
+        pass

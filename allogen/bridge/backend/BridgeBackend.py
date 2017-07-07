@@ -26,10 +26,16 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+
+class BridgeBackend(object):
+    def __init__(self):
+        pass
+
+    def full_pass(self, context):
+        pass
+
+    def handle_class(self, context, cls):
+        pass
+
+    def codegen(self, context, cls):
+        pass

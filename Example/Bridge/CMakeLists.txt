@@ -26,10 +26,23 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+include(CompileAllogenInterface)
+add_allogen_interface(Allogen.Example.Bridge.Generate
+        LANGUAGE        Java
+        IDL             ${CMAKE_CURRENT_SOURCE_DIR}/IDL/Example.i
+        
+        INCLUDE_DIRS    ${CMAKE_CURRENT_SOURCE_DIR}/IDL
+        
+        TARGET_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/Java
+        BRIDGE_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/Source/JNI
+)
+
+# Conditionally enable the Java bridge based on JNI presence
+if(TARGET Allogen.JNI)
+    file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Source/JNI/*.cpp)
+    add_library(Allogen.Example.Bridge.JNI SHARED ${SRCS})
+    target_link_libraries(Allogen.Example.Bridge.JNI
+            PUBLIC  Allogen.JNI
+            PRIVATE Allogen.Example
+    )
+endif()

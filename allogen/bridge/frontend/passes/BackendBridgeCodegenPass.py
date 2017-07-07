@@ -25,11 +25,20 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from allogen.bridge.backend.java.JavaBridgeBackend import JavaBridgeBackend
+from allogen.bridge.frontend.CompilerPass import CompilerPass
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+
+class BackendBridgeCodegenPass(CompilerPass):
+    def run(self, context):
+        backend = JavaBridgeBackend()
+
+        backend.full_pass(context)
+
+        for cls in context.classes.values():
+            backend.handle_class(context, cls)
+
+        for cls in context.classes.values():
+            backend.codegen(context, cls)
+    def get_order(self):
+        return 600

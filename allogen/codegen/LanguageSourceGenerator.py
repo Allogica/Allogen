@@ -43,7 +43,9 @@ class LanguageSourceGenerator(object):
         return None
 
     def get_parent_node(self):
-        return self.node_stack[-2]
+        if -2 in self.node_stack:
+            return self.node_stack[-2]
+        return None
 
     def first_pass(self, node):
         pass
@@ -157,7 +159,8 @@ class LanguageSourceGenerator(object):
     def comment(self, writer, comment):
         raise Exception("Comment blocks are not supported by the generator implementation")
 
-def writeDoxygenLikeDocumentationBlock(writer, node):
+
+def write_doxygen_like_documentation_block(writer, node):
     if node.documentation is not None:
         writer(writer.tab, '/**', writer.nl)
         writer(

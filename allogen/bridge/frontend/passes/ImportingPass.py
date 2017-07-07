@@ -26,10 +26,35 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+from allogen.bridge.frontend.CompilerPass import CompilerPass
+from allogen.bridge.idl.Parser import Parser
+
+import os
+
+
+class ImportingPass(CompilerPass):
+    """
+    Parses all files declared as imported in the source IDL
+    """
+
+    def run(self, context):
+        parser = Parser()
+        # parse all imported idls
+        context.imports = map(
+            lambda imported: parser.parse(
+                open(os.path.join(os.path.dirname(context.file), imported.path)).read()
+            ),
+            context.idl.imports
+        )
+
+        context.imported_classes = {}
+        for imported in context.imports:
+            loaded = imported.get_classes()
+            for (k, v) in loaded.iteritems():
+                if k in context.imported_classes or k in context.all_classes:
+                    raise Exception(k+" class was already imported")
+            context.imported_classes.update(loaded)
+            context.all_classes.update(loaded)
+
+    def get_order(self):
+        return 200

@@ -1,5 +1,5 @@
 class IDL(object):
-    def __init__(self, declarations=None, definitions=None, imports=None):
+    def __init__(self, declarations=None, definitions=None, imports=None, includes=None):
         self.declarations = declarations
         if self.declarations is None:
             self.declarations = []
@@ -12,11 +12,26 @@ class IDL(object):
         if self.imports is None:
             self.imports = []
 
+        self.includes = includes
+        if self.includes is None:
+            self.includes = []
+
     def __str__(self):
         return str(self.__dict__)
 
     def __repr__(self):
         return str(self.__dict__)
+
+    def __copy__(self):
+        newone = type(self)(**self.__dict__)
+        newone.__dict__.update(self.__dict__)
+        return newone
+
+    def __deepcopy__(self, memo):
+        from copy import deepcopy
+        newone = type(self)(**self.__dict__)
+        newone.__dict__.update(deepcopy(self.__dict__))
+        return newone
 
     def add_declaration(self, declaration):
         self.declarations.append(declaration)
@@ -26,6 +41,12 @@ class IDL(object):
 
     def add_import(self, imp):
         self.imports.append(imp)
+
+    def get_classes(self):
+        classes = {}
+        for decl in self.declarations:
+            classes.update(decl.get_classes())
+        return classes
 
 
 class IDLObject(object):
@@ -37,6 +58,20 @@ class IDLObject(object):
 
     def __repr__(self):
         return str(self.__dict__)
+
+    def __copy__(self):
+        newone = type(self)(**self.__dict__)
+        newone.__dict__.update(self.__dict__)
+        return newone
+
+    def __deepcopy__(self, memo):
+        from copy import deepcopy
+        newone = type(self)(**self.__dict__)
+        newone.__dict__.update(deepcopy(self.__dict__))
+        return newone
+
+    def get_classes(self):
+        return {}
 
 
 class IDLAnnotation(IDLObject):
@@ -67,9 +102,10 @@ class IDLImport(IDLObject):
 
 
 class IDLInclude(IDLObject):
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, angled=False, **kwargs):
         super(IDLInclude, self).__init__(**kwargs)
         self.path = path
+        self.angled = angled
 
 
 class IDLDefinition(IDLObject):
@@ -94,12 +130,19 @@ class IDLNamespace(IDLAnnotatedObject):
     def add_declaration(self, member):
         self.contents.append(member)
 
+    def get_classes(self):
+        classes = {}
+        for content in self.contents:
+            classes.update(content.get_classes())
+        return classes
+
 
 class IDLTypename(IDLObject):
     def __init__(self, name, optional=False, **kwargs):
         super(IDLTypename, self).__init__(**kwargs)
         self.name = name
         self.optional = optional
+        self.linked_type = None
 
 
 class IDLTypeAlias(IDLAnnotatedObject):
@@ -113,13 +156,20 @@ class IDLTypeAlias(IDLAnnotatedObject):
 
 
 class IDLClass(IDLAnnotatedObject):
-    def __init__(self, name, methods=None, extends=None, implements=None, description=None, **kwargs):
+    def __init__(self, name, constructors=None, destructor=None, methods=None, extends=None, implements=None, description=None, **kwargs):
         super(IDLClass, self).__init__(**kwargs)
 
         self.name = name
-        self.methods = methods
-        if self.methods is None:
-            self.methods = []
+
+        self.constructors = constructors
+        if self.constructors is None:
+            self.constructors = []
+
+        self.destructor = destructor
+
+        self.methods_dict = methods
+        if self.methods_dict is None:
+            self.methods_dict = {}
 
         self.extends = extends
         if self.extends is None:
@@ -132,8 +182,22 @@ class IDLClass(IDLAnnotatedObject):
         self.description = description
         self.namespace = None
 
+    def __getattr__(self, item):
+        if item == 'methods':
+            return sorted({x for v in self.methods_dict.itervalues() for x in v})
+
     def add_method(self, method):
-        self.methods.append(method)
+        if method.name not in self.methods:
+            self.methods[method.name] = []
+        self.methods[method.name].append(method)
+
+    def get_method(self, name):
+        return next((m for m in self.methods if m.name == name), None)
+
+    def get_classes(self):
+        return {
+            self.name: self
+        }
 
 
 class IDLMethodArgument(IDLAnnotatedObject):
@@ -157,7 +221,7 @@ class IDLMethod(IDLAnnotatedObject):
             raise Exception("IDLMethod return type must be a IDLTypename")
 
         if self.ret is None:
-            self.ret = []
+            self.ret = IDLTypename(name='void')
 
         self.arguments = arguments
         if self.arguments is None:

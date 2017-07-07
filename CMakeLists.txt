@@ -26,10 +26,37 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from ..TargetLanguage import TargetLanguage
+project(Allogen CXX)
+cmake_minimum_required(VERSION 3.2)
 
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+endif()
 
-class CSharpTargetLanguage(TargetLanguage):
-    def __init__(self):
-        pass
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 
+find_package(JNI)
+if(JNI_FOUND)
+    add_library(Allogen.JNI INTERFACE)
+    target_include_directories(Allogen.JNI
+            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Source
+            INTERFACE ${JNI_INCLUDE_DIRS}
+    )
+    target_link_libraries(Allogen.JNI
+            INTERFACE ${JNI_LIBRARIES}
+    )
+endif()
+
+add_library(Allogen.ObjectiveC INTERFACE)
+target_include_directories(Allogen.ObjectiveC
+        INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Source
+)
+
+# Enables the Allogen example.
+# This is off by default so that the library is easier to integrate
+# using a add_directory.
+option(ALLOGEN_EXAMPLE "Enables the Allogen example." OFF)
+
+if(ALLOGEN_EXAMPLE)
+    add_subdirectory(Example)
+endif()

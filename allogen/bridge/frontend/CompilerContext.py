@@ -26,10 +26,23 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+
+class CompilerContext(object):
+    def __init__(self):
+        self.types = {}
+
+    def find_type(self, name, scope=''):
+        namespaces = scope.split('::')
+        ns_dict = self.types
+        for namespace in namespaces:
+            if name in ns_dict:
+                return ns_dict[name]
+
+            if not namespace in ns_dict:
+                return None
+            ns_dict = ns_dict[namespace]
+
+        if name in ns_dict:
+            return ns_dict[name]
+        return None
+

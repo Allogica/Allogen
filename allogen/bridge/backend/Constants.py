@@ -26,10 +26,8 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+codegen_notice = """THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT CHANGE IT!
+
+This file was generated using the Allogen bridge tool. If
+you wish to make changes to it, you must edit the original
+interface declaration file and regenerate the bridge code."""

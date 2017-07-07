@@ -43,13 +43,14 @@ class LanguageConstruct(object):
         return None
 
     def __copy__(self):
-        newone = type(self)(**self.__dict__)
+        newone = type(self).__new__(type(self))
         newone.__dict__.update(self.__dict__)
         return newone
 
     def __deepcopy__(self, memo):
         from copy import deepcopy
-        newone = type(self)(**self.__dict__)
+
+        newone = type(self).__new__(type(self))
         newone.__dict__.update(deepcopy(self.__dict__))
         return newone
 

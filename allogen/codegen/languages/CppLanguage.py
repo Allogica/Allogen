@@ -245,7 +245,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
     def clazz(self, writer, cls):
         self.change_visiblity_scope(writer, cls.visibility, cls.force_visibility_change)
 
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, cls)
+        doc_ln = write_doxygen_like_documentation_block(writer, cls)
         writer(
             writer.tab, "class ", cls.name,
             partial(self.__class__.class_body, self, writer, cls),
@@ -255,7 +255,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
     def template_spec_class(self, writer, cls):
         self.change_visiblity_scope(writer, cls.visibility, cls.force_visibility_change)
 
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, cls)
+        doc_ln = write_doxygen_like_documentation_block(writer, cls)
         writer(
             writer.tab, 'template<', cls.template, '>', writer.nl,
             writer.tab, "class ", cls.name, '<', cls.specialization, '>',
@@ -288,7 +288,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
     def member_var(self, writer, member):
         self.change_visiblity_scope(writer, member.visibility, member.force_visibility_change)
 
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, member)
+        doc_ln = write_doxygen_like_documentation_block(writer, member)
         writer(
             writer.tab,
             member.type, " ", member.name,
@@ -304,7 +304,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
     def member_func(self, writer, member, template=None):
         self.change_visiblity_scope(writer, member.visibility, member.force_visibility_change)
 
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, member)
+        doc_ln = write_doxygen_like_documentation_block(writer, member)
         writer(
             (
                 template, [
@@ -337,7 +337,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
 
         self.change_visiblity_scope(writer, const.visibility, const.force_visibility_change)
 
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, const)
+        doc_ln = write_doxygen_like_documentation_block(writer, const)
         writer(
             writer.tab,
             partial(self.__class__.func_attributes, self, writer, const),
@@ -363,7 +363,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
         cls = self.get_last_node_of_kind(Class)
         self.change_visiblity_scope(writer, dest.visibility, dest.force_visibility_change)
 
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, dest)
+        doc_ln = write_doxygen_like_documentation_block(writer, dest)
         writer(
             writer.tab,
             partial(self.__class__.func_attributes, self, writer, dest),
@@ -378,7 +378,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
         )
 
     def func(self, writer, func):
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, func)
+        doc_ln = write_doxygen_like_documentation_block(writer, func)
         writer(
             writer.tab,
             partial(self.__class__.func_attributes, self, writer, func),
@@ -404,7 +404,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
     def alias(self, writer, alias):
         writer((
             not alias.out_of_line, [
-                partial(writeDoxygenLikeDocumentationBlock, writer, alias),
+                partial(write_doxygen_like_documentation_block, writer, alias),
                 "using ", alias.name + " = ", alias.to + ";"
             ]
         ))
@@ -412,7 +412,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
     def enum(self, writer, enum):
         self.change_visiblity_scope(writer, enum.visibility, enum.force_visibility_change)
 
-        doc_ln = writeDoxygenLikeDocumentationBlock(writer, enum)
+        doc_ln = write_doxygen_like_documentation_block(writer, enum)
         writer(
             writer.tab,
             (
@@ -432,7 +432,7 @@ class CppHeaderFileLanguage(CppLanguageSourceGenerator):
         )
 
     def enum_def(self, writer, enum_def):
-        writeDoxygenLikeDocumentationBlock(writer, enum_def)
+        write_doxygen_like_documentation_block(writer, enum_def)
         writer(
             writer.tab,
             enum_def.name,

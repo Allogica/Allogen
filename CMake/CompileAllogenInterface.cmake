@@ -26,10 +26,50 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+if (ADD_ALLOGEN_INTERFACE_INCLUDED)
+    return()
+endif ()
+set(ADD_ALLOGEN_INTERFACE_INCLUDED)
+
+include(CMakeParseArguments)
+find_package(PythonInterp)
+
+if (NOT ALLOGEN_COMPILER)
+    find_file(ALLOGEN_COMPILER allogenc
+            HINTS ${ALLOGEN_ROOT}/bin
+            DOC "The Allogen compiler path"
+    )
+    if (ALLOGEN_COMPILER)
+        message(STATUS "Found the Allogen compiler at ${ALLOGEN_COMPILER}")
+    else ()
+        message(WARNING "Could not find the Allogen compiler. Try setting ALLOGEN_ROOT variable to the root of the Allogen install.")
+    endif ()
+endif ()
+
+function(add_allogen_interface target_name)
+    set(options)
+    set(oneValueArgs LANGUAGE TARGET_DIR BRIDGE_DIR)
+    set(multiValueArgs IDL INCLUDE_DIRS)
+    cmake_parse_arguments(IFT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    
+    if (NOT PYTHONINTERP_FOUND OR NOT ALLOGEN_COMPILER)
+        return()
+    endif ()
+    
+    set(INCLUDE_LIST)
+    foreach(${dir} ${IFT_INCLUDE_DIRS})
+        list(APPEND -I${dir})
+    endforeach()
+    
+    add_custom_target(${target_name} SOURCES ${IFT_IDL}
+            DEPENDS ${IFT_IDL}
+            COMMAND ${PYTHON_EXECUTABLE} ${ALLOGEN_COMPILER}
+                --target ${IFT_LANGUAGE}
+                --target-dir ${IFT_TARGET_DIR}
+                --bridge-dir ${IFT_BRIDGE_DIR}
+                ${INCLUDE_LIST}
+                ${IFT_IDL}
+            COMMENT "Compiling Allogen interface files..."
+    )
+
+endfunction()

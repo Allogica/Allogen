@@ -78,7 +78,7 @@ class CSharpLanguageSourceGenerator(LanguageSourceGenerator):
             writer(type.name)
 
     def clazz(self, writer, cls):
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, cls)
+        doc_nl = write_doxygen_like_documentation_block(writer, cls)
         writer(
             writer.tab,
             visibility_scope_mapping[cls.visibility],
@@ -92,7 +92,7 @@ class CSharpLanguageSourceGenerator(LanguageSourceGenerator):
         )
 
     def member_var(self, writer, member):
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, member)
+        doc_nl = write_doxygen_like_documentation_block(writer, member)
         writer(
             writer.tab,
             visibility_scope_mapping[member.visibility],
@@ -127,7 +127,7 @@ class CSharpLanguageSourceGenerator(LanguageSourceGenerator):
         )
 
     def member_func(self, writer, member):
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, member)
+        doc_nl = write_doxygen_like_documentation_block(writer, member)
         writer(
             writer.tab,
             visibility_scope_mapping[member.visibility],
@@ -143,7 +143,7 @@ class CSharpLanguageSourceGenerator(LanguageSourceGenerator):
     def constructor(self, writer, const):
         cls = self.get_last_node_of_kind(Class)
 
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, const)
+        doc_nl = write_doxygen_like_documentation_block(writer, const)
         writer(
             writer.tab,
             visibility_scope_mapping[const.visibility],
@@ -162,7 +162,7 @@ class CSharpLanguageSourceGenerator(LanguageSourceGenerator):
         raise Exception("Delegated constructor initializers are not supported by the generator implementation")
 
     def destructor(self, writer, dest):
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, dest)
+        doc_nl = write_doxygen_like_documentation_block(writer, dest)
         writer(
             writer.tab,
             '@Override', writer.nl, writer.tab,
@@ -194,7 +194,7 @@ class CSharpLanguageSourceGenerator(LanguageSourceGenerator):
         raise Exception("Equal comparison expressions are not supported by the generator implementation")
 
     def enum(self, writer, enum):
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, enum)
+        doc_nl = write_doxygen_like_documentation_block(writer, enum)
         writer(
             writer.tab,
             'enum ', enum.name, ' {', writer.nl,
@@ -209,7 +209,7 @@ class CSharpLanguageSourceGenerator(LanguageSourceGenerator):
         )
 
     def enum_def(self, writer, d):
-        doc_nl = writeDoxygenLikeDocumentationBlock(writer, d)
+        doc_nl = write_doxygen_like_documentation_block(writer, d)
         writer(
             writer.tab,
             d.name,

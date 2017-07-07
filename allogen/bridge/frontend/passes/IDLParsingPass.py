@@ -26,10 +26,21 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+from allogen.bridge.frontend.CompilerPass import CompilerPass
+from allogen.bridge.idl.Parser import Parser
+
+
+class IDLParsingPass(CompilerPass):
+    """
+    This compile pass parses the IDL file
+    """
+
+    def run(self, context):
+        parser = Parser()
+        context.idl = parser.parse(context.source)
+
+        context.idl_classes = context.idl.get_classes()
+        context.all_classes = dict(context.idl_classes)
+
+    def get_order(self):
+        return 100

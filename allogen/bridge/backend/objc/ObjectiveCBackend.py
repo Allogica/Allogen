@@ -26,10 +26,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-obsolete.py
-*.pyc
-proto.py
-proto2.py
-.idea/
-*.iml
-cmake-build-*
+from allogen.bridge.backend.Backend import Backend
+
+
+class ObjectiveCBackend(Backend):
+    def create_target_backend(self):
+        return
+
+    def create_bridge_backend(self):
+        return
