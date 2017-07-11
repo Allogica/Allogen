@@ -1,5 +1,6 @@
 
 #include "Allogen/Example/ExampleClass.hpp"
+#include "Allogen/Example/AnotherClass.hpp"
 
 namespace Allogen::Example {
 
@@ -95,5 +96,17 @@ namespace Allogen::Example {
             name: string
         );
 
+        AnotherClass createAnother(
+            name: string
+        );
+
+        void printAnother(
+            another: AnotherClass
+        );
+
+    }
+
+    class AnotherClass {
+        destructor();
     }
 }

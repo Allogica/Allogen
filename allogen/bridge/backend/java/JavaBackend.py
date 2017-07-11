@@ -50,12 +50,12 @@ class JavaBackend(Backend):
         builtins['void'] = lambda context, typename: PrimitiveType(
             context=context, typename=typename,
             jni_type='void', bridge_type='void', target_type='void',
-            java_signature='V')
+            java_signature='V', java_complex_mangling=False)
 
         builtins['string'] = lambda context, typename: PrimitiveType(
             context=context, typename=typename,
             jni_type='jstring', bridge_type='std::string', target_type='String',
-            java_signature='Ljava/lang/String;')
+            java_signature='Ljava/lang/String;', java_complex_mangling=True)
 
         java_signature_names = {
             8: 'B',
@@ -69,11 +69,11 @@ class JavaBackend(Backend):
             builtins['int' + bits + '_t'] = lambda context, typename: PrimitiveType(
                 context=context, typename=typename,
                 jni_type='j' + java, bridge_type='int' + bits + '_t', target_type=java,
-                java_signature=java_signature_names[bits_n])
+                java_signature=java_signature_names[bits_n], java_complex_mangling=False)
             builtins['uint' + bits + '_t'] = lambda context, typename: PrimitiveType(
                 context=context, typename=typename,
                 jni_type='j' + java, bridge_type='uint' + bits + '_t', target_type=java,
-                java_signature=java_signature_names[bits_n])
+                java_signature=java_signature_names[bits_n], java_complex_mangling=False)
 
         builtins['lambda'] = lambda context, typename: JavaLambda(context, typename)
 
@@ -121,7 +121,7 @@ class JavaBackend(Backend):
 
     def method(self, namespace, clazz, method, constructor=False):
         method.java_name = method.name
-        self.typename(method.ret)
+        self.typename(namespace, clazz, method, None, method.ret)
 
         if not constructor and not isinstance(clazz, IDLInterface):
             method.target_object.native = True
@@ -145,7 +145,7 @@ class JavaBackend(Backend):
     def argument(self, namespace, clazz, method, argument):
         """:type argument allogen.bridge.idl.Objects.IDLMethodArgument"""
         argument.java_name = argument.name
-        self.typename(argument.type)
+        self.typename(namespace, clazz, method, argument, argument.type)
 
         if 'Callback' in argument.annotations:
             callback = argument.annotations['Callback']
@@ -175,7 +175,7 @@ class JavaBackend(Backend):
             self.compiler.synthesize_interface(callback_interface)
             self.context.add_sister_class(callback_interface)
 
-    def typename(self, typename):
+    def typename(self, namespace, clazz, method, argument, typename):
         # remap to Java type
         typename.java_cpp_type = typename.linked_type.get_bridge_name()
 
@@ -183,7 +183,7 @@ class JavaBackend(Backend):
             typename.java_jni_type = typename.linked_type.jni_type
         else:
             typename.java_jni_type = 'jobject'
-            typename.linked_type.java_signature = None
+            typename.linked_type.java_signature = 'L'+('/'.join(clazz.namespaces))+'/'+typename.name
 
         typename.java_type = typename.linked_type.get_target_name()
 
@@ -200,12 +200,6 @@ def jni_method_name_mangling(clazz, package_name, method):
     name = "Java_" + ("_".join(package + [class_name, method_name]))
 
     return name
-
-
-mangling_map = {
-    'string': {'complex': True, 'value': 'Ljava_lang_String'},
-    'uint32_t': {'complex': False, 'value': 'I'}
-}
 
 
 def jni_method_overload_name_mangling(clazz, package_name, method):
@@ -238,14 +232,14 @@ def jni_method_overload_name_mangling(clazz, package_name, method):
         arg_name = arg.type.name
 
         overload_name = ''
-        if arg_name in mangling_map:
-            overload_name += mangling_map[arg_name]['value']
-            if use_numbered_separator and mangling_map[arg_name]['complex']:
-                overload_name += '_' + str(i)
-                i = i + 1
+        mangled_name = arg.type.linked_type.java_signature
+        mangled_name.replace('/', '_')
 
-            overloads.append(overload_name)
-        else:
-            raise Exception('Invalid mangling type: ' + arg_name)
+        overload_name += mangled_name
+        if use_numbered_separator and arg.type.linked_type.java_complex_mangling:
+            overload_name += '_' + str(i)
+            i = i + 1
+
+        overloads.append(overload_name)
 
     return name + ("__".join(overloads))

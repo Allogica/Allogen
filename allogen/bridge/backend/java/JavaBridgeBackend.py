@@ -29,7 +29,7 @@ from string import Template
 
 from allogen.bridge.backend.BridgeBackend import BridgeBackend
 from allogen.bridge.backend.Constants import codegen_notice
-from allogen.bridge.idl.Objects import IDLTypename
+from allogen.bridge.idl.Objects import IDLTypename, IDLClass
 from allogen.codegen.Constructs import Function, Raw, MethodArgument, TypeName, Comment, Namespace
 from allogen.codegen.StreamSourceCodeWriter import StreamSourceCodeWriter
 from allogen.codegen.languages.CppLanguage import CppImplementationFileLanguage, CppHeaderFileLanguage
@@ -171,6 +171,7 @@ class JavaBridgeBackend(BridgeBackend):
                 else:
                     idl_includes.append('#include "' + include.path + '"')
 
+
             file.writelines(map(lambda l: l + '\n',
                                 [
                                     '#pragma once',
@@ -184,7 +185,7 @@ class JavaBridgeBackend(BridgeBackend):
                                 ['']
                                 +
                                 map(lambda x: '#include "' + x.name + '.hpp"',
-                                    filter(lambda x: isinstance(x, IDLTypename), cls.types_used)) + [
+                                    filter(lambda x: isinstance(x, IDLClass), cls.types_used)) + [
                                     '',
                                     'ALLOGEN_BRIDGED_CLASS_CONVERTER(' + cls.fully_qualified_name + ', "' + cls.java_class_file + '")',
                                     ''

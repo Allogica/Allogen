@@ -37,6 +37,9 @@ public class Test {
         System.out.println("Original: " + n.getInteger());
         System.out.println("Copy: " + copy.getInteger());
 
+        AnotherClass anotherClass = n.createAnother("Testing");
+        n.printAnother(anotherClass);
+
         n = null;
         copy = null;
 

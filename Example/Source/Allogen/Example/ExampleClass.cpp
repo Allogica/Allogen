@@ -38,4 +38,12 @@ namespace Allogen { namespace Example {
 		std::cout << "Hello " << name << std::endl;
 	}
 
+	AnotherClass ExampleClass::createAnother(const std::string& name) {
+		return AnotherClass(name);
+	}
+
+	void ExampleClass::printAnother(const AnotherClass& another) {
+		std::cout << "Hello " << another.getName() << " from another!" << std::endl;
+	}
+
 }}

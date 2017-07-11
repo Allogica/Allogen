@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <functional>
 
+#include "AnotherClass.hpp"
+
 namespace Allogen { namespace Example {
 
 	class ExampleClass {
@@ -28,6 +30,8 @@ namespace Allogen { namespace Example {
 		ExampleClass* getSelf();
 
 		void sayHello(const std::string& name);
+		AnotherClass createAnother(const std::string& name);
+		void printAnother(const AnotherClass& another);
 
 	};
 

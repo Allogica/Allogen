@@ -113,4 +113,18 @@ public class ExampleClass {
 	 */
 	public native void sayHello(String name);
 
+	/**
+	 * 
+	 * 
+	 * @param name 
+	 */
+	public native AnotherClass createAnother(String name);
+
+	/**
+	 * 
+	 * 
+	 * @param another 
+	 */
+	public native void printAnother(AnotherClass another);
+
 }

@@ -13,8 +13,6 @@
 #include "Allogen/Example/ExampleClass.hpp"
 #include "Allogen/Example/AnotherClass.hpp"
 
-#include "AnotherClass.hpp"
-#include "AnotherClass.hpp"
 
-ALLOGEN_BRIDGED_CLASS_CONVERTER(Allogen::Example::ExampleClass, "allogen/example/ExampleClass")
+ALLOGEN_BRIDGED_CLASS_CONVERTER(Allogen::Example::AnotherClass, "allogen/example/AnotherClass")
 

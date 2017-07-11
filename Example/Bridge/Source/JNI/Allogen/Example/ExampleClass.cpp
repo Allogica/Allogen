@@ -61,9 +61,17 @@ namespace Allogen { namespace Example {
 		return WrappedMethod<Allogen::Example::ExampleClass, void(std::function<void()>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<void()> callback) {return wself->doAsync(callback);}, Lambda::make(_env_, callback, "onCallback", "()V"));
 	}
 
+	extern "C" JNIEXPORT jobject JNICALL Java_allogen_example_ExampleClass_createAnother(JNIEnv* _env_, jobject _jthis_, jstring name) {
+		return WrappedMethod<Allogen::Example::ExampleClass, AnotherClass(std::string)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->createAnother(name);}, name);
+	}
+
 	extern "C" JNIEXPORT jobject JNICALL Java_allogen_example_ExampleClass_copy(JNIEnv* _env_, jobject _jthis_) {
 		return WrappedMethod<Allogen::Example::ExampleClass, ExampleClass()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {{
             return ExampleClass(*wself);
         }});
+	}
+
+	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_printAnother(JNIEnv* _env_, jobject _jthis_, jobject another) {
+		return WrappedMethod<Allogen::Example::ExampleClass, void(AnotherClass)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, AnotherClass another) {return wself->printAnother(another);}, another);
 	}
 }}

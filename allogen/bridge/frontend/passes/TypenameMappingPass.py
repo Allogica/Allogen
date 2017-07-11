@@ -85,7 +85,8 @@ class TypenameMappingPass(CompilerPass):
                             clazz.types_used.append(type.user_type)
 
             # we dont include ourselves on this list
-            clazz.types_used.remove(clazz)
+            if clazz in clazz.types_used:
+                clazz.types_used.remove(clazz)
 
     def map_typename(self, typename, scope):
         """:type typename allogen.bridge.idl.Objects.IDLTypename"""
