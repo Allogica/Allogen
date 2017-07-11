@@ -92,15 +92,15 @@ class CompilerContext(object):
 
         found = self.find_type(typename.name, scope=scope)
         if found:
-            typename.linked_type = UserDefinedType(found, context=self, typename=typename)
-            return typename.linked_type
+            typename.linked_type = found.typename
+            return found.typename
 
         builtin = self.create_builtin_type(typename)
         if builtin:
             typename.linked_type = builtin
             return builtin
 
-        return None
+        raise Exception("Could not resolve type "+typename.name)
 
     def add_sister_class(self, sister_class):
         self.interfaces[sister_class.name] = sister_class

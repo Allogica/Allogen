@@ -69,10 +69,10 @@ class UserDefinedType(CompilerType):
         self.user_type = user_type
 
     def get_bridge_name(self):
-        return self.typename.name
+        return self.user_type.name
 
     def get_target_name(self):
-        return self.typename.name
+        return self.user_type.name
 
     def filter(self, object):
         pass

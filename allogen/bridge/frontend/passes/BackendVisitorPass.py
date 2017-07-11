@@ -37,6 +37,7 @@ class BackendVisitorPass(CompilerPass):
         namespace = None
         for clazz in context.classes.values():
             backend.clazz(namespace, clazz)
+
             for constructor in clazz.constructors:
                 backend.constructor(namespace, clazz, constructor)
                 for argument in constructor.arguments:
@@ -53,6 +54,7 @@ class BackendVisitorPass(CompilerPass):
                 for argument in method.arguments:
                     backend.argument(namespace, clazz, method, argument)
                 backend.method_post(namespace, clazz, method)
+
             backend.clazz_post(namespace, clazz)
 
         for interface in context.interfaces.values():

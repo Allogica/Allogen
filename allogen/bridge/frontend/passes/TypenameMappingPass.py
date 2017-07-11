@@ -54,6 +54,9 @@ class TypenameMappingPass(CompilerPass):
             elif decl.__class__ == IDLClass:
                 self.create_class(context, decl, None)
 
+        for clazz in context.all_classes.itervalues():
+            clazz.typename = UserDefinedType(user_type=clazz, context=context, typename=None)
+
         self.create_type_tree(context)
         self.resolve_types(context)
 
@@ -77,6 +80,7 @@ class TypenameMappingPass(CompilerPass):
     def resolve_types(self, context):
         for (class_name, clazz) in context.classes.iteritems():
             clazz.types_used = []
+
             for method in clazz.constructors + [clazz.destructor] + clazz.methods:
                 if method.ret is not None:
                     type = self.map_typename(method.ret, scope=clazz.cpp_namespace)
@@ -98,14 +102,16 @@ class TypenameMappingPass(CompilerPass):
         compiler_type = None
 
         found = self.context.find_type(typename.name, scope)
-        if found:
-            compiler_type = UserDefinedType(context=self.context, typename=typename, user_type=self.context.find_type(typename.name, scope), scope=scope)
+        if found and found.typename is None:
+            return found.typename
+        elif found:
+            compiler_type = found.typename
 
         # if not a user type it could be a builtin
         if not compiler_type:
             compiler_type = self.context.create_builtin_type(typename, scope=scope)
 
-        if not type:
+        if not compiler_type:
             raise Exception("Typename " + typename.name + " could not be resolved.")
 
         typename.linked_type = compiler_type
