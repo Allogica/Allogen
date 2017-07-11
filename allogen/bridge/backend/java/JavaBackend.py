@@ -35,23 +35,28 @@ from allogen.bridge.idl.Objects import *
 
 
 class JavaBackend(Backend):
+    # Z 	                    boolean
+    # B	                        byte
+    # C	                        char
+    # S 	                    short
+    # I	                        int
+    # J	                        long
+    # F	                        float
+    # D	                        double
+    # L fully-qualified-class;  fully-qualified-class
+    # [ type	                type[]
+    # ( arg-types ) ret-type	method type
     def register_builtins(self, builtins):
         builtins['void'] = lambda context, typename: PrimitiveType(
             context=context, typename=typename,
             jni_type='void', bridge_type='void', target_type='void',
             java_signature='V')
 
-        # Z 	                    boolean
-        # B	                        byte
-        # C	                        char
-        # S 	                    short
-        # I	                        int
-        # J	                        long
-        # F	                        float
-        # D	                        double
-        # L fully-qualified-class;  fully-qualified-class
-        # [ type	                type[]
-        # ( arg-types ) ret-type	method type
+        builtins['string'] = lambda context, typename: PrimitiveType(
+            context=context, typename=typename,
+            jni_type='jstring', bridge_type='std::string', target_type='String',
+            java_signature='Ljava/lang/String;')
+
         java_signature_names = {
             8: 'B',
             16: 'S',

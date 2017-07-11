@@ -43,6 +43,10 @@ namespace Allogen { namespace Example {
 		return WrappedMethod<Allogen::Example::ExampleClass, uint32_t()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {return wself->getInteger();});
 	}
 
+	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_sayHello(JNIEnv* _env_, jobject _jthis_, jstring name) {
+		return WrappedMethod<Allogen::Example::ExampleClass, void(std::string)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->sayHello(name);}, name);
+	}
+
 	extern "C" JNIEXPORT jint JNICALL Java_allogen_example_ExampleClass_virtualCallback(JNIEnv* _env_, jobject _jthis_, jobject callback, jint a, jint b) {
 		return WrappedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint32_t, uint32_t)>, uint32_t, uint32_t)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint32_t, uint32_t)> callback, uint32_t a, uint32_t b) {{
             return callback(a, b);

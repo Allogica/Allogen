@@ -34,4 +34,8 @@ namespace Allogen { namespace Example {
 		return this;
 	}
 
+	void ExampleClass::sayHello(const std::string& name) {
+		std::cout << "Hello " << name << std::endl;
+	}
+
 }}

@@ -106,4 +106,11 @@ public class ExampleClass {
 	 */
 	public native int virtualCallback(AsyncTaskCallback2 callback, int a, int b);
 
+	/**
+	 * 
+	 * 
+	 * @param name 
+	 */
+	public native void sayHello(String name);
+
 }

@@ -7,6 +7,8 @@ public class Test {
     public static void main(String[] args) throws InterruptedException {
         ExampleClass n = new ExampleClass(200);
 
+        n.sayHello("Allogen Bridge");
+
         n.doAsync(() -> {
             System.out.println("Done async!!!!");
         });

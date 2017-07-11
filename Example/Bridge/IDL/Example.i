@@ -91,5 +91,9 @@ namespace Allogen::Example {
             return callback(a, b);
         }
 
+        void sayHello(
+            name: string
+        );
+
     }
 }

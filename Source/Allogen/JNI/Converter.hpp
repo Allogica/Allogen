@@ -35,112 +35,97 @@
 #include <string>
 
 namespace Allogen {
-    namespace JNI {
+	namespace JNI {
 
-        /**
-         * The converter template class is responsible for converting to and from
-         * Java JNI types and C++ types.
-         *
-         * A user can specialize the template to add custom conversion for a
-         * type not supported by the Allogen runtime support library.
-         *
-         * A converter must implement 2 static member functions and 1 type alias.
-         *
-         *  - static void toJava(JNIEnv *env, T object);
-         *    Must convert a C++ object into a Java object.
-         *
-         *  - static T fromJava(JNIEnv *env, jobject object);
-         *    Must convert a Java object into a C++ object
-         *
-         *  - JavaType type alias
-         *    Must define the object type used by the JNI library.
-         *    Most times <tt>jobject</tt> is desired.
-         *
-         * @tparam T the type to convert
-         */
-        template<typename T, typename=void>
-        struct Converter;
+		/**
+		 * The converter template class is responsible for converting to and from
+		 * Java JNI types and C++ types.
+		 *
+		 * A user can specialize the template to add custom conversion for a
+		 * type not supported by the Allogen runtime support library.
+		 *
+		 * A converter must implement 2 static member functions and 1 type alias.
+		 *
+		 *  - static void toJava(JNIEnv *env, T object);
+		 *    Must convert a C++ object into a Java object.
+		 *
+		 *  - static T fromJava(JNIEnv *env, jobject object);
+		 *    Must convert a Java object into a C++ object
+		 *
+		 *  - JavaType type alias
+		 *    Must define the object type used by the JNI library.
+		 *    Most times <tt>jobject</tt> is desired.
+		 *
+		 * @tparam T the type to convert
+		 */
+		template<typename T, typename=void>
+		struct Converter;
 
-        /**
-         * A converter specialization for <tt>void</tt> types.
-         */
-        template<>
-        struct Converter<void> {
-            using JavaType = void;
+		/**
+		 * A converter specialization for <tt>void</tt> types.
+		 */
+		template<>
+		struct Converter<void> {
+			using JavaType = void;
 
-//            /**
-//             * Performs a <tt>void</tt> conversion.
-//             *
-//             * @param env the JNI environment
-//             */
-//            static void toJava(JNIEnv *env) {
-//                return;
-//            }
+			/**
+			 * Performs a <tt>void</tt> conversion.
+			 *
+			 * @param env the JNI environment
+			 */
+			static void toJava(JNIEnv* env) {}
 
-            /**
-             * Performs a <tt>void</tt> conversion.
-             *
-             * @param env the JNI environment
-             */
-            template<typename... Ignored>
-            static void toJava(JNIEnv *env, Ignored... ignored) {
-                return;
-            }
+			/**
+			 * Performs a <tt>void</tt> conversion.
+			 *
+			 * @param env the JNI environment
+			 */
+			static void fromJava(JNIEnv* env) {}
 
-            /**
-             * Performs a <tt>void</tt> conversion.
-             *
-             * @param env the JNI environment
-             */
-            template<typename... Ignored>
-            static void fromJava(JNIEnv *env, Ignored... ignored) {
-                return;
-            }
+		};
 
-        };
+		/**
+		 * A converter specialization for string types
+		 */
+		template<>
+		struct Converter<std::string> {
+			/**
+			 * The Java string type
+			 */
+			using JavaType = jstring;
 
-        /**
-         * A converter specialization for string types
-         */
-        template<>
-        struct Converter<std::string> {
-            /**
-             * The Java string type
-             */
-            using JavaType = jstring;
+			/**
+			 * Creates a Java string from a C++ string
+			 *
+			 * @param env the JNI environment
+			 * @param string the C++ string
+			 *
+			 * @return the newly created Java string or NULL if
+			 * no memory could be allocated
+			 */
+			static jstring toJava(JNIEnv* env, const std::string& string) {
+				return env->NewStringUTF(string.c_str());
+			}
 
-            /**
-             * Creates a Java string from a C++ string
-             *
-             * @param env the JNI environment
-             * @param string the C++ string
-             *
-             * @return the newly created Java string or NULL if
-             * no memory could be allocated
-             */
-            static jstring toJava(JNIEnv *env, const std::string &string) {
-                return env->NewStringUTF(string.c_str());
-            }
+			/**
+			 * Creates a C++ string from a Java string
+			 *
+			 * @param env the JNI environment
+			 * @param string the Java string
+			 *
+			 * @return the C++ string created from the Java string contents
+			 */
+			static std::string fromJava(JNIEnv* env, jstring string) {
+				const char* inCStr = env->GetStringUTFChars(string, nullptr);
+				if(NULL == inCStr) return NULL;
 
-            /**
-             * Creates a C++ string from a Java string
-             *
-             * @param env the JNI environment
-             * @param string the Java string
-             *
-             * @return the C++ string created from the Java string contents
-             */
-            static std::string fromJava(JNIEnv *env, jstring string) {
-                const char *inCStr = env->GetStringUTFChars(string, nullptr);
-                if (NULL == inCStr) return NULL;
+				std::string str = inCStr; // TODO maybe we should check for exceptions here
+				env->ReleaseStringUTFChars(string, inCStr);  // release resources
 
-                std::string str = inCStr; // TODO maybe we should check for exceptions here
-                env->ReleaseStringUTFChars(string, inCStr);  // release resources
+				return str;
+			}
+		};
 
-                return str;
-            }
-        };
-
-    }
+	}
 }
 

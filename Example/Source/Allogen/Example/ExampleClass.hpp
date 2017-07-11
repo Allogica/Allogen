@@ -27,6 +27,8 @@ namespace Allogen { namespace Example {
 
 		ExampleClass* getSelf();
 
+		void sayHello(const std::string& name);
+
 	};
 
 }}
