@@ -26,5 +26,55 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import allogen
+
+
 class Backend(object):
-    pass
+    context = None  # type: allogen.bridge.frontend.CompilerContext.CompilerContext
+    compiler = None  # type: allogen.bridge.frontend.Compiler.Compiler
+
+    def register_builtins(self, builtins):
+        pass
+
+    def create_target_backend(self):
+        raise Exception("create_target_backend not implemented by Backend implementation")
+
+    def create_bridge_backend(self):
+        raise Exception("create_bridge_backend not implemented by Backend implementation")
+
+    # visitors
+    def namespace(self, namespace):
+        pass
+
+    def clazz(self, namespace, clazz):
+        pass
+
+    def clazz_post(self, namespace, clazz):
+        pass
+
+    def interface(self, namespace, interface):
+        pass
+
+    def interface_post(self, namespace, interface):
+        pass
+
+    def constructor(self, namespace, clazz, constructor):
+        pass
+
+    def constructor_post(self, namespace, clazz, constructor):
+        pass
+
+    def destructor(self, namespace, clazz, destructor):
+        pass
+
+    def destructor_post(self, namespace, clazz, destructor):
+        pass
+
+    def method(self, namespace, clazz, method, constructor=False):
+        pass
+
+    def method_post(self, namespace, clazz, method, constructor=False):
+        pass
+
+    def argument(self, namespace, clazz, method, argument):
+        pass

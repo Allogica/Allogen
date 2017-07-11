@@ -26,6 +26,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from allogen.bridge.frontend.CompilerPass import CompilerPass
+from allogen.bridge.frontend.CompilerType import UserDefinedType
 from allogen.bridge.idl.Objects import IDLNamespace, IDLClass, IDLConstructor, IDLDestructor
 
 
@@ -42,6 +43,8 @@ class TypenameMappingPass(CompilerPass):
         pass
 
     def run(self, context):
+        """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
+
         context.classes = {}
         self.context = context
 
@@ -69,27 +72,43 @@ class TypenameMappingPass(CompilerPass):
     def resolve_types(self, context):
         for (class_name, clazz) in context.classes.iteritems():
             clazz.types_used = []
-            for method in clazz.methods:
+            for method in clazz.constructors + [clazz.destructor] + clazz.methods:
                 if method.ret is not None:
                     type = self.map_typename(method.ret, scope=clazz.cpp_namespace)
-                    if type and type not in clazz.types_used:
-                        clazz.types_used.append(type)
+                    if type and type not in clazz.types_used and isinstance(type, UserDefinedType):
+                        clazz.types_used.append(type.user_type)
 
                 for argument in method.arguments:
                     if argument.type is not None:
                         type = self.map_typename(argument.type, scope=clazz.cpp_namespace)
-                        if type and type not in clazz.types_used:
-                            clazz.types_used.append(type)
+                        if type and type not in clazz.types_used and isinstance(type, UserDefinedType):
+                            clazz.types_used.append(type.user_type)
 
             # we dont include ourselves on this list
             clazz.types_used.remove(clazz)
 
     def map_typename(self, typename, scope):
-        type = self.context.find_type(typename.name, scope)
-        typename.linked_type = type
-        return type
+        """:type typename allogen.bridge.idl.Objects.IDLTypename"""
+        compiler_type = None
+
+        found = self.context.find_type(typename.name, scope)
+        if found:
+            compiler_type = UserDefinedType(context=self.context, typename=typename, user_type=self.context.find_type(typename.name, scope))
+
+        # if not a user type it could be a builtin
+        if not compiler_type:
+            compiler_type = self.context.create_builtin_type(typename)
+
+        if not type:
+            raise Exception("Typename " + typename.name + " could not be resolved.")
+
+        typename.linked_type = compiler_type
+        return compiler_type
 
     def enter_namespace(self, context, namespace):
+        """
+        :type namespace IDLNamespace
+        """
         for decl in namespace.contents:
             if decl.__class__ == IDLNamespace:
                 self.enter_namespace(context, decl)
@@ -97,6 +116,10 @@ class TypenameMappingPass(CompilerPass):
                 self.create_class(context, decl, namespace.name)
 
     def create_class(self, context, cls, namespace):
+        """
+        :type cls IDLClass
+        """
+
         fully_qualified_name = cls.name
         cls.namespaces = []
         if namespace:
@@ -104,8 +127,8 @@ class TypenameMappingPass(CompilerPass):
             cls.namespaces = namespace.split('::')
 
         context.classes[fully_qualified_name] = cls
-        cls.cpp_namespace=namespace
-        cls.fully_qualified_name=fully_qualified_name
+        cls.cpp_namespace = namespace
+        cls.fully_qualified_name = fully_qualified_name
 
     def get_order(self):
         return 300

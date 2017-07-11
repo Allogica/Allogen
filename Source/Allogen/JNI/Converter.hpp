@@ -68,12 +68,22 @@ namespace Allogen {
         struct Converter<void> {
             using JavaType = void;
 
+//            /**
+//             * Performs a <tt>void</tt> conversion.
+//             *
+//             * @param env the JNI environment
+//             */
+//            static void toJava(JNIEnv *env) {
+//                return;
+//            }
+
             /**
              * Performs a <tt>void</tt> conversion.
              *
              * @param env the JNI environment
              */
-            static void toJava(JNIEnv *env) {
+            template<typename... Ignored>
+            static void toJava(JNIEnv *env, Ignored... ignored) {
                 return;
             }
 
@@ -82,7 +92,8 @@ namespace Allogen {
              *
              * @param env the JNI environment
              */
-            static void fromJava(JNIEnv *env) {
+            template<typename... Ignored>
+            static void fromJava(JNIEnv *env, Ignored... ignored) {
                 return;
             }
 

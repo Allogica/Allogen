@@ -36,72 +36,10 @@ class CodegenConstructsCreationPass(CompilerPass):
         self.namespace = ''
 
     def run(self, context):
-        for (name, cls) in context.classes.iteritems():
-            cls.obj = Class(
-                name=cls.name,
-                documentation=cls.description,
-                members=[]
-            )
+        """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
 
-            for constructor in cls.constructors:
-                c = self.map_constructor(constructor)
-                constructor.obj = c
-                cls.obj.members.append(c)
-
-            c = self.map_destructor(cls.destructor)
-            cls.destructor.obj = c
-            cls.obj.members.append(c)
-
-            for method in cls.methods:
-                m = self.map_generic_method(method)
-                method.obj = m
-                cls.obj.members.append(m)
-
-
-    def map_generic_method(self, method):
-        if method.__class__ == IDLConstructor:
-            return self.map_constructor(method)
-        elif method.__class__ == IDLDestructor:
-            return self.map_destructor(method)
-        elif method.__class__ == IDLMethod:
-            return self.map_method(method)
-
-    def map_constructor(self, constructor):
-        return Constructor(
-            documentation=constructor.description,
-            args=map(lambda a: self.map_argument(a), constructor.arguments),
-            idl=constructor
-        )
-
-    def map_destructor(self, constructor):
-        return Destructor(
-            documentation=constructor.description,
-            args=map(lambda a: self.map_argument(a), constructor.arguments),
-            idl=constructor
-        )
-
-    def map_typename(self, typename):
-        if isinstance(typename, list):
-            return TypeName('void')
-        return TypeName(name=typename.name)
-
-    def map_method(self, method):
-        return Method(
-            name=method.name,
-            args=map(lambda a: self.map_argument(a), method.arguments),
-            ret=self.map_typename(method.ret),
-            documentation=method.description,
-            idl=method
-        )
-
-    def map_argument(self, arg):
-        return MethodArgument(
-            name=arg.name,
-            type=self.map_typename(arg.type),
-            documentation=arg.description,
-            default_value=arg.default_value,
-            idl=arg
-        )
+        for (name, clazz) in context.classes.iteritems():
+            self.compiler.synthesize_class(clazz)
 
     def get_order(self):
         return 400

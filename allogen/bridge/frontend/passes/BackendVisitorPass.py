@@ -27,36 +27,42 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from allogen.bridge.frontend.CompilerPass import CompilerPass
-from allogen.bridge.idl.Parser import Parser
-
-import os
 
 
-class ImportingPass(CompilerPass):
-    """
-    Parses all files declared as imported in the source IDL
-    """
-
+class BackendVisitorPass(CompilerPass):
     def run(self, context):
         """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
+        backend = context.backend
 
-        parser = Parser()
-        # parse all imported idls
-        context.imports = map(
-            lambda imported: parser.parse(
-                open(os.path.join(os.path.dirname(context.file), imported.path)).read()
-            ),
-            context.idl.imports
-        )
+        namespace = None
+        for clazz in context.classes.values():
+            backend.clazz(namespace, clazz)
+            for constructor in clazz.constructors:
+                backend.constructor(namespace, clazz, constructor)
+                for argument in constructor.arguments:
+                    backend.argument(namespace, clazz, constructor, argument)
+                backend.constructor_post(namespace, clazz, constructor)
 
-        context.imported_classes = {}
-        for imported in context.imports:
-            loaded = imported.get_classes()
-            for (k, v) in loaded.iteritems():
-                if k in context.imported_classes or k in context.all_classes:
-                    raise Exception(k+" class was already imported")
-            context.imported_classes.update(loaded)
-            context.all_classes.update(loaded)
+            backend.destructor(namespace, clazz, clazz.destructor)
+            for argument in clazz.destructor.arguments:
+                backend.argument(namespace, clazz, clazz.destructor, argument)
+            backend.destructor_post(namespace, clazz, clazz.destructor)
+
+            for method in clazz.methods:
+                backend.method(namespace, clazz, method)
+                for argument in method.arguments:
+                    backend.argument(namespace, clazz, method, argument)
+                backend.method_post(namespace, clazz, method)
+            backend.clazz_post(namespace, clazz)
+
+        for interface in context.interfaces.values():
+            backend.interface(namespace, interface)
+            for method in interface.methods:
+                backend.method(namespace, interface, method)
+                for argument in method.arguments:
+                    backend.argument(namespace, interface, method, argument)
+                backend.method_post(namespace, interface, method)
+            backend.interface_post(namespace, interface)
 
     def get_order(self):
-        return 200
+        return 500

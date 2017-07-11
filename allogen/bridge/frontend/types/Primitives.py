@@ -26,54 +26,87 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import allogen
+from allogen.bridge.frontend.CompilerType import BuiltinType
 
 
-class CompilerType(object):
-    typename = None  # type: allogen.bridge.idl.Objects.IDLTypename
-    forward = None  # type: str
-
-    def __init__(self, context, typename):
-        self.context = context
-        self.typename = typename
-
-    def __str__(self):
-        return "CompilerType"
+class PrimitiveType(BuiltinType):
+    def __init__(self, context, typename, **kwargs):
+        super(BuiltinType, self).__init__(context, typename)
+        self.__dict__.update(kwargs)
 
     def get_bridge_name(self):
-        return self.typename.name
+            return self.bridge_type
 
     def get_target_name(self):
-        return self.typename.name
+        return self.target_type
 
-    def target_return(self, object, method):
-        pass
-
-    def target_argument(self, object, method, argument):
-        argument.forward = argument.name
-
-    def bridge_return(self, object, method):
-        pass
-
-    def bridge_argument(self, object, clazz, method, argument):
-        return argument.name
-
-
-class UserDefinedType(CompilerType):
-    def __init__(self, user_type, **kwargs):
-        super(UserDefinedType, self).__init__(**kwargs)
-        self.user_type = user_type
-
+class VoidType(PrimitiveType):
     def get_bridge_name(self):
-        return self.typename.name
+        return 'void'
 
     def get_target_name(self):
-        return self.typename.name
-
-    def filter(self, object):
-        pass
+        return 'void'
 
 
-class BuiltinType(CompilerType):
-    def __init__(self, **kwargs):
-        super(BuiltinType, self).__init__(**kwargs)
+class Int8Type(PrimitiveType):
+    def get_bridge_name(self):
+        return 'int8_t'
+
+    def get_target_name(self):
+        return 'int8_t'
+
+
+class UInt8Type(PrimitiveType):
+    def get_bridge_name(self):
+        return 'uint8_t'
+
+    def get_target_name(self):
+        return 'uint8_t'
+
+
+class Int16Type(PrimitiveType):
+    def get_bridge_name(self):
+        return 'int16_t'
+
+    def get_target_name(self):
+        return 'int16_t'
+
+
+class UInt16Type(PrimitiveType):
+    def get_bridge_name(self):
+        return 'uint16_t'
+
+    def get_target_name(self):
+        return 'uint16_t'
+
+
+class Int32Type(PrimitiveType):
+    def get_bridge_name(self):
+        return 'int32_t'
+
+    def get_target_name(self):
+        return 'int32_t'
+
+
+class UInt32Type(PrimitiveType):
+    def get_bridge_name(self):
+        return 'uint32_t'
+
+    def get_target_name(self):
+        return 'uint32_t'
+
+
+class Int64Type(PrimitiveType):
+    def get_bridge_name(self):
+        return 'int64_t'
+
+    def get_target_name(self):
+        return 'int64_t'
+
+
+class UInt64Type(PrimitiveType):
+    def get_bridge_name(self):
+        return 'uint64_t'
+
+    def get_target_name(self):
+        return 'uint64_t'

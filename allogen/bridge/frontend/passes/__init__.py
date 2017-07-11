@@ -28,7 +28,7 @@
 
 from . import *
 from . import BackendBridgeCodegenPass, BackendTargetCodegenPass, IDLParsingPass, TypenameMappingPass, ImportingPass, \
-    CodegenConstructsCreationPass
+    CodegenConstructsCreationPass, BackendVisitorPass
 
 __all__ = [
     'BackendBridgeCodegenPass',
@@ -36,5 +36,6 @@ __all__ = [
     'IDLParsingPass',
     'TypenameMappingPass',
     'ImportingPass',
-    'CodegenConstructsCreationPass'
+    'CodegenConstructsCreationPass',
+    'BackendVisitorPass'
 ]

@@ -26,11 +26,32 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import backend
+from allogen.bridge.frontend.CompilerType import BuiltinType
+from pyparsing import *
+from allogen.bridge.idl.Parser import *
 
-class Allogen(object):
-    def __init__(self, idl):
-        self.idl = idl
+lambda_syntax = (
+    typename('type') + Literal('(').suppress() + (
+        InterfaceDict(delimitedList(ZeroOrMore(method_argument)), param='name')
+    )('arguments') + Literal(')').suppress()
+)
 
-    def generate(self, language):
-        pass
+
+class FunctionType(BuiltinType):
+    def __init__(self, context, typename, **kwargs):
+        super(FunctionType, self).__init__(context=context, typename=typename)
+
+        parsed = lambda_syntax.parseString(typename.template_arguments)
+        parser = Parser()
+
+        self.lambda_return_type = parser.parse_typename(parsed.type)
+        self.context.resolve(self.lambda_return_type)
+
+        self.lambda_arguments = parser.parse_arguments(parsed)
+        for argument in self.lambda_arguments:
+            self.context.resolve(argument.type)
+            print 
+
+    def get_bridge_name(self):
+        arg_types = ", ".join(map(lambda t: t.type.linked_type.get_bridge_name(), self.lambda_arguments))
+        return 'std::function<'+self.lambda_return_type.linked_type.get_bridge_name()+'(' + arg_types + ')>'

@@ -48,7 +48,7 @@ class JavaTargetBackend(TargetBackend):
         # we need a way to store the object pointer in Java, we create a dummy "pointer" field
         # on the class. This type has a 64 bit integer type which is large enough for almost all
         # platforms
-        cls.obj.members.insert(0, Field(
+        cls.target_object.members.insert(0, Field(
             name='pointer', type='long', visibility=VisibilityPrivate,
             documentation='A numeric value that represents the pointer used to access the wrapped object.\n\n'
                           'This value should not be changed by the user and is automatically initialized by the _init\n'
@@ -61,7 +61,7 @@ class JavaTargetBackend(TargetBackend):
         initializers = []
         native_init_template = Template("pointer = this._init(${args});")
         last_constructor = None
-        for constructor in cls.obj.members:
+        for constructor in cls.target_object.members:
             if constructor.__class__ == Constructor:
                 last_constructor = constructor
                 constructor.body = [
@@ -81,9 +81,9 @@ class JavaTargetBackend(TargetBackend):
 
         if last_constructor:
             for ini in initializers:
-                cls.obj.members.insert(cls.obj.members.index(last_constructor)+1, ini)
+                cls.target_object.members.insert(cls.target_object.members.index(last_constructor)+1, ini)
 
-        for method in cls.obj.members:
+        for method in cls.target_object.members:
             if method.__class__ == Method:
                 idl_method = cls.get_method(method.name)
                 if not idl_method:
@@ -99,14 +99,12 @@ class JavaTargetBackend(TargetBackend):
                                        'resources that are system wide.'
 
     def codegen(self, context, cls):
-        path = os.path.join(context.target_out_dir, reduce(lambda o, ns: os.path.join(ns.lower(), o), reversed(cls.namespaces), cls.obj.name+'.java'))
+        path = os.path.join(context.target_out_dir, cls.java_file_location)
 
         if not os.path.exists(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
 
-        package = reduce(lambda o, ns: Namespace(name=ns, content=[o]), reversed(cls.namespaces), cls.obj)
-
-        # package = Namespace('allogen', content=[Namespace('tests', content=[cls.obj])])
+        package = reduce(lambda o, ns: Namespace(name=ns, content=[o]), reversed(cls.namespaces), cls.target_object)
 
         generator = JavaLanguageSourceGenerator()
         stream = FileSourceCodeWriter(path, generator=generator)

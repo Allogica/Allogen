@@ -36,6 +36,8 @@ class IDLParsingPass(CompilerPass):
     """
 
     def run(self, context):
+        """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
+
         parser = Parser()
         context.idl = parser.parse(context.source)
 

@@ -7,6 +7,7 @@ namespace Allogen::Example {
     /// classes into another target language.
     /// Comments on this file are automatically appended into the generated
     /// code as documentation strings.
+    @Copyable
     class ExampleClass {
 
         /// Creates a new ExampleClass object with the default value of 0.
@@ -47,6 +48,48 @@ namespace Allogen::Example {
             return ExampleClass(*wself);
         }
 
-    }
+        /// Performs a async task
+        void doAsync(
+            /// The callback function
+            @Callback(interface="AsyncTaskCallback", method="onCallback")
+            callback: lambda<void()>
+        );
 
+        /// Executes a callback function returning a integer with two integer arguments
+        uint32_t anotherCallback(
+            /// The callback function
+            @Callback(interface="AsyncTaskCallback2", method="onCallback")
+            callback: lambda<uint32_t(
+                /// The "a" integer
+                a: uint16_t,
+
+                /// The "b" integer
+                b: uint16_t
+            )>
+        );
+
+        /// Executes a callback function returning a integer with two integer arguments.
+        /// This callback does not have a corresponding implementation in the native C++
+        /// ExampleClass class.
+        uint32_t virtualCallback(
+            /// The callback function
+            @Callback(interface="AsyncTaskCallback2", method="onCallback")
+            callback: lambda<uint32_t(
+                /// The "a" integer
+                a: uint16_t,
+
+                /// The "b" integer
+                b: uint16_t
+            )>,
+
+            /// The "a" integer
+            a: uint16_t,
+
+            /// The "b" integer
+            b: uint16_t
+        ) {
+            return callback(a, b);
+        }
+
+    }
 }

@@ -42,10 +42,10 @@ class ObjectiveCTargetBackend(TargetBackend):
         pass
 
     def handle_class(self, context, cls):
-        cls.obj.name = "AD" + cls.obj.name
-        # cls.obj.body = cls.idl.body
+        cls.target_object.name = "AD" + cls.target_object.name
+        # cls.target_object.body = cls.idl.body
 
-        for method in cls.obj.members:
+        for method in cls.target_object.members:
             idl_method = cls.idl.get_method(method.name)
             if not idl_method:
                 continue
@@ -53,19 +53,19 @@ class ObjectiveCTargetBackend(TargetBackend):
             method.body = [Raw(idl_method.body)]
 
         # add the conversion constructor
-        cls.obj.members += [
+        cls.target_object.members += [
             Constructor(args=[
                 MethodArgument(name="cppObject", type=TypeName(name=cls.cpp_namespace+'::'+cls.idl.name, pointer=True))
             ])
         ]
 
     def codegen(self, context, cls):
-        path = os.path.join(context.out_dir, cls.obj.name)
+        path = os.path.join(context.out_dir, cls.target_object.name)
 
         generator = ObjectiveCInterfaceLanguageSourceGenerator()
         stream = FileSourceCodeWriter(path + '.h', generator=generator)
-        stream(cls.obj)
+        stream(cls.target_object)
 
         generator = ObjectiveCImplementationLanguageSourceGenerator()
         stream = FileSourceCodeWriter(path + '.mm', generator=generator)
-        stream(cls.obj)
+        stream(cls.target_object)

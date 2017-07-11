@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "Allogen/JNI/Converter.h"
+#include "Allogen/JNI/Converter.hpp"
 
 namespace Allogen {
 	namespace JNI {

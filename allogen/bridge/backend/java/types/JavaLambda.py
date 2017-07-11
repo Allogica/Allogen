@@ -26,4 +26,21 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from . import *
+from allogen.bridge.frontend.types.Function import FunctionType
+
+
+class JavaLambda(FunctionType):
+    def get_target_name(self):
+        return None
+
+    def bridge_argument(self, object, clazz, method, argument):
+        args_string = ""
+        for arg in self.lambda_arguments:
+            args_string += arg.type.linked_type.java_signature
+
+        name = argument.annotations['Callback'].attributes['method']
+
+        return "Lambda::make(_env_, " + argument.name + ', "'+name+'", "(' + args_string + ')' + method.ret.linked_type.java_signature + '")'
+
+    def filter_bridge(self, object):
+        pass

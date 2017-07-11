@@ -70,13 +70,13 @@ namespace Allogen {
 			 */
 			template<typename Executor>
 			static inline typename Converter<R>::JavaType call(JNIEnv* env, jobject jthis, Executor&& executor,
-															   typename Converter<Args>::JavaType& ... args) {
+															   typename Converter<Args>::JavaType... args) {
 				return Converter<R>::toJava(
 						env,
 						executor(
 								Converter<Class*>::fromJava(env, jthis),
 								Converter<Args>::fromJava(
-										env, args
+										env, std::move(args)
 								)...
 						)
 				);
@@ -104,12 +104,13 @@ namespace Allogen {
 			 */
 			template<typename Executor>
 			static inline void call(JNIEnv* env, jobject jthis, Executor&& executor,
-									typename Converter<Args>::JavaType& ... args) {
+									typename Converter<Args>::JavaType... args) {
 				return executor(
 						Converter<Class*>::fromJava(env, jthis),
 						Converter<Args>::fromJava(
-								env, args
+								env, std::move(args)
 						)...
+
 				);
 			}
 		};

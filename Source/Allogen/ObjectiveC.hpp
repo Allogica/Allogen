@@ -30,11 +30,8 @@
 
 #pragma once
 
-/*
- * Include the JNI header first, then include all other support headers
- */
-#include <jni.h>
+#include <Foundation/Foundation.h>
 
-#include "Allogen/JNI/Converter.h"
-#include "Allogen/JNI/Converter/IntegralTypes.h"
-#include "Allogen/JNI/WrappedMethod.h"
+//#include "Allogen/ObjectiveC/Converter.hpp"
+//#include "Allogen/ObjectiveC/Converter/IntegralTypes.hpp"
+//#include "Allogen/ObjectiveC/WrappedMethod.hpp"

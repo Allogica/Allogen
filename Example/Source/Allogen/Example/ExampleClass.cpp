@@ -22,4 +22,16 @@ namespace Allogen { namespace Example {
 		return integer;
 	}
 
+	void ExampleClass::doAsync(std::function<void()> async) {
+		async();
+	}
+
+	uint32_t ExampleClass::anotherCallback(std::function<uint32_t(uint16_t, uint16_t)> callback) {
+		return callback(20, 30);
+	}
+
+	ExampleClass* ExampleClass::getSelf() {
+		return this;
+	}
+
 }}

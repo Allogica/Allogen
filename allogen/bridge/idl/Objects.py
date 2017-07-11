@@ -1,4 +1,13 @@
+from allogen.bridge.frontend.CompilerType import CompilerType
+from allogen.codegen.Constructs import *
+
+
 class IDL(object):
+    declarations = None  # type: list(IDLClass|IDLNamespace)
+    definitions = None  # type: list(IDLDefinition)
+    imports = None  # type: list(IDLImport)
+    includes = None  # type: list(IDLInclude)
+
     def __init__(self, declarations=None, definitions=None, imports=None, includes=None):
         self.declarations = declarations
         if self.declarations is None:
@@ -75,6 +84,9 @@ class IDLObject(object):
 
 
 class IDLAnnotation(IDLObject):
+    name = None  # type: str
+    attributes = None  # type: dict(str, str)
+
     def __init__(self, name, attributes=None):
         super(IDLAnnotation, self).__init__()
         self.name = name
@@ -84,6 +96,8 @@ class IDLAnnotation(IDLObject):
 
 
 class IDLAnnotatedObject(IDLObject):
+    annotations = None  # type: IDLAnnotation
+
     def __init__(self, annotations=None, **kwargs):
         super(IDLAnnotatedObject, self).__init__(**kwargs)
 
@@ -116,6 +130,8 @@ class IDLDefinition(IDLObject):
 
 
 class IDLNamespace(IDLAnnotatedObject):
+    target_object = None  # type: Namespace
+
     def __init__(self, name, contents, description=None, **kwargs):
         super(IDLNamespace, self).__init__(**kwargs)
 
@@ -138,10 +154,17 @@ class IDLNamespace(IDLAnnotatedObject):
 
 
 class IDLTypename(IDLObject):
-    def __init__(self, name, optional=False, **kwargs):
+    linked_type = None  # type: CompilerType
+
+    def __init__(self, name, optional=False, template_arguments=None, **kwargs):
         super(IDLTypename, self).__init__(**kwargs)
         self.name = name
         self.optional = optional
+
+        self.template_arguments = template_arguments
+        if self.template_arguments is None:
+            self.template_arguments = []
+
         self.linked_type = None
 
 
@@ -155,8 +178,48 @@ class IDLTypeAlias(IDLAnnotatedObject):
         self.namespace = None
 
 
+class IDLInterface(IDLAnnotatedObject):
+    target_object = None  # type: Class
+    methods_dict = None  # type: dict(str, IDLMethod)
+
+    def __init__(self, name, methods=None, description=None, **kwargs):
+        super(IDLInterface, self).__init__(**kwargs)
+
+        self.name = name
+
+        self.methods_dict = methods
+        if self.methods_dict is None:
+            self.methods_dict = {}
+        elif isinstance(self.methods_dict, list):
+            self.methods_dict = {}
+            self.add_methods(methods)
+
+        self.description = description
+
+    def __getattr__(self, item):
+        if item == 'methods':
+            return sorted({x for v in self.methods_dict.itervalues() for x in v})
+
+    def add_method(self, method):
+        if method.name not in self.methods_dict:
+            self.methods_dict[method.name] = []
+        self.methods_dict[method.name].append(method)
+
+    def add_methods(self, methods):
+        for method in methods:
+            self.add_method(method)
+
+
 class IDLClass(IDLAnnotatedObject):
-    def __init__(self, name, constructors=None, destructor=None, methods=None, extends=None, implements=None, description=None, **kwargs):
+    target_object = None  # type: Class
+    constructors = None  # type: list(Constructor)
+    destructor = None  # type: Destructor
+    # methods = None  # type: list(Method)
+    extends = None  # type: list(str)
+    implements = None  # type: list(str)
+
+    def __init__(self, name, constructors=None, destructor=None, methods=None, extends=None, implements=None,
+                 description=None, **kwargs):
         super(IDLClass, self).__init__(**kwargs)
 
         self.name = name
@@ -187,9 +250,9 @@ class IDLClass(IDLAnnotatedObject):
             return sorted({x for v in self.methods_dict.itervalues() for x in v})
 
     def add_method(self, method):
-        if method.name not in self.methods:
-            self.methods[method.name] = []
-        self.methods[method.name].append(method)
+        if method.name not in self.methods_dict:
+            self.methods_dict[method.name] = []
+        self.methods_dict[method.name].append(method)
 
     def get_method(self, name):
         return next((m for m in self.methods if m.name == name), None)
@@ -201,6 +264,9 @@ class IDLClass(IDLAnnotatedObject):
 
 
 class IDLMethodArgument(IDLAnnotatedObject):
+    target_object = None  # type: MethodArgument
+    type = None  # type: TypeName
+
     def __init__(self, name, type, default_value, description=None, **kwargs):
         super(IDLMethodArgument, self).__init__(**kwargs)
 
@@ -212,6 +278,10 @@ class IDLMethodArgument(IDLAnnotatedObject):
 
 
 class IDLMethod(IDLAnnotatedObject):
+    target_object = None  # type: Method
+    ret = None  # type: TypeName
+    arguments = None  # type: IDLMethodArgument
+
     def __init__(self, name, ret, arguments=None, body=None, description=None, **kwargs):
         super(IDLMethod, self).__init__(**kwargs)
         self.name = name
@@ -237,10 +307,14 @@ class IDLMethod(IDLAnnotatedObject):
 
 
 class IDLConstructor(IDLMethod):
+    target_object = None  # type: Constructor
+
     def __init__(self, **kwargs):
         super(IDLConstructor, self).__init__(ret=None, **kwargs)
 
 
 class IDLDestructor(IDLMethod):
+    target_object = None  # type: Destructor
+
     def __init__(self, **kwargs):
         super(IDLDestructor, self).__init__(ret=None, **kwargs)

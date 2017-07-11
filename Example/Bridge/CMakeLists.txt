@@ -45,4 +45,5 @@ if(TARGET Allogen.JNI)
             PUBLIC  Allogen.JNI
             PRIVATE Allogen.Example
     )
+    add_dependencies(Allogen.Example.Bridge.JNI Allogen.Example.Bridge.Generate)
 endif()

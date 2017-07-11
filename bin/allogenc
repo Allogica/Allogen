@@ -52,17 +52,12 @@ parser.add_argument('--print-products', action='store_const', const='print_produ
 
 args = parser.parse_args()
 
-products = []
 for source in args.sources:
     compiler = Compiler()
-
-    if args.action == 'print_products':
-        products += compiler.list_products(os.path.join(os.path.dirname(__file__), source))
-    else:
-        compiler.compile_file(
-            os.path.join(os.path.dirname(__file__), source),
-            target_out_dir=os.path.join(os.path.dirname(__file__), args.target_dir),
-            bridge_out_dir=os.path.join(os.path.dirname(__file__), args.bridge_dir),
-            include_directories=args.include_path,
-            target=args.language
-        )
+    compiler.compile_file(
+        os.path.join(os.path.dirname(__file__), source),
+        target_out_dir=os.path.join(os.path.dirname(__file__), args.target_dir),
+        bridge_out_dir=os.path.join(os.path.dirname(__file__), args.bridge_dir),
+        include_directories=args.include_path,
+        target=args.language
+    )

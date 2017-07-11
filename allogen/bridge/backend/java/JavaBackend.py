@@ -27,14 +27,220 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from allogen.bridge.backend.Backend import Backend
+from allogen.bridge.backend.java.JavaBridgeBackend import JavaBridgeBackend
+from allogen.bridge.backend.java.JavaTargetBackend import JavaTargetBackend
+from allogen.bridge.backend.java.types.JavaLambda import JavaLambda
+from allogen.bridge.frontend.types.Primitives import PrimitiveType
+from allogen.bridge.idl.Objects import *
 
 
 class JavaBackend(Backend):
+    def register_builtins(self, builtins):
+        builtins['void'] = lambda context, typename: PrimitiveType(
+            context=context, typename=typename,
+            jni_type='void', bridge_type='void', target_type='void',
+            java_signature='V')
+
+        # Z 	                    boolean
+        # B	                        byte
+        # C	                        char
+        # S 	                    short
+        # I	                        int
+        # J	                        long
+        # F	                        float
+        # D	                        double
+        # L fully-qualified-class;  fully-qualified-class
+        # [ type	                type[]
+        # ( arg-types ) ret-type	method type
+        java_signature_names = {
+            8: 'B',
+            16: 'S',
+            32: 'I',
+            64: 'J'
+        }
+        for (bits, java) in {8: 'byte', 16: 'short', 32: 'int', 64: 'long'}.iteritems():
+            bits_n = bits
+            bits = str(bits)
+            builtins['int' + bits + '_t'] = lambda context, typename: PrimitiveType(
+                context=context, typename=typename,
+                jni_type='j' + java, bridge_type='int' + bits + '_t', target_type=java,
+                java_signature=java_signature_names[bits_n])
+            builtins['uint' + bits + '_t'] = lambda context, typename: PrimitiveType(
+                context=context, typename=typename,
+                jni_type='j' + java, bridge_type='uint' + bits + '_t', target_type=java,
+                java_signature=java_signature_names[bits_n])
+
+        builtins['lambda'] = lambda context, typename: JavaLambda(context, typename)
+
     def create_target_backend(self):
-        return
+        return JavaTargetBackend()
 
     def create_bridge_backend(self):
-        return
+        return JavaBridgeBackend()
 
-def jni_name_manling(class_name, method_name, args):
-    pass
+    def output_files_for_clazz(self, clazz):
+        return [
+            clazz.java_file_location,
+            clazz.java_cpp_file_location,
+            clazz.java_header_file_location
+        ]
+
+    # visitors
+    def namespace(self, namespace):
+        namespace.java_name = namespace.name
+
+    def clazz(self, namespace, clazz):
+        clazz.java_name = clazz.name
+        clazz.java_package_name = ".".join(map(lambda ns: ns.lower(), clazz.namespaces))
+        clazz.java_fully_qualified_name = clazz.java_package_name + '.' + clazz.name
+
+        clazz.java_class_file = "/".join(map(lambda ns: ns.lower(), clazz.namespaces) + ['']) + clazz.java_name
+        clazz.java_file_location = "/".join(
+            map(lambda ns: ns.lower(), clazz.namespaces) + ['']) + clazz.java_name + '.java'
+
+        clazz.java_jni_file_location = "/".join(clazz.namespaces + ['']) + clazz.name
+        clazz.java_cpp_file_location = "/".join(clazz.namespaces + ['']) + clazz.name + '.cpp'
+        clazz.java_header_file_location = "/".join(clazz.namespaces + ['']) + clazz.name + '.hpp'
+
+    def interface(self, namespace, interface):
+        self.clazz(namespace, interface)
+        pass
+
+    def constructor(self, namespace, clazz, constructor):
+        constructor.name = '_init'
+        self.method(namespace, clazz, constructor, constructor=True)
+
+    def destructor(self, namespace, clazz, destructor):
+        destructor.name = 'finalize'
+        self.method(namespace, clazz, destructor)
+
+    def method(self, namespace, clazz, method, constructor=False):
+        method.java_name = method.name
+        self.typename(method.ret)
+
+        if not constructor and not isinstance(clazz, IDLInterface):
+            method.target_object.native = True
+
+        method.java_jni_name = jni_method_name_mangling(
+            clazz=clazz,
+            package_name=clazz.java_package_name,
+            method=method)
+
+        all_methods = dict(clazz.methods_dict)
+        all_methods['_init'] = clazz.constructors
+
+        # fix overloads
+        if method.name in all_methods and len(all_methods[method.name]) >= 2:
+            method.java_jni_name = jni_method_overload_name_mangling(
+                clazz=clazz,
+                package_name=clazz.java_package_name,
+                method=method
+            )
+
+    def argument(self, namespace, clazz, method, argument):
+        """:type argument allogen.bridge.idl.Objects.IDLMethodArgument"""
+        argument.java_name = argument.name
+        self.typename(argument.type)
+
+        if 'Callback' in argument.annotations:
+            callback = argument.annotations['Callback']
+            callback_function = argument.type.linked_type
+
+            # register a new helper interface
+            callback_interface = IDLInterface(
+                name=callback.attributes['interface'],
+                methods=[
+                    IDLMethod(
+                        name=callback.attributes['method'],
+                        ret=callback_function.lambda_return_type,
+                        arguments=callback_function.lambda_arguments
+                    )
+                ]
+            )
+
+            callback_interface.namespaces = clazz.namespaces
+            callback_interface.for_class = clazz
+            callback_interface.for_method = method
+            callback_interface.for_argument = argument
+
+            argument.callback_interface = callback_interface
+            argument.type.name = callback_interface.name
+            argument.target_object.type.name = callback_interface.name
+
+            self.compiler.synthesize_interface(callback_interface)
+            self.context.add_sister_class(callback_interface)
+
+    def typename(self, typename):
+        # remap to Java type
+        typename.java_cpp_type = typename.linked_type.get_bridge_name()
+
+        if typename.linked_type and isinstance(typename.linked_type, PrimitiveType):
+            typename.java_jni_type = typename.linked_type.jni_type
+        else:
+            typename.java_jni_type = 'jobject'
+            typename.linked_type.java_signature = None
+
+        typename.java_type = typename.linked_type.get_target_name()
+
+
+def jni_method_name_mangling(clazz, package_name, method):
+    class_name = clazz.java_name.replace('_', '_1')
+    method_name = method.java_name.replace('_', '_1')
+
+    package = []
+    if package_name is not None:
+        package_name = package_name.replace('_', '_1')
+        package = package_name.split(".")
+
+    name = "Java_" + ("_".join(package + [class_name, method_name]))
+
+    return name
+
+
+mangling_map = {
+    'string': {'complex': True, 'value': 'Ljava_lang_String'},
+    'uint32_t': {'complex': False, 'value': 'I'}
+}
+
+
+def jni_method_overload_name_mangling(clazz, package_name, method):
+    use_numbered_separator = False
+
+    def fix_underscore(name, use_numbered_separator):
+        if '_' in name:
+            use_numbered_separator = True
+            fixed_name = ''
+            for c in name:
+                fixed_name += c
+                if c == '_':
+                    fixed_name = '_1'
+            name = fixed_name
+        return name, use_numbered_separator
+
+    package = []
+    if package_name is not None:
+        package_name, use_numbered_separator = fix_underscore(package_name, use_numbered_separator)
+        package = package_name.split(".")
+
+    class_name, use_numbered_separator = fix_underscore(clazz.java_name, use_numbered_separator)
+    method_name, use_numbered_separator = fix_underscore(method.java_name, use_numbered_separator)
+
+    name = "Java_" + ("_".join(package + [class_name, method_name])) + '__'
+
+    i = 2
+    overloads = []
+    for arg in method.arguments:
+        arg_name = arg.type.name
+
+        overload_name = ''
+        if arg_name in mangling_map:
+            overload_name += mangling_map[arg_name]['value']
+            if use_numbered_separator and mangling_map[arg_name]['complex']:
+                overload_name += '_' + str(i)
+                i = i + 1
+
+            overloads.append(overload_name)
+        else:
+            raise Exception('Invalid mangling type: ' + arg_name)
+
+    return name + ("__".join(overloads))

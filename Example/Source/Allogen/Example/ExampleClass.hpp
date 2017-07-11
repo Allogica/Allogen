@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 
 namespace Allogen { namespace Example {
 
@@ -19,6 +20,12 @@ namespace Allogen { namespace Example {
 	public:
 		void setInteger(uint32_t a);
 		uint32_t getInteger() const;
+
+	public:
+		void doAsync(std::function<void()> async);
+		uint32_t anotherCallback(std::function<uint32_t(uint16_t, uint16_t)> callback);
+
+		ExampleClass* getSelf();
 
 	};
 

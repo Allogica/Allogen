@@ -25,11 +25,43 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+from allogen.bridge.backend.Backend import Backend
+from allogen.bridge.frontend.types.Primitives import *
+from allogen.bridge.idl.Objects import *
 
 class CompilerContext(object):
+    compiler = None  # type: Compiler
+    backend = None  # type: Backend
+
+    types = {}  # type: list(IDLClass)
+    builtin_types = {}  # type: list(BuiltinType)
+
+    classes = {}  # type: dict(str, IDLClass)
+    interfaces = {}  # type: dict(str, IDLInterface)
+
+    all_classes = {}  # type: dict(str, IDLClass)
+
+    idl = None  # type: IDL
+    file = None  # type: str
+    source = None  # type: str
+
     def __init__(self):
         self.types = {}
+        self.builtin_types = {}
+
+    def add_builtin_type(self, name, clazz):
+        if name not in self.builtin_types:
+            self.builtin_types[name] = clazz
+
+    def create_builtin_type(self, typename):
+        """
+        :param typename: IDLTypename
+        :return:
+        """
+        if typename.name in self.builtin_types:
+            constructor = self.builtin_types[typename.name]
+            return constructor(self, typename)
+        return None
 
     def find_type(self, name, scope=''):
         namespaces = scope.split('::')
@@ -46,3 +78,21 @@ class CompilerContext(object):
             return ns_dict[name]
         return None
 
+    def resolve(self, typename, scope=''):
+        if typename.linked_type:
+            return typename.linked_type
+
+        found = self.find_type(typename.name, scope=scope)
+        if found:
+            typename.linked_type = found
+            return found
+
+        builtin = self.create_builtin_type(typename)
+        if builtin:
+            typename.linked_type = builtin
+            return builtin
+
+        return None
+
+    def add_sister_class(self, sister_class):
+        self.interfaces[sister_class.name] = sister_class

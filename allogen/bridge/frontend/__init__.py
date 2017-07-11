@@ -26,3 +26,13 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from . import *
+
+__all__ = [
+    'Compiler',
+    'CompilerContext',
+    'CompilerPass',
+    'CompilerType',
+    'passes',
+    'types'
+]

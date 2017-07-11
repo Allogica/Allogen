@@ -28,6 +28,9 @@
 
 
 class TargetBackend(object):
+    context = None  # type: CompilerContext
+    compiler = None  # type: Compiler
+
     def __init__(self):
         pass
 
@@ -37,6 +40,8 @@ class TargetBackend(object):
     def handle_class(self, context, cls):
         pass
 
-    def codegen(self, context, cls):
+    def handle_interface(self, context, cls):
         pass
 
+    def codegen(self, context, cls):
+        pass

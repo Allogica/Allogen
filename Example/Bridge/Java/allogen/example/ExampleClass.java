@@ -81,4 +81,29 @@ public class ExampleClass {
 	 */
 	public native ExampleClass copy();
 
+	/**
+	 * Performs a async task
+	 * 
+	 * @param callback The callback function
+	 */
+	public native void doAsync(AsyncTaskCallback callback);
+
+	/**
+	 * Executes a callback function returning a integer with two integer arguments
+	 * 
+	 * @param callback The callback function
+	 */
+	public native int anotherCallback(AsyncTaskCallback2 callback);
+
+	/**
+	 * Executes a callback function returning a integer with two integer arguments.
+	 * This callback does not have a corresponding implementation in the native C++
+	 * ExampleClass class.
+	 * 
+	 * @param callback The callback function
+	 * @param a The "a" integer
+	 * @param b The "b" integer
+	 */
+	public native int virtualCallback(AsyncTaskCallback2 callback, int a, int b);
+
 }

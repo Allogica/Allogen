@@ -33,15 +33,17 @@ from allogen.bridge.frontend.CompilerPass import CompilerPass
 
 class BackendTargetCodegenPass(CompilerPass):
     def run(self, context):
-        backend = JavaTargetBackend()
+        """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
+        target_backend = context.backend.create_target_backend()
 
-        backend.full_pass(context)
+        target_backend.full_pass(context)
+        for clazz in context.classes.values():
+            target_backend.handle_class(context, clazz)
+        for interface in context.interfaces.values():
+            target_backend.handle_interface(context, interface)
 
-        for cls in context.classes.values():
-            backend.handle_class(context, cls)
-
-        for cls in context.classes.values():
-            backend.codegen(context, cls)
+        for clazz in context.classes.values() + context.interfaces.values():
+            target_backend.codegen(context, clazz)
 
     def get_order(self):
-        return 500
+        return 1000

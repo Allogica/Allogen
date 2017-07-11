@@ -35,17 +35,31 @@ namespace Allogen { namespace Example {
 		return WrappedMethod<Allogen::Example::ExampleClass, void()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass *wself) { delete wself; });
 	}
 
+	extern "C" JNIEXPORT jint JNICALL Java_allogen_example_ExampleClass_anotherCallback(JNIEnv* _env_, jobject _jthis_, jobject callback) {
+		return WrappedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint32_t, uint32_t)>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint32_t, uint32_t)> callback) {return wself->anotherCallback(callback);}, Lambda::make(_env_, callback, "onCallback", "(II)I"));
+	}
+
 	extern "C" JNIEXPORT jint JNICALL Java_allogen_example_ExampleClass_getInteger(JNIEnv* _env_, jobject _jthis_) {
 		return WrappedMethod<Allogen::Example::ExampleClass, uint32_t()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {return wself->getInteger();});
 	}
 
-	extern "C" JNIEXPORT jobject JNICALL Java_allogen_example_ExampleClass_copy(JNIEnv* _env_, jobject _jthis_) {
-		return WrappedMethod<Allogen::Example::ExampleClass, Allogen::Example::ExampleClass()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {{
-            return ExampleClass(*wself);
-        }});
+	extern "C" JNIEXPORT jint JNICALL Java_allogen_example_ExampleClass_virtualCallback(JNIEnv* _env_, jobject _jthis_, jobject callback, jint a, jint b) {
+		return WrappedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint32_t, uint32_t)>, uint32_t, uint32_t)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint32_t, uint32_t)> callback, uint32_t a, uint32_t b) {{
+            return callback(a, b);
+        }}, Lambda::make(_env_, callback, "onCallback", "(II)I"), a, b);
 	}
 
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_setInteger(JNIEnv* _env_, jobject _jthis_, jint aInteger) {
 		return WrappedMethod<Allogen::Example::ExampleClass, void(uint32_t)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, uint32_t aInteger) {return wself->setInteger(aInteger);}, aInteger);
+	}
+
+	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_doAsync(JNIEnv* _env_, jobject _jthis_, jobject callback) {
+		return WrappedMethod<Allogen::Example::ExampleClass, void(std::function<void()>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<void()> callback) {return wself->doAsync(callback);}, Lambda::make(_env_, callback, "onCallback", "()V"));
+	}
+
+	extern "C" JNIEXPORT jobject JNICALL Java_allogen_example_ExampleClass_copy(JNIEnv* _env_, jobject _jthis_) {
+		return WrappedMethod<Allogen::Example::ExampleClass, ExampleClass()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {{
+            return ExampleClass(*wself);
+        }});
 	}
 }}

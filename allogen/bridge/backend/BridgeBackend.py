@@ -28,6 +28,9 @@
 
 
 class BridgeBackend(object):
+    context = None  # type: CompilerContext
+    compiler = None # type: Compiler
+
     def __init__(self):
         pass
 

@@ -67,6 +67,8 @@ implements_declaration = Combine(Literal('implements').suppress() + Word(cpp_ide
 cpp_inline_code = Combine(originalTextFor(nestedExpr(opener='{', closer='}')))
 typename = Group(
     Combine(delimitedList(Word(cpp_ident), delim='::'), joinString='::')('typename') + Optional(
+        QuotedString('<', endQuoteChar='>', multiline=True)('path')
+    )('template') + Optional(
         Literal('?')('optional') | Literal('!')('non_null')
     )
 )
@@ -291,21 +293,12 @@ class Parser:
     def parse_typename(self, decl):
         return IDLTypename(
             name=decl.typename,
-            optional='optional' in decl
+            optional='optional' in decl,
+            template_arguments=decl.template
         )
 
     def parse_annotations(self, decl):
-        # return map(
-        #     lambda annotation: IDLAnnotation(
-        #         name=annotation.name,
-        #         attributes=map(
-        #             lambda attr:
-        #         )
-        #     ),
-        #     decl.arguments
-        # )
-
-        annotations = list()
+        annotations = dict()
         for annotation in decl.annotations:
             a = IDLAnnotation(
                 name=annotation.name
@@ -313,6 +306,7 @@ class Parser:
             for e in annotation:
                 if 'value' in e:
                     a.attributes[e.name] = e.value
-            annotations.append(a)
+            annotations[a.name] = a
 
         return annotations
+

@@ -25,11 +25,15 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from allogen.bridge.frontend.CompilerContext import CompilerContext
+
 
 class CompilerPass(object):
-    pass
+    context = None  # type: CompilerContext
+    compiler = None  # type: Compiler
 
     def run(self, context):
+        """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
         pass
 
     def get_order(self):

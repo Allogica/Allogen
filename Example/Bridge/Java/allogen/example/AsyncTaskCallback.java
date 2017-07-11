@@ -6,12 +6,8 @@
  * interface declaration file and regenerate the bridge code.
  */
 
-#pragma once
+package allogen.example;
 
-#include <Allogen/JNI.h>
-
-#include "Allogen/Example/ExampleClass.hpp"
-
-
-ALLOGEN_BRIDGED_CLASS_CONVERTER(Allogen::Example::ExampleClass, "allogen/example/ExampleClass")
-
+public interface AsyncTaskCallback {
+	public void onCallback();
+}

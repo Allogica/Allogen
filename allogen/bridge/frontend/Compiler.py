@@ -26,8 +26,11 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from allogen.bridge.backend.java.JavaBackend import JavaBackend
 from allogen.bridge.frontend.CompilerContext import CompilerContext
-import passes as p
+import allogen.bridge.frontend.passes as p
+from allogen.bridge.idl.Objects import *
+
 
 class Compiler(object):
     def __init__(self, passes=None):
@@ -38,6 +41,7 @@ class Compiler(object):
                 p.ImportingPass.ImportingPass(),
                 p.TypenameMappingPass.TypenameMappingPass(),
                 p.CodegenConstructsCreationPass.CodegenConstructsCreationPass(),
+                p.BackendVisitorPass.BackendVisitorPass(),
                 p.BackendTargetCodegenPass.BackendTargetCodegenPass(),
                 p.BackendBridgeCodegenPass.BackendBridgeCodegenPass()
             ]
@@ -53,7 +57,102 @@ class Compiler(object):
         context = CompilerContext()
         context.__dict__.update(kwargs)
 
+        context.backend = JavaBackend()
+        context.backend.context = context
+        context.backend.compiler = self
+
         context.source = source
 
+        # register backend types
+        context.backend.register_builtins(context.builtin_types)
+
         for compiler_pass in sorted(self.passes, key=lambda p: p.get_order()):
+            compiler_pass.context = context
+            compiler_pass.compiler = self
             compiler_pass.run(context)
+
+    def synthesize_class(self, clazz):
+        clazz.target_object = Class(
+            name=clazz.name,
+            documentation=clazz.description,
+            members=[]
+        )
+
+        for constructor in clazz.constructors:
+            c = self.synthesize_constructor(constructor)
+            constructor.target_object = c
+            clazz.target_object.members.append(c)
+
+        c = self.synthesize_destructor(clazz.destructor)
+        clazz.destructor.target_object = c
+        clazz.target_object.members.append(c)
+
+        for method in clazz.methods:
+            m = self.synthesize_generic_method(method)
+            method.target_object = m
+            clazz.target_object.members.append(m)
+
+    def synthesize_interface(self, clazz):
+        clazz.target_object = Class(
+            name=clazz.name,
+            documentation=clazz.description,
+            members=[], abstract=True, interface=True
+        )
+
+        for method in clazz.methods:
+            m = self.synthesize_generic_method(method)
+            method.target_object = m
+            clazz.target_object.members.append(m)
+
+    def synthesize_generic_method(self, method):
+        if method.__class__ == IDLConstructor:
+            return self.synthesize_constructor(method)
+        elif method.__class__ == IDLDestructor:
+            return self.synthesize_destructor(method)
+        elif method.__class__ == IDLMethod:
+            return self.synthesize_method(method)
+
+    def synthesize_constructor(self, constructor):
+        c = Constructor(
+            documentation=constructor.description,
+            args=map(lambda a: self.synthesize_argument(a), constructor.arguments),
+            idl=constructor
+        )
+        constructor.target_object = c
+        return c
+
+    def synthesize_destructor(self, destructor):
+        d = Destructor(
+            documentation=destructor.description,
+            args=map(lambda a: self.synthesize_argument(a), destructor.arguments),
+            idl=destructor
+        )
+        destructor.target_object = d
+        return d
+
+    def synthesize_typename(self, typename):
+        if isinstance(typename, list):
+            return TypeName('void')
+        return TypeName(name=typename.linked_type.get_target_name())
+
+    def synthesize_method(self, method):
+        m = Method(
+            name=method.name,
+            args=map(lambda a: self.synthesize_argument(a), method.arguments),
+            ret=self.synthesize_typename(method.ret),
+            documentation=method.description,
+            idl=method
+        )
+        method.target_object = m
+        return m
+
+    def synthesize_argument(self, arg):
+        a = MethodArgument(
+            name=arg.name,
+            type=self.synthesize_typename(arg.type),
+            documentation=arg.description,
+            default_value=arg.default_value,
+            idl=arg
+        )
+        arg.target_object = a
+        return a

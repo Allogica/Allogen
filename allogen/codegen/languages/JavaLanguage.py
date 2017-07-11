@@ -76,11 +76,16 @@ class JavaLanguageSourceGenerator(LanguageSourceGenerator):
 
     def clazz(self, writer, cls):
         doc_nl = write_doxygen_like_documentation_block(writer, cls)
+
+        class_or_interface = 'class'
+        if cls.interface:
+            class_or_interface = 'interface'
+
         writer(
             writer.tab,
             visibility_scope_mapping[cls.visibility],
             (cls.final, ' final'),
-            ' class ', cls.name, ' {', writer.nl,
+            ' ', class_or_interface, ' ', cls.name, ' {', writer.nl,
             writer.indented(writer.joined(
                 writer.nl,
                 cls.members
@@ -110,7 +115,7 @@ class JavaLanguageSourceGenerator(LanguageSourceGenerator):
 
         writer(
             (
-                func.body is not None, [
+                func.body, [
                     ' {', writer.nl,
                     writer.indented(
                         writer.joined(
