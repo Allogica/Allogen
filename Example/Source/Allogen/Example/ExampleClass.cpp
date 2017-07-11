@@ -42,6 +42,10 @@ namespace Allogen { namespace Example {
 		return AnotherClass(name);
 	}
 
+	void ExampleClass::createAnotherAsync(const std::string& name, std::function<void(AnotherClass)> callback) {
+		callback(createAnother(name));
+	}
+
 	void ExampleClass::printAnother(const AnotherClass& another) {
 		std::cout << "Hello " << another.getName() << " from another!" << std::endl;
 	}

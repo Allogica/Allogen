@@ -40,6 +40,12 @@ public class Test {
         AnotherClass anotherClass = n.createAnother("Testing");
         n.printAnother(anotherClass);
 
+        ExampleClass finalN = n;
+        n.createAnotherAsync("Testing2", (AnotherClass another) -> {
+            System.out.println("Received a async another: " + another.getName());
+            finalN.printAnother(another);
+        });
+
         n = null;
         copy = null;
 

@@ -100,6 +100,15 @@ namespace Allogen::Example {
             name: string
         );
 
+        void createAnotherAsync(
+            name: string,
+            @Callback(interface="CreateAnotherAsyncCallback", method="createAnother")
+            callback: lambda<void(
+                /// The created another object
+                another: AnotherClass
+            )>
+        );
+
         void printAnother(
             another: AnotherClass
         );
@@ -108,5 +117,8 @@ namespace Allogen::Example {
 
     class AnotherClass {
         destructor();
+
+        string getName();
+        void setName(newName: string);
     }
 }

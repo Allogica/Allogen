@@ -123,6 +123,14 @@ public class ExampleClass {
 	/**
 	 * 
 	 * 
+	 * @param name 
+	 * @param callback 
+	 */
+	public native void createAnotherAsync(String name, CreateAnotherAsyncCallback callback);
+
+	/**
+	 * 
+	 * 
 	 * @param another 
 	 */
 	public native void printAnother(AnotherClass another);

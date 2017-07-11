@@ -181,7 +181,7 @@ namespace Allogen {
 		template<>
 		struct FunctionTrait<void> {
 			template<typename... Args>
-			static void javaCall(JNIEnv* env, const Lambda& lambda, Args& ... args) {
+			static void javaCall(JNIEnv* env, const Lambda& lambda, Args&& ... args) {
 				env->CallVoidMethod(lambda, lambda, args...);
 			}
 		};
@@ -189,7 +189,7 @@ namespace Allogen {
 		template<>
 		struct FunctionTrait<uint8_t> {
 			template<typename... Args>
-			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args& ... args) {
+			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args&& ... args) {
 				return env->CallByteMethod(lambda, lambda, args...);
 			}
 		};
@@ -197,7 +197,7 @@ namespace Allogen {
 		template<>
 		struct FunctionTrait<uint32_t> {
 			template<typename... Args>
-			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args& ... args) {
+			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args&& ... args) {
 				return env->CallIntMethod(lambda, lambda, args...);
 			}
 		};
@@ -261,7 +261,8 @@ namespace Allogen {
 
 					return Converter<R>::fromJava(
 							env, Traits::javaCall(
-									env, lambda, args...
+									env, lambda,
+									Converter<Args>::toJava(env, args)...
 							)
 					);
 
@@ -328,7 +329,8 @@ namespace Allogen {
 //					}
 
 					Traits::javaCall(
-							env, lambda, args...
+							env, lambda,
+							Converter<Args>::toJava(env, args)...
 					);
 
 					// TODO detach thread

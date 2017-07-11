@@ -30,6 +30,7 @@ from allogen.bridge.backend.Backend import Backend
 from allogen.bridge.backend.java.JavaBridgeBackend import JavaBridgeBackend
 from allogen.bridge.backend.java.JavaTargetBackend import JavaTargetBackend
 from allogen.bridge.backend.java.types.JavaLambda import JavaLambda
+from allogen.bridge.frontend.CompilerType import UserDefinedType
 from allogen.bridge.frontend.types.Primitives import PrimitiveType
 from allogen.bridge.idl.Objects import *
 
@@ -96,7 +97,8 @@ class JavaBackend(Backend):
 
     def clazz(self, namespace, clazz):
         clazz.java_name = clazz.name
-        clazz.java_package_name = ".".join(map(lambda ns: ns.lower(), clazz.namespaces))
+        clazz.java_packages = map(lambda ns: ns.lower(), clazz.namespaces)
+        clazz.java_package_name = ".".join(clazz.java_packages)
         clazz.java_fully_qualified_name = clazz.java_package_name + '.' + clazz.name
 
         clazz.java_class_file = "/".join(map(lambda ns: ns.lower(), clazz.namespaces) + ['']) + clazz.java_name
@@ -181,9 +183,12 @@ class JavaBackend(Backend):
 
         if typename.linked_type and isinstance(typename.linked_type, PrimitiveType):
             typename.java_jni_type = typename.linked_type.jni_type
+        elif typename.linked_type and isinstance(typename.linked_type, UserDefinedType):
+            typename.java_jni_type = 'jobject'
+            typename.linked_type.java_signature = 'L'+('/'.join(typename.linked_type.user_type.java_packages))+'/'+typename.name+';'
         else:
             typename.java_jni_type = 'jobject'
-            typename.linked_type.java_signature = 'L'+('/'.join(clazz.namespaces))+'/'+typename.name
+
 
         typename.java_type = typename.linked_type.get_target_name()
 

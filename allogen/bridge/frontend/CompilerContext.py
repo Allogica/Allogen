@@ -26,6 +26,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from allogen.bridge.backend.Backend import Backend
+from allogen.bridge.frontend.CompilerType import UserDefinedType
 from allogen.bridge.frontend.types.Primitives import *
 from allogen.bridge.idl.Objects import *
 
@@ -35,6 +36,7 @@ class CompilerContext(object):
 
     types = {}  # type: list(IDLClass)
     builtin_types = {}  # type: list(BuiltinType)
+    mapped_types = []  #type: list(CompilerType)
 
     classes = {}  # type: dict(str, IDLClass)
     interfaces = {}  # type: dict(str, IDLInterface)
@@ -53,14 +55,20 @@ class CompilerContext(object):
         if name not in self.builtin_types:
             self.builtin_types[name] = clazz
 
-    def create_builtin_type(self, typename):
+    def create_builtin_type(self, typename, scope=None):
         """
         :param typename: IDLTypename
         :return:
         """
         if typename.name in self.builtin_types:
             constructor = self.builtin_types[typename.name]
-            return constructor(self, typename)
+
+            t = constructor(self, typename)
+            t.scope = scope
+
+            self.mapped_types.append(t)
+            return t
+
         return None
 
     def find_type(self, name, scope=''):
@@ -84,8 +92,8 @@ class CompilerContext(object):
 
         found = self.find_type(typename.name, scope=scope)
         if found:
-            typename.linked_type = found
-            return found
+            typename.linked_type = UserDefinedType(found, context=self, typename=typename)
+            return typename.linked_type
 
         builtin = self.create_builtin_type(typename)
         if builtin:

@@ -57,6 +57,11 @@ class TypenameMappingPass(CompilerPass):
         self.create_type_tree(context)
         self.resolve_types(context)
 
+        # perform the second phase lookup
+        # print context.types
+        for type in context.mapped_types:
+            type.lookup(context)
+
     def create_type_tree(self, context):
         for clazz in context.classes.itervalues():
             namespaces = clazz.cpp_namespace.split('::')
@@ -94,16 +99,19 @@ class TypenameMappingPass(CompilerPass):
 
         found = self.context.find_type(typename.name, scope)
         if found:
-            compiler_type = UserDefinedType(context=self.context, typename=typename, user_type=self.context.find_type(typename.name, scope))
+            compiler_type = UserDefinedType(context=self.context, typename=typename, user_type=self.context.find_type(typename.name, scope), scope=scope)
 
         # if not a user type it could be a builtin
         if not compiler_type:
-            compiler_type = self.context.create_builtin_type(typename)
+            compiler_type = self.context.create_builtin_type(typename, scope=scope)
 
         if not type:
             raise Exception("Typename " + typename.name + " could not be resolved.")
 
         typename.linked_type = compiler_type
+        self.context.mapped_types.append(compiler_type)
+        compiler_type.scope = scope
+
         return compiler_type
 
     def enter_namespace(self, context, namespace):

@@ -31,4 +31,16 @@ public class AnotherClass {
 	@Override
 	protected native void finalize() throws Throwable;
 
+	/**
+	 * 
+	 */
+	public native String getName();
+
+	/**
+	 * 
+	 * 
+	 * @param newName 
+	 */
+	public native void setName(String newName);
+
 }

@@ -33,9 +33,10 @@ class CompilerType(object):
     typename = None  # type: allogen.bridge.idl.Objects.IDLTypename
     forward = None  # type: str
 
-    def __init__(self, context, typename):
+    def __init__(self, context, typename, scope=None):
         self.context = context
         self.typename = typename
+        self.scope = scope
 
     def __str__(self):
         return "CompilerType"
@@ -57,6 +58,9 @@ class CompilerType(object):
 
     def bridge_argument(self, object, clazz, method, argument):
         return argument.name
+
+    def lookup(self, context):
+        pass
 
 
 class UserDefinedType(CompilerType):

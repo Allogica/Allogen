@@ -39,18 +39,18 @@ lambda_syntax = (
 
 class FunctionType(BuiltinType):
     def __init__(self, context, typename, **kwargs):
-        super(FunctionType, self).__init__(context=context, typename=typename)
+        super(FunctionType, self).__init__(context=context, typename=typename, **kwargs)
 
         parsed = lambda_syntax.parseString(typename.template_arguments)
         parser = Parser()
 
         self.lambda_return_type = parser.parse_typename(parsed.type)
-        self.context.resolve(self.lambda_return_type)
-
         self.lambda_arguments = parser.parse_arguments(parsed)
+
+    def lookup(self, context):
+        self.context.resolve(self.lambda_return_type, scope=self.scope)
         for argument in self.lambda_arguments:
-            self.context.resolve(argument.type)
-            print 
+            self.context.resolve(argument.type, scope=self.scope)
 
     def get_bridge_name(self):
         arg_types = ", ".join(map(lambda t: t.type.linked_type.get_bridge_name(), self.lambda_arguments))

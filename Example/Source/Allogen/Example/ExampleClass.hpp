@@ -30,7 +30,11 @@ namespace Allogen { namespace Example {
 		ExampleClass* getSelf();
 
 		void sayHello(const std::string& name);
+
 		AnotherClass createAnother(const std::string& name);
+		void createAnotherAsync(const std::string& name,
+								std::function<void(AnotherClass)> callback);
+
 		void printAnother(const AnotherClass& another);
 
 	};
