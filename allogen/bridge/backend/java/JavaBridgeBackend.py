@@ -35,6 +35,8 @@ from allogen.codegen.Constructs import Function, Raw, MethodArgument, TypeName, 
 from allogen.codegen.StreamSourceCodeWriter import StreamSourceCodeWriter
 from allogen.codegen.languages.CppLanguage import CppImplementationFileLanguage, CppHeaderFileLanguage
 
+from functools import reduce
+
 import os
 
 T_init_new = Template(
@@ -207,8 +209,9 @@ class JavaBridgeBackend(BridgeBackend):
                 ''
             ]))
 
-            package = Namespace('Allogen', content=[Namespace('Example', content=[stream.joined(
+
+            namespace = reduce(lambda o, ns: Namespace(name=ns, content=[o]), reversed(cls.namespaces), stream.joined(
                 [stream.nl, stream.nl],
                 cls.jni_methods
-            )])])
-            stream(package)
+            ))
+            stream(namespace)

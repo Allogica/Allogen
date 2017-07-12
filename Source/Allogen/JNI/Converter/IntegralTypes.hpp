@@ -119,6 +119,10 @@ namespace Allogen {
 		struct IntegralConverterTrait<uint64_t> {
 			using T = jlong;
 		};
+		template<>
+		struct IntegralConverterTrait<bool> {
+			using T = jboolean;
+		};
 
 	}
 }

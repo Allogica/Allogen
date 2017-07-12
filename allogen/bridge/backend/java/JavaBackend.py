@@ -54,6 +54,10 @@ class JavaBackend(Backend):
             context=context, typename=typename,
             jni_type='void', bridge_type='void', target_type='void',
             java_signature='V', java_complex_mangling=False)
+        builtins['bool'] = lambda context, typename: PrimitiveType(
+            context=context, typename=typename,
+            jni_type='jboolean', bridge_type='bool', target_type='boolean',
+            java_signature='Z', java_complex_mangling=False)
 
         builtins['string'] = lambda context, typename: PrimitiveType(
             context=context, typename=typename,
@@ -191,6 +195,7 @@ class JavaBackend(Backend):
             typename.java_jni_type = 'jobject'
             typename.linked_type.java_signature = 'L' + (
             '/'.join(typename.linked_type.user_type.java_packages)) + '/' + typename.name + ';'
+            typename.linked_type.java_complex_mangling = True
         else:
             typename.java_jni_type = 'jobject'
 
@@ -242,7 +247,7 @@ def jni_method_overload_name_mangling(clazz, package_name, method):
 
         overload_name = ''
         mangled_name = arg.type.linked_type.java_signature
-        mangled_name.replace('/', '_')
+        mangled_name = mangled_name.replace('/', '_')[:-1]
 
         overload_name += mangled_name
         if use_numbered_separator and arg.type.linked_type.java_complex_mangling:
