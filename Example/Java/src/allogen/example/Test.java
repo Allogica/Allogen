@@ -43,7 +43,9 @@ public class Test {
         ExampleClass finalN = n;
         n.createAnotherAsync("Testing2", (AnotherClass another) -> {
             System.out.println("Received a async another: " + another.getName());
-            finalN.printAnother(another);
+            finalN.printAnotherAsync(another, () -> {
+                System.out.println("Printing complete");
+            });
         });
 
         n = null;

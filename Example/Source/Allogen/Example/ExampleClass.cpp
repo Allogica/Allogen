@@ -50,4 +50,9 @@ namespace Allogen { namespace Example {
 		std::cout << "Hello " << another.getName() << " from another!" << std::endl;
 	}
 
+	void ExampleClass::printAnotherAsync(const AnotherClass& another, std::function<void()> callback) {
+		printAnother(another);
+		callback();
+	}
+
 }}

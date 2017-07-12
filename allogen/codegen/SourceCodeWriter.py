@@ -26,8 +26,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from LanguageSourceGenerator import *
-
+from allogen.codegen.Constructs import LanguageConstruct
 
 class SourceCodeWriter(object):
     """Class that writes and idents strings to another stream (file, buffer, etc)"""

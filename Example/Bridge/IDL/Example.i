@@ -113,9 +113,21 @@ namespace Allogen::Example {
             another: AnotherClass
         );
 
+        void printAnotherAsync(
+            another: AnotherClass,
+            @Callback(interface="PrintAnotherAsyncCallback", method="printAnother")
+            callback: lambda<void()>
+        );
+
     }
 
     class AnotherClass {
+        constructor(
+            parent: AnotherClass,
+            sub: string
+        ) {
+            return nullptr;
+        }
         destructor();
 
         string getName();

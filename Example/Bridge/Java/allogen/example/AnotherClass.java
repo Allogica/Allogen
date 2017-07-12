@@ -21,6 +21,25 @@ public class AnotherClass {
 	private long pointer;
 
 	/**
+	 * 
+	 * 
+	 * @param parent 
+	 * @param sub 
+	 */
+	public AnotherClass(AnotherClass parent, String sub) {
+		pointer = this._init(parent, sub);
+	}
+
+	/**
+	 * This method performs the object creation. This method should only be called
+	 * from the object constructor.
+	 * 
+	 * @param parent 
+	 * @param sub 
+	 */
+	private native long _init(AnotherClass parent, String sub);
+
+	/**
 	 * This method deletes the wrapped C++ object. This method should
 	 * not be called directly by the user, but must be called by the GC.
 	 * 

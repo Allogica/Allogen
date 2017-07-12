@@ -135,4 +135,12 @@ public class ExampleClass {
 	 */
 	public native void printAnother(AnotherClass another);
 
+	/**
+	 * 
+	 * 
+	 * @param another 
+	 * @param callback 
+	 */
+	public native void printAnotherAsync(AnotherClass another, PrintAnotherAsyncCallback callback);
+
 }

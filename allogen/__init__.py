@@ -26,8 +26,8 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import bridge
-__all__ = ['bridge']
+# from bridge import *
+__all__ = ['bridge', 'codegen']
 
 __author__ = "Rogiel Sulzbach, Gabriel Marins da Costa"
 __copyright__ = "Copyright 2017, Allogica"

@@ -27,7 +27,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from allogen.bridge.frontend.CompilerType import BuiltinType
-from pyparsing import *
 from allogen.bridge.idl.Parser import *
 
 lambda_syntax = (

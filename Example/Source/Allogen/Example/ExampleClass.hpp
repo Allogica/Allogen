@@ -36,6 +36,8 @@ namespace Allogen { namespace Example {
 								std::function<void(AnotherClass)> callback);
 
 		void printAnother(const AnotherClass& another);
+		void printAnotherAsync(const AnotherClass& another,
+							   std::function<void()> callback);
 
 	};
 

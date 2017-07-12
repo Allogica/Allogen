@@ -26,5 +26,4 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import CppLanguage, JavaLanguage, ObjectiveCLanguage, CSharpLanguage
 __all__ = ['CppLanguage', 'JavaLanguage', 'ObjectiveCLanguage', 'CSharpLanguage']

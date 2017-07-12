@@ -64,7 +64,7 @@ class JavaBackend(Backend):
             32: 'I',
             64: 'J'
         }
-        for (bits, java) in {8: 'byte', 16: 'short', 32: 'int', 64: 'long'}.iteritems():
+        for (bits, java) in {8: 'byte', 16: 'short', 32: 'int', 64: 'long'}.items():
             bits_n = bits
             bits = str(bits)
             builtins['int' + bits + '_t'] = lambda context, typename: PrimitiveType(

@@ -38,7 +38,7 @@ class CodegenConstructsCreationPass(CompilerPass):
     def run(self, context):
         """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
 
-        for (name, clazz) in context.classes.iteritems():
+        for (name, clazz) in context.classes.items():
             self.compiler.synthesize_class(clazz)
 
     def get_order(self):

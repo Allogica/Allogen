@@ -72,6 +72,8 @@ class CompilerContext(object):
         return None
 
     def find_type(self, name, scope=''):
+        if scope is None:
+            scope = ""
         namespaces = scope.split('::')
         ns_dict = self.types
         for namespace in namespaces:
@@ -95,7 +97,7 @@ class CompilerContext(object):
             typename.linked_type = found.typename
             return found.typename
 
-        builtin = self.create_builtin_type(typename)
+        builtin = self.create_builtin_type(typename, scope=scope)
         if builtin:
             typename.linked_type = builtin
             return builtin

@@ -54,7 +54,7 @@ class TypenameMappingPass(CompilerPass):
             elif decl.__class__ == IDLClass:
                 self.create_class(context, decl, None)
 
-        for clazz in context.all_classes.itervalues():
+        for clazz in context.all_classes.values():
             clazz.typename = UserDefinedType(user_type=clazz, context=context, typename=None)
 
         self.create_type_tree(context)
@@ -66,7 +66,7 @@ class TypenameMappingPass(CompilerPass):
             type.lookup(context)
 
     def create_type_tree(self, context):
-        for clazz in context.classes.itervalues():
+        for clazz in context.classes.values():
             namespaces = clazz.cpp_namespace.split('::')
 
             ns_dict = context.types
@@ -78,7 +78,7 @@ class TypenameMappingPass(CompilerPass):
             ns_dict[clazz.name] = clazz
 
     def resolve_types(self, context):
-        for (class_name, clazz) in context.classes.iteritems():
+        for (class_name, clazz) in context.classes.items():
             clazz.types_used = []
 
             for method in clazz.constructors + [clazz.destructor] + clazz.methods:
@@ -99,26 +99,8 @@ class TypenameMappingPass(CompilerPass):
 
     def map_typename(self, typename, scope):
         """:type typename allogen.bridge.idl.Objects.IDLTypename"""
-        compiler_type = None
-
-        found = self.context.find_type(typename.name, scope)
-        if found and found.typename is None:
-            return found.typename
-        elif found:
-            compiler_type = found.typename
-
-        # if not a user type it could be a builtin
-        if not compiler_type:
-            compiler_type = self.context.create_builtin_type(typename, scope=scope)
-
-        if not compiler_type:
-            raise Exception("Typename " + typename.name + " could not be resolved.")
-
-        typename.linked_type = compiler_type
-        self.context.mapped_types.append(compiler_type)
-        compiler_type.scope = scope
-
-        return compiler_type
+        self.context.resolve(typename, scope)
+        return typename.linked_type
 
     def enter_namespace(self, context, namespace):
         """

@@ -42,7 +42,7 @@ class BackendTargetCodegenPass(CompilerPass):
         for interface in context.interfaces.values():
             target_backend.handle_interface(context, interface)
 
-        for clazz in context.classes.values() + context.interfaces.values():
+        for clazz in list(context.classes.values()) + list(context.interfaces.values()):
             target_backend.codegen(context, clazz)
 
     def get_order(self):

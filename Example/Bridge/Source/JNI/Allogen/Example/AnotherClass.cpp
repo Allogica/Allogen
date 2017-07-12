@@ -11,6 +11,12 @@
 using namespace Allogen::JNI;
 
 namespace Allogen { namespace Example {
+	extern "C" JNIEXPORT jlong Java_allogen_example_AnotherClass__1init(JNIEnv* _env_, jobject _jthis_, jobject parent, jstring sub) {
+		return WrappedMethod<void, Allogen::Example::AnotherClass(AnotherClass, std::string)>::call(_env_, _jthis_, [](AnotherClass parent, std::string sub) {{
+            return nullptr;
+        }}, parent, sub);
+	}
+
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_AnotherClass_finalize(JNIEnv* _env_, jobject _jthis_) {
 		return WrappedMethod<Allogen::Example::AnotherClass, void()>::call(_env_, _jthis_, [](Allogen::Example::AnotherClass *wself) { delete wself; });
 	}

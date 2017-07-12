@@ -198,7 +198,7 @@ class IDLInterface(IDLAnnotatedObject):
 
     def __getattr__(self, item):
         if item == 'methods':
-            return sorted({x for v in self.methods_dict.itervalues() for x in v})
+            return sorted({x for v in self.methods_dict.values() for x in v})
 
     def add_method(self, method):
         if method.name not in self.methods_dict:
@@ -247,7 +247,7 @@ class IDLClass(IDLAnnotatedObject):
 
     def __getattr__(self, item):
         if item == 'methods':
-            return sorted({x for v in self.methods_dict.itervalues() for x in v})
+            return sorted({x for v in self.methods_dict.values() for x in v})
 
     def add_method(self, method):
         if method.name not in self.methods_dict:
