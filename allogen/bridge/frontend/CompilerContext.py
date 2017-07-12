@@ -104,7 +104,7 @@ class CompilerContext(object):
             typename.linked_type = builtin
             return builtin
 
-        raise Exception("Could not resolve type " + typename.name)
+        raise Exception("Could not resolve type " + typename.name+" in scope "+scope)
 
     def add_sister_class(self, sister_class: IDLInterface):
         self.interfaces[sister_class.name] = sister_class

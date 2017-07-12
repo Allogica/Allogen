@@ -1,9 +1,8 @@
-
 #include "Allogen/Example/ExampleClass.hpp"
-#include "Allogen/Example/AnotherClass.hpp"
+
+import "AnotherClass.i"
 
 namespace Allogen::Example {
-
     /// A simple test class that shows how Allogen can bridge C++
     /// classes into another target language.
     /// Comments on this file are automatically appended into the generated
@@ -119,18 +118,5 @@ namespace Allogen::Example {
             callback: lambda<void()>
         );
 
-    }
-
-    class AnotherClass {
-        constructor(
-            parent: AnotherClass,
-            sub: string
-        ) {
-            return nullptr;
-        }
-        destructor();
-
-        string getName();
-        void setName(newName: string);
     }
 }

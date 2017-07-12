@@ -44,7 +44,6 @@ def InterfaceDict(expr, param):
 #                     tokenlist[ikey] = pyparsing._ParseResultsWithOffset(dictvalue, i)
 #                 else:
 #                     tokenlist[ikey] = pyparsing._ParseResultsWithOffset(dictvalue[0], i)
-#             print(tokenlist[ikey])
 #
 #
 #         if self.resultsName:

@@ -27,9 +27,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 include(CompileAllogenInterface)
+
+file(GLOB_RECURSE IDLS ${CMAKE_CURRENT_SOURCE_DIR}/IDL/*.i)
 add_allogen_interface(Allogen.Example.Bridge.Generate
         LANGUAGE        Java
-        IDL             ${CMAKE_CURRENT_SOURCE_DIR}/IDL/Example.i
+        IDL             ${IDLS}
         
         INCLUDE_DIRS    ${CMAKE_CURRENT_SOURCE_DIR}/IDL
         

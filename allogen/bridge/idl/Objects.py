@@ -56,6 +56,12 @@ class IDL(object):
             classes.update(decl.get_classes())
         return classes
 
+    def merge(self, other):
+        self.declarations += other.declarations
+        self.definitions += other.definitions
+        self.imports += other.imports
+        self.includes += other.includes
+
 
 class IDLObject(object):
     def __init__(self):

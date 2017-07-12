@@ -32,13 +32,17 @@ from allogen.bridge.frontend.CompilerContext import CompilerContext
 import allogen.bridge.frontend.passes as p
 from allogen.bridge.idl.Objects import *
 
+from allogen.bridge.idl.Parser import Parser
+
 class Compiler(object):
+    parser = Parser()
+
     def __init__(self, passes=None):
         self.passes = passes
         if self.passes is None:
             self.passes = [
-                p.IDLParsingPass.IDLParsingPass(),
-                p.ImportingPass.ImportingPass(),
+                # p.IDLParsingPass.IDLParsingPass(),
+                # p.ImportingPass.ImportingPass(),
                 p.TypenameMappingPass.TypenameMappingPass(),
                 p.CodegenConstructsCreationPass.CodegenConstructsCreationPass(),
                 p.BackendVisitorPass.BackendVisitorPass(),
@@ -49,19 +53,30 @@ class Compiler(object):
     def add_compiler_pass(self, compiler_pass: allogen.bridge.frontend.CompilerPass.CompilerPass):
         self.passes.append(compiler_pass)
 
-    def compile_file(self, file, **kwargs):
-        with open(file) as f:
-            return self.compile_source(f.read(), file=file, **kwargs)
+    def compile_files(self, files, **kwargs):
+        self.context = CompilerContext()
+        self.context.__dict__.update(kwargs)
 
-    def compile_source(self, source: str, **kwargs):
-        context = CompilerContext()
-        context.__dict__.update(kwargs)
+        self.context.idl = IDL()
 
+        for file in files:
+            with open(file) as f:
+                print("Parsing file", file)
+                self.parse_file(f.read())
+
+        self.context.idl_classes = self.context.idl.get_classes()
+        self.context.all_classes = dict(self.context.idl_classes)
+
+        self.compile(self.context)
+
+    def parse_file(self, source: str):
+        self.context.idl.merge(self.parser.parse(source))
+        pass
+
+    def compile(self, context: CompilerContext):
         context.backend = JavaBackend()
         context.backend.context = context
         context.backend.compiler = self
-
-        context.source = source
 
         # register backend types
         context.backend.register_builtins(context.builtin_types)
