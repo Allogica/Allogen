@@ -25,16 +25,20 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import allogen
 from allogen.bridge.frontend.CompilerPass import CompilerPass
 
 
 class BackendVisitorPass(CompilerPass):
-    def run(self, context):
+    def run(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext):
         """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
         backend = context.backend
 
         namespace = None
+
+        for clazz in context.classes.values():
+            backend.clazz_pre(namespace, clazz)
+
         for clazz in context.classes.values():
             backend.clazz(namespace, clazz)
 

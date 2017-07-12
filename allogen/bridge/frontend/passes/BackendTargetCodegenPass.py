@@ -25,14 +25,14 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import allogen
 from allogen.bridge.backend.objc.ObjectiveCTargetBackend import ObjectiveCTargetBackend
 from allogen.bridge.backend.java.JavaTargetBackend import JavaTargetBackend
 from allogen.bridge.frontend.CompilerPass import CompilerPass
 
 
 class BackendTargetCodegenPass(CompilerPass):
-    def run(self, context):
+    def run(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext):
         """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
         target_backend = context.backend.create_target_backend()
 
@@ -43,6 +43,7 @@ class BackendTargetCodegenPass(CompilerPass):
             target_backend.handle_interface(context, interface)
 
         for clazz in list(context.classes.values()) + list(context.interfaces.values()):
+            print("Codegen for backend target class", clazz.name)
             target_backend.codegen(context, clazz)
 
     def get_order(self):

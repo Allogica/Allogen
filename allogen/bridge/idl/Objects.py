@@ -1,6 +1,5 @@
-from allogen.bridge.frontend.CompilerType import CompilerType
+import allogen
 from allogen.codegen.Constructs import *
-
 
 class IDL(object):
     declarations = None  # type: list(IDLClass|IDLNamespace)
@@ -154,7 +153,7 @@ class IDLNamespace(IDLAnnotatedObject):
 
 
 class IDLTypename(IDLObject):
-    linked_type = None  # type: CompilerType
+    linked_type = None  # type: allogen.bridge.frontend.CompilerType.CompilerType
 
     def __init__(self, name, optional=False, template_arguments=None, **kwargs):
         super(IDLTypename, self).__init__(**kwargs)
@@ -247,14 +246,14 @@ class IDLClass(IDLAnnotatedObject):
 
     def __getattr__(self, item):
         if item == 'methods':
-            return sorted({x for v in self.methods_dict.values() for x in v})
+            return [x for v in self.methods_dict.values() for x in v]
 
     def add_method(self, method):
         if method.name not in self.methods_dict:
             self.methods_dict[method.name] = []
         self.methods_dict[method.name].append(method)
 
-    def get_method(self, name):
+    def get_method(self, name: str):
         return next((m for m in self.methods if m.name == name), None)
 
     def get_classes(self):

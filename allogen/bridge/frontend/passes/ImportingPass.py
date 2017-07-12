@@ -25,7 +25,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import allogen
 from allogen.bridge.frontend.CompilerPass import CompilerPass
 from allogen.bridge.idl.Parser import Parser
 
@@ -37,17 +37,17 @@ class ImportingPass(CompilerPass):
     Parses all files declared as imported in the source IDL
     """
 
-    def run(self, context):
+    def run(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext):
         """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
 
         parser = Parser()
         # parse all imported idls
-        context.imports = map(
+        context.imports = list(map(
             lambda imported: parser.parse(
                 open(os.path.join(os.path.dirname(context.file), imported.path)).read()
             ),
             context.idl.imports
-        )
+        ))
 
         context.imported_classes = {}
         for imported in context.imports:

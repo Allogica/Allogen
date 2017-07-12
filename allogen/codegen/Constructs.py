@@ -132,7 +132,7 @@ class Constructor(Method):
                 return ConstructorInitializer(s)
             return s
 
-        self.initializers = map(fix_strings, self.initializers)
+        self.initializers = list(map(fix_strings, self.initializers))
 
 
 class ConstructorInitializer(LanguageConstruct):

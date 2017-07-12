@@ -32,7 +32,7 @@ endif ()
 set(ADD_ALLOGEN_INTERFACE_INCLUDED)
 
 include(CMakeParseArguments)
-find_package(PythonInterp)
+find_package(PythonInterp 3.5)
 
 if (NOT ALLOGEN_COMPILER)
     find_file(ALLOGEN_COMPILER allogenc

@@ -13,10 +13,10 @@ public class Test {
             System.out.println("Done async!!!!");
         });
 
-        int r = n.anotherCallback((int a, int b) -> a + b);
+        int r = n.anotherCallback((short a, short b) -> a + b);
         System.out.println(r);
 
-        r = n.virtualCallback((int a, int b) -> a + b, 100, 200);
+        r = n.virtualCallback((short a, short b) -> a + b, (short) 100, (short) 200);
         System.out.println(r);
 
         System.out.println("Newly constructed");

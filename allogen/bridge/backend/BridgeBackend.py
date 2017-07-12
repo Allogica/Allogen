@@ -26,19 +26,23 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import allogen
+from allogen.bridge.frontend.CompilerContext import CompilerContext
+from allogen.bridge.idl.Objects import IDLClass
+
 
 class BridgeBackend(object):
-    context = None  # type: CompilerContext
-    compiler = None # type: Compiler
+    context = None  # type: allogen.bridge.frontend.CompilerContext.CompilerContext
+    compiler = None # type: allogen.bridge.frontend.Compiler.Compiler
 
     def __init__(self):
         pass
 
-    def full_pass(self, context):
+    def full_pass(self, context: CompilerContext):
         pass
 
-    def handle_class(self, context, cls):
+    def handle_class(self, context: CompilerContext, cls: IDLClass):
         pass
 
-    def codegen(self, context, cls):
+    def codegen(self, context: CompilerContext, cls: IDLClass):
         pass

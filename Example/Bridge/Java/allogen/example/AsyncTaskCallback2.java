@@ -9,5 +9,5 @@
 package allogen.example;
 
 public interface AsyncTaskCallback2 {
-	public int onCallback(int a, int b);
+	public int onCallback(short a, short b);
 }

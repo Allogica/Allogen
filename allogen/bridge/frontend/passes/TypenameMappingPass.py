@@ -25,9 +25,10 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import allogen
 from allogen.bridge.frontend.CompilerPass import CompilerPass
 from allogen.bridge.frontend.CompilerType import UserDefinedType
-from allogen.bridge.idl.Objects import IDLNamespace, IDLClass, IDLConstructor, IDLDestructor
+from allogen.bridge.idl.Objects import IDLNamespace, IDLClass, IDLConstructor, IDLDestructor, IDLTypename
 
 
 class TypenameMappingPass(CompilerPass):
@@ -42,7 +43,7 @@ class TypenameMappingPass(CompilerPass):
         self.namespaces = []
         pass
 
-    def run(self, context):
+    def run(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext):
         """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
 
         context.classes = {}
@@ -61,11 +62,10 @@ class TypenameMappingPass(CompilerPass):
         self.resolve_types(context)
 
         # perform the second phase lookup
-        # print context.types
         for type in context.mapped_types:
             type.lookup(context)
 
-    def create_type_tree(self, context):
+    def create_type_tree(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext):
         for clazz in context.classes.values():
             namespaces = clazz.cpp_namespace.split('::')
 
@@ -77,7 +77,7 @@ class TypenameMappingPass(CompilerPass):
 
             ns_dict[clazz.name] = clazz
 
-    def resolve_types(self, context):
+    def resolve_types(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext):
         for (class_name, clazz) in context.classes.items():
             clazz.types_used = []
 
@@ -97,12 +97,12 @@ class TypenameMappingPass(CompilerPass):
             if clazz in clazz.types_used:
                 clazz.types_used.remove(clazz)
 
-    def map_typename(self, typename, scope):
+    def map_typename(self, typename: IDLTypename, scope):
         """:type typename allogen.bridge.idl.Objects.IDLTypename"""
         self.context.resolve(typename, scope)
         return typename.linked_type
 
-    def enter_namespace(self, context, namespace):
+    def enter_namespace(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext, namespace: IDLNamespace):
         """
         :type namespace IDLNamespace
         """
@@ -112,7 +112,7 @@ class TypenameMappingPass(CompilerPass):
             elif decl.__class__ == IDLClass:
                 self.create_class(context, decl, namespace.name)
 
-    def create_class(self, context, cls, namespace):
+    def create_class(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext, cls: IDLClass, namespace):
         """
         :type cls IDLClass
         """
@@ -124,6 +124,7 @@ class TypenameMappingPass(CompilerPass):
             cls.namespaces = namespace.split('::')
 
         context.classes[fully_qualified_name] = cls
+
         cls.cpp_namespace = namespace
         cls.fully_qualified_name = fully_qualified_name
 

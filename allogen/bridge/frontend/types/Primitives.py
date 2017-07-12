@@ -28,7 +28,6 @@
 
 from allogen.bridge.frontend.CompilerType import BuiltinType
 
-
 class PrimitiveType(BuiltinType):
     def __init__(self, context, typename, **kwargs):
         super(BuiltinType, self).__init__(context, typename)

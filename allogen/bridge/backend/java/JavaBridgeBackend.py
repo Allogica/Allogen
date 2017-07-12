@@ -29,6 +29,7 @@ from string import Template
 
 from allogen.bridge.backend.BridgeBackend import BridgeBackend
 from allogen.bridge.backend.Constants import codegen_notice
+from allogen.bridge.frontend.CompilerContext import CompilerContext
 from allogen.bridge.idl.Objects import IDLTypename, IDLClass
 from allogen.codegen.Constructs import Function, Raw, MethodArgument, TypeName, Comment, Namespace
 from allogen.codegen.StreamSourceCodeWriter import StreamSourceCodeWriter
@@ -61,7 +62,7 @@ class JavaBridgeBackend(BridgeBackend):
     def full_pass(self, context):
         pass
 
-    def handle_class(self, context, cls):
+    def handle_class(self, context: CompilerContext, cls: IDLClass):
         cls.jni_methods = []
 
         for constructor in cls.constructors:
@@ -74,7 +75,7 @@ class JavaBridgeBackend(BridgeBackend):
             if not constructor.body:
                 constructor.body = T_init_new.substitute({
                     'cpp_class_name': cls.fully_qualified_name,
-                    'cpp_arg_names': ", ".join(map(lambda a: a.name, constructor.arguments)),
+                    'cpp_arg_names': ", ".join(list(map(lambda a: a.name, constructor.arguments))),
                 })
 
             jni_impl.body = [
@@ -84,7 +85,7 @@ class JavaBridgeBackend(BridgeBackend):
                     'cpp_args': ", ".join(
                         map(lambda a: a.type.java_cpp_type + " " + a.name, constructor.arguments)),
                     'cpp_arg_names': ", ".join(map(lambda a: a.name, constructor.arguments)),
-                    'cpp_arg_names_comma': ", ".join([''] + map(lambda a: a.name, constructor.arguments)),
+                    'cpp_arg_names_comma': ", ".join([''] + list(map(lambda a: a.name, constructor.arguments))),
                     'cpp_body': constructor.body
                 }))
             ]
@@ -98,12 +99,12 @@ class JavaBridgeBackend(BridgeBackend):
                 'cpp_class_name': cls.fully_qualified_name,
                 'cpp_signature': ", ".join(map(lambda a: a.type.java_cpp_type, cls.destructor.arguments)),
                 'cpp_args': ", ".join(
-                    [''] + map(lambda a: a.type.java_cpp_type + " " + a.name, cls.destructor.arguments)),
-                'cpp_arg_names': ", ".join([''] + map(lambda a: a.name, cls.destructor.arguments)),
+                    [''] + list(map(lambda a: a.type.java_cpp_type + " " + a.name, cls.destructor.arguments))),
+                'cpp_arg_names': ", ".join([''] + list(map(lambda a: a.name, cls.destructor.arguments))),
             }))
         ]
 
-        for (method_name, overloads) in cls.methods_dict.iteritems():
+        for (method_name, overloads) in cls.methods_dict.items():
             for method in overloads:
                 jni_impl = self.create_jni_function(cls, method, context)
                 cls.jni_methods.append(jni_impl)
@@ -120,10 +121,10 @@ class JavaBridgeBackend(BridgeBackend):
                         'cpp_return_type': method.ret.java_cpp_type,
                         'cpp_signature': ", ".join(map(lambda a: a.type.java_cpp_type, method.arguments)),
                         'cpp_args': ", ".join(
-                            [''] + map(lambda a: a.type.java_cpp_type + " " + a.name, method.arguments)),
+                            [''] + list(map(lambda a: a.type.java_cpp_type + " " + a.name, method.arguments))),
                         'cpp_arg_names': ", ".join(
-                            [''] + map(lambda a: a.type.linked_type.bridge_argument(jni_impl, cls, method, a),
-                                       method.arguments)),
+                            [''] + list(map(lambda a: a.type.linked_type.bridge_argument(jni_impl, cls, method, a),
+                                       method.arguments))),
                         'cpp_body': cls.get_method(method.name).body
                     }))
                 ]
@@ -151,7 +152,7 @@ class JavaBridgeBackend(BridgeBackend):
                  ] + jni_args,
             body=[method.body])
 
-    def codegen(self, context, cls):
+    def codegen(self, context: CompilerContext, cls: IDLClass):
         path = os.path.join(context.bridge_out_dir, cls.java_jni_file_location)
         dirname = os.path.dirname(path)
 
@@ -172,7 +173,7 @@ class JavaBridgeBackend(BridgeBackend):
                     idl_includes.append('#include "' + include.path + '"')
 
 
-            file.writelines(map(lambda l: l + '\n',
+            file.writelines(list(map(lambda l: l + '\n',
                                 [
                                     '#pragma once',
                                     '',
@@ -180,16 +181,16 @@ class JavaBridgeBackend(BridgeBackend):
                                     ''
                                 ]
                                 +
-                                map(lambda x: '#include "' + x.path + '"', context.idl.includes)
+                                list(map(lambda x: '#include "' + x.path + '"', context.idl.includes))
                                 +
                                 ['']
                                 +
-                                map(lambda x: '#include "' + x.name + '.hpp"',
-                                    filter(lambda x: isinstance(x, IDLClass), cls.types_used)) + [
+                                list(map(lambda x: '#include "' + x.name + '.hpp"',
+                                    filter(lambda x: isinstance(x, IDLClass), cls.types_used))) + [
                                     '',
                                     'ALLOGEN_BRIDGED_CLASS_CONVERTER(' + cls.fully_qualified_name + ', "' + cls.java_class_file + '")',
                                     ''
-                                ]))
+                                ])))
 
             cls.bridge_header = cls.name + '.hpp'
 

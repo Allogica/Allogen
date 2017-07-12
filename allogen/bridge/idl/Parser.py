@@ -1,36 +1,56 @@
 from pyparsing import *
 import pyparsing
 
+def InterfaceDict(expr, param):
+    def createDict(tokens):
+        d = ParseResults()
+        i = 0
+        for token in tokens:
+            ikey = pyparsing._ustr(token[param])
 
-class InterfaceDict(TokenConverter):
-    def __init__(self, expr, param):
-        super(InterfaceDict, self).__init__(expr)
-        self.saveAsList = True
-        self.param = param
-
-    def postParse(self, instring, loc, tokenlist):
-        for i, tok in enumerate(tokenlist):
-            if len(tok) == 0:
-                continue
-            ikey = tok[self.param]
-            if isinstance(ikey, int):
-                ikey = pyparsing._ustr(tok[0]).strip()
-            if len(tok) == 1:
-                tokenlist[ikey] = pyparsing._ParseResultsWithOffset("", i)
-            elif len(tok) == 2 and not isinstance(tok[1], ParseResults):
-                tokenlist[ikey] = pyparsing._ParseResultsWithOffset(tok[1], i)
+            dictvalue = token.copy()  # ParseResults(i)
+            if len(dictvalue) != 1 or (isinstance(dictvalue, ParseResults) and dictvalue.haskeys()):
+                d[ikey] = pyparsing._ParseResultsWithOffset(dictvalue, i)
             else:
-                dictvalue = tok.copy()  # ParseResults(i)
-                del dictvalue[0]
-                if len(dictvalue) != 1 or (isinstance(dictvalue, ParseResults) and dictvalue.haskeys()):
-                    tokenlist[ikey] = pyparsing._ParseResultsWithOffset(dictvalue, i)
-                else:
-                    tokenlist[ikey] = pyparsing._ParseResultsWithOffset(dictvalue[0], i)
+                d[ikey] = pyparsing._ParseResultsWithOffset(dictvalue[0], i)
 
-        if self.resultsName:
-            return [tokenlist]
-        else:
-            return tokenlist
+            d.append(d[ikey])
+
+            i = i + 1
+        return [d]
+    return expr.setParseAction(lambda toks: createDict(toks))
+
+# class InterfaceDict(TokenConverter):
+#     def __init__(self, expr, param):
+#         super(InterfaceDict, self).__init__(expr)
+#         self.saveAsList = True
+#         self.param = param
+#
+#     def postParse(self, instring, loc, tokenlist):
+#         for i, tok in enumerate(tokenlist):
+#             if len(tok) == 0:
+#                 continue
+#             ikey = tok[self.param]
+#             if isinstance(ikey, int):
+#                 ikey = pyparsing._ustr(tok[0]).strip()
+#             if len(tok) == 1:
+#                 tokenlist[ikey] = pyparsing._ParseResultsWithOffset("", i)
+#             elif len(tok) == 2 and not isinstance(tok[1], ParseResults):
+#                 tokenlist[ikey] = pyparsing._ParseResultsWithOffset(tok[1], i)
+#             else:
+#                 dictvalue = tok.copy()  # ParseResults(i)
+#                 del dictvalue[self.param]
+#                 if len(dictvalue) != 1 or (isinstance(dictvalue, ParseResults) and dictvalue.haskeys()):
+#                     tokenlist[ikey] = pyparsing._ParseResultsWithOffset(dictvalue, i)
+#                 else:
+#                     tokenlist[ikey] = pyparsing._ParseResultsWithOffset(dictvalue[0], i)
+#             print(tokenlist[ikey])
+#
+#
+#         if self.resultsName:
+#             return [tokenlist]
+#         else:
+#             return tokenlist
 
 
 opening_bracket = Literal('{').suppress()
@@ -50,11 +70,11 @@ include_decl = Group(Or([
 
 annotation = Group(
     Literal('@').suppress() + Word(cpp_ident)('name') + Optional(
-        Literal('(') + InterfaceDict(delimitedList(Group(
+        Literal('(') + Dict(delimitedList(Group(
             Word(cpp_ident)('name') + Literal('=') + Combine(
                 Literal('true') | Literal('false') | QuotedString('"') | Word(nums)
             )('value')
-        )), param='name') + Literal(')')
+        ))) + Literal(')')
     ) + optional_semicolon
 )
 annotations = InterfaceDict(ZeroOrMore(
@@ -192,10 +212,10 @@ class Parser:
     def parse(self, str):
         parsed = syntax.parseString(str, parseAll=True)
         return IDL(
-            declarations=map(self.parse_declaration, parsed.content),
-            imports=map(self.parse_import, parsed.imports),
-            includes=map(self.parse_include, parsed.includes),
-            definitions=map(self.parse_definition, parsed.definitions)
+            declarations=list(map(self.parse_declaration, parsed.content)),
+            imports=list(map(self.parse_import, parsed.imports)),
+            includes=list(map(self.parse_include, parsed.includes)),
+            definitions=list(map(self.parse_definition, parsed.definitions))
         )
 
     def parse_definition(self, decl):
@@ -224,7 +244,7 @@ class Parser:
     def parse_namespace(self, decl):
         return IDLNamespace(
             name=decl.name,
-            contents=map(self.parse_declaration, decl.content),
+            contents=list(map(self.parse_declaration, decl.content)),
             annotations=self.parse_annotations(decl),
             description=decl.documentation
         )
@@ -236,7 +256,7 @@ class Parser:
             description=decl.documentation,
             implements=decl.implements,
             extends=decl.extends,
-            constructors=map(self.parse_constructor, decl.constructors),
+            constructors=list(map(self.parse_constructor, decl.constructors)),
             destructor=self.parse_destructor(decl.destructor),
             methods=self.parse_methods(decl.methods)
         )
@@ -279,7 +299,7 @@ class Parser:
         return methods
 
     def parse_arguments(self, decl):
-        return map(
+        return list(map(
             lambda arg: IDLMethodArgument(
                 name=arg.name,
                 type=self.parse_typename(arg.type),
@@ -288,7 +308,7 @@ class Parser:
                 description=arg.documentation
             ),
             decl.arguments
-        )
+        ))
 
     def parse_typename(self, decl):
         return IDLTypename(
@@ -309,4 +329,3 @@ class Parser:
             annotations[a.name] = a
 
         return annotations
-

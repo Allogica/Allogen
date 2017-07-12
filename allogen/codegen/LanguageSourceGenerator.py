@@ -83,7 +83,7 @@ class LanguageSourceGenerator(object):
             Comment: self.comment
         }
 
-        for (type, impl) in impl_mapping.iteritems():
+        for (type, impl) in impl_mapping.items():
             if node.__class__ == type:
                 self.node_stack.append(node)
                 ret = impl(writer, node)
@@ -164,7 +164,7 @@ def write_doxygen_like_documentation_block(writer, node):
     if node.documentation is not None:
         writer(writer.tab, '/**', writer.nl)
         writer(
-            map(lambda x: [writer.tab, ' * ', x, writer.nl], node.documentation.split('\n'))
+            list(map(lambda x: [writer.tab, ' * ', x, writer.nl], node.documentation.split('\n')))
         )
 
         if node.args is not None and len(node.args) > 0:

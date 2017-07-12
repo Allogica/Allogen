@@ -40,15 +40,21 @@ class SourceCodeWriter(object):
     class IndentedBlockHint:
         def __init__(self, *args):
             self.args = list(args)
+            if isinstance(self.args, map):
+                self.args = list(self.args)
 
     class DeindentedBlockHint:
         def __init__(self, *args):
             self.args = list(args)
+            if isinstance(self.args, map):
+                self.args = list(self.args)
 
     class JoinedHint:
         def __init__(self, glue, args):
             self.glue = glue
             self.args = args
+            if isinstance(self.args, map):
+                self.args = list(self.args)
 
     def __init__(self, generator, *args):
         self.indent = 0
@@ -69,6 +75,9 @@ class SourceCodeWriter(object):
     def write(self, o):
         if o is None:
             return False
+
+        elif isinstance(o, map):
+            return self.write(list(o))
 
         elif isinstance(o, tuple) and (len(o) == 2 or len(o) == 3):
             if o[0] and o[0] is not None:

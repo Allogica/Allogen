@@ -27,36 +27,39 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import allogen
+from allogen.bridge.idl.Objects import IDLTypename, IDLMethod, IDLMethodArgument, IDLClass
+from allogen.codegen.Constructs import LanguageConstruct
 
 
 class CompilerType(object):
     typename = None  # type: allogen.bridge.idl.Objects.IDLTypename
     forward = None  # type: str
 
-    def __init__(self, context, typename, scope=None):
+    def __init__(self, context, typename: IDLTypename, scope=None):
         self.context = context
         self.typename = typename
         self.scope = scope
 
     def __str__(self):
-        return "CompilerType"
+        return str(self.__dict__)
 
-    def get_bridge_name(self):
+    def get_bridge_name(self) -> str:
         return self.typename.name
 
-    def get_target_name(self):
+    def get_target_name(self) -> str:
         return self.typename.name
 
-    def target_return(self, object, method):
+    def target_return(self, object: LanguageConstruct, method: IDLMethod):
         pass
 
-    def target_argument(self, object, method, argument):
+    def target_argument(self, object: LanguageConstruct, method: IDLMethod, argument: IDLMethodArgument):
         argument.forward = argument.name
 
-    def bridge_return(self, object, method):
+    def bridge_return(self, object: LanguageConstruct, method: IDLMethod):
         pass
 
-    def bridge_argument(self, object, clazz, method, argument):
+    def bridge_argument(self, object: LanguageConstruct, clazz: IDLClass, method: IDLMethod,
+                        argument: IDLMethodArgument):
         return argument.name
 
     def lookup(self, context):
@@ -64,7 +67,7 @@ class CompilerType(object):
 
 
 class UserDefinedType(CompilerType):
-    def __init__(self, user_type, **kwargs):
+    def __init__(self, user_type: IDLClass, **kwargs):
         super(UserDefinedType, self).__init__(**kwargs)
         self.user_type = user_type
 

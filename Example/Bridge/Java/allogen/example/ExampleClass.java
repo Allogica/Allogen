@@ -104,7 +104,7 @@ public class ExampleClass {
 	 * @param a The "a" integer
 	 * @param b The "b" integer
 	 */
-	public native int virtualCallback(AsyncTaskCallback2 callback, int a, int b);
+	public native int virtualCallback(AsyncTaskCallback2 callback, short a, short b);
 
 	/**
 	 * 

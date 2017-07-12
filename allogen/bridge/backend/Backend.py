@@ -27,6 +27,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import allogen
+import typing
+
+from allogen.bridge.idl.Objects import *
 
 
 class Backend(object):
@@ -43,38 +46,41 @@ class Backend(object):
         raise Exception("create_bridge_backend not implemented by Backend implementation")
 
     # visitors
-    def namespace(self, namespace):
+    def namespace(self, namespace: IDLNamespace):
         pass
 
-    def clazz(self, namespace, clazz):
+    def clazz_pre(self, namespace: IDLNamespace, clazz: IDLClass):
         pass
 
-    def clazz_post(self, namespace, clazz):
+    def clazz(self, namespace: IDLNamespace, clazz: IDLClass):
         pass
 
-    def interface(self, namespace, interface):
+    def clazz_post(self, namespace: IDLNamespace, clazz: IDLClass):
         pass
 
-    def interface_post(self, namespace, interface):
+    def interface(self, namespace: IDLNamespace, interface: IDLInterface):
         pass
 
-    def constructor(self, namespace, clazz, constructor):
+    def interface_post(self, namespace: IDLNamespace, interface: IDLInterface):
         pass
 
-    def constructor_post(self, namespace, clazz, constructor):
+    def constructor(self, namespace: IDLNamespace, clazz: IDLClass, constructor: IDLConstructor):
         pass
 
-    def destructor(self, namespace, clazz, destructor):
+    def constructor_post(self, namespace: IDLNamespace, clazz: IDLClass, constructor: IDLConstructor):
         pass
 
-    def destructor_post(self, namespace, clazz, destructor):
+    def destructor(self, namespace: IDLNamespace, clazz: IDLClass, destructor: IDLDestructor):
         pass
 
-    def method(self, namespace, clazz, method, constructor=False):
+    def destructor_post(self, namespace: IDLNamespace, clazz: IDLClass, destructor: IDLDestructor):
         pass
 
-    def method_post(self, namespace, clazz, method, constructor=False):
+    def method(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, constructor=False):
         pass
 
-    def argument(self, namespace, clazz, method, argument):
+    def method_post(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, constructor=False):
+        pass
+
+    def argument(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, argument: IDLMethodArgument):
         pass

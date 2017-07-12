@@ -25,18 +25,20 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from allogen.bridge.backend.Backend import Backend
-from allogen.bridge.frontend.CompilerType import UserDefinedType
+
+import allogen
+
 from allogen.bridge.frontend.types.Primitives import *
 from allogen.bridge.idl.Objects import *
 
+
 class CompilerContext(object):
-    compiler = None  # type: Compiler
-    backend = None  # type: Backend
+    compiler = None  # type: allogen.bridge.frontend.Compiler.Compiler
+    backend = None  # type: allogen.bridge.backend.Backend.Backend
 
     types = {}  # type: list(IDLClass)
     builtin_types = {}  # type: list(BuiltinType)
-    mapped_types = []  #type: list(CompilerType)
+    mapped_types = []  # type: list(CompilerType)
 
     classes = {}  # type: dict(str, IDLClass)
     interfaces = {}  # type: dict(str, IDLInterface)
@@ -51,11 +53,11 @@ class CompilerContext(object):
         self.types = {}
         self.builtin_types = {}
 
-    def add_builtin_type(self, name, clazz):
+    def add_builtin_type(self, name: str, clazz):
         if name not in self.builtin_types:
             self.builtin_types[name] = clazz
 
-    def create_builtin_type(self, typename, scope=None):
+    def create_builtin_type(self, typename: IDLTypename, scope=None):
         """
         :param typename: IDLTypename
         :return:
@@ -71,7 +73,7 @@ class CompilerContext(object):
 
         return None
 
-    def find_type(self, name, scope=''):
+    def find_type(self, name: str, scope=''):
         if scope is None:
             scope = ""
         namespaces = scope.split('::')
@@ -88,7 +90,7 @@ class CompilerContext(object):
             return ns_dict[name]
         return None
 
-    def resolve(self, typename, scope=''):
+    def resolve(self, typename: IDLTypename, scope=''):
         if typename.linked_type:
             return typename.linked_type
 
@@ -102,7 +104,7 @@ class CompilerContext(object):
             typename.linked_type = builtin
             return builtin
 
-        raise Exception("Could not resolve type "+typename.name)
+        raise Exception("Could not resolve type " + typename.name)
 
-    def add_sister_class(self, sister_class):
+    def add_sister_class(self, sister_class: IDLInterface):
         self.interfaces[sister_class.name] = sister_class

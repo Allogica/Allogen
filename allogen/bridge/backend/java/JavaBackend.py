@@ -26,11 +26,13 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import typing
+
 from allogen.bridge.backend.Backend import Backend
 from allogen.bridge.backend.java.JavaBridgeBackend import JavaBridgeBackend
 from allogen.bridge.backend.java.JavaTargetBackend import JavaTargetBackend
 from allogen.bridge.backend.java.types.JavaLambda import JavaLambda
-from allogen.bridge.frontend.CompilerType import UserDefinedType
+from allogen.bridge.frontend.CompilerType import UserDefinedType, CompilerType
 from allogen.bridge.frontend.types.Primitives import PrimitiveType
 from allogen.bridge.idl.Objects import *
 
@@ -47,7 +49,7 @@ class JavaBackend(Backend):
     # L fully-qualified-class;  fully-qualified-class
     # [ type	                type[]
     # ( arg-types ) ret-type	method type
-    def register_builtins(self, builtins):
+    def register_builtins(self, builtins: typing.List[CompilerType]):
         builtins['void'] = lambda context, typename: PrimitiveType(
             context=context, typename=typename,
             jni_type='void', bridge_type='void', target_type='void',
@@ -65,16 +67,14 @@ class JavaBackend(Backend):
             64: 'J'
         }
         for (bits, java) in {8: 'byte', 16: 'short', 32: 'int', 64: 'long'}.items():
-            bits_n = bits
-            bits = str(bits)
-            builtins['int' + bits + '_t'] = lambda context, typename: PrimitiveType(
+            builtins['int' + str(bits) + '_t'] = lambda context, typename, bits=bits, java=java: PrimitiveType(
                 context=context, typename=typename,
-                jni_type='j' + java, bridge_type='int' + bits + '_t', target_type=java,
-                java_signature=java_signature_names[bits_n], java_complex_mangling=False)
-            builtins['uint' + bits + '_t'] = lambda context, typename: PrimitiveType(
+                jni_type='j' + java, bridge_type='int' + str(bits) + '_t', target_type=java,
+                java_signature=java_signature_names[bits], java_complex_mangling=False)
+            builtins['uint' + str(bits) + '_t'] = lambda context, typename, bits=bits, java=java: PrimitiveType(
                 context=context, typename=typename,
-                jni_type='j' + java, bridge_type='uint' + bits + '_t', target_type=java,
-                java_signature=java_signature_names[bits_n], java_complex_mangling=False)
+                jni_type='j' + java, bridge_type='uint' + str(bits) + '_t', target_type=java,
+                java_signature=java_signature_names[bits], java_complex_mangling=False)
 
         builtins['lambda'] = lambda context, typename: JavaLambda(context, typename)
 
@@ -84,7 +84,7 @@ class JavaBackend(Backend):
     def create_bridge_backend(self):
         return JavaBridgeBackend()
 
-    def output_files_for_clazz(self, clazz):
+    def output_files_for_clazz(self, clazz: IDLClass):
         return [
             clazz.java_file_location,
             clazz.java_cpp_file_location,
@@ -92,36 +92,37 @@ class JavaBackend(Backend):
         ]
 
     # visitors
-    def namespace(self, namespace):
+    def namespace(self, namespace: IDLNamespace):
         namespace.java_name = namespace.name
 
-    def clazz(self, namespace, clazz):
+    def clazz_pre(self, namespace: IDLNamespace, clazz: IDLClass):
         clazz.java_name = clazz.name
-        clazz.java_packages = map(lambda ns: ns.lower(), clazz.namespaces)
+        clazz.java_packages = list(map(lambda ns: ns.lower(), clazz.namespaces))
         clazz.java_package_name = ".".join(clazz.java_packages)
         clazz.java_fully_qualified_name = clazz.java_package_name + '.' + clazz.name
 
-        clazz.java_class_file = "/".join(map(lambda ns: ns.lower(), clazz.namespaces) + ['']) + clazz.java_name
+        clazz.java_class_file = "/".join(list(map(lambda ns: ns.lower(), clazz.namespaces)) + ['']) + clazz.java_name
         clazz.java_file_location = "/".join(
-            map(lambda ns: ns.lower(), clazz.namespaces) + ['']) + clazz.java_name + '.java'
+            list(map(lambda ns: ns.lower(), clazz.namespaces)) + ['']) + clazz.java_name + '.java'
 
         clazz.java_jni_file_location = "/".join(clazz.namespaces + ['']) + clazz.name
         clazz.java_cpp_file_location = "/".join(clazz.namespaces + ['']) + clazz.name + '.cpp'
         clazz.java_header_file_location = "/".join(clazz.namespaces + ['']) + clazz.name + '.hpp'
 
-    def interface(self, namespace, interface):
+    def interface(self, namespace: IDLNamespace, interface: IDLInterface):
         self.clazz(namespace, interface)
         pass
 
-    def constructor(self, namespace, clazz, constructor):
+    def constructor(self, namespace: IDLNamespace, clazz: IDLClass, constructor: IDLConstructor):
         constructor.name = '_init'
         self.method(namespace, clazz, constructor, constructor=True)
 
-    def destructor(self, namespace, clazz, destructor):
+    def destructor(self, namespace: IDLNamespace, clazz: IDLClass, destructor: IDLDestructor):
         destructor.name = 'finalize'
         self.method(namespace, clazz, destructor)
 
-    def method(self, namespace, clazz, method, constructor=False):
+    def method(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod,
+               constructor=False):
         method.java_name = method.name
         self.typename(namespace, clazz, method, None, method.ret)
 
@@ -144,7 +145,7 @@ class JavaBackend(Backend):
                 method=method
             )
 
-    def argument(self, namespace, clazz, method, argument):
+    def argument(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, argument: IDLMethodArgument):
         """:type argument allogen.bridge.idl.Objects.IDLMethodArgument"""
         argument.java_name = argument.name
         self.typename(namespace, clazz, method, argument, argument.type)
@@ -177,7 +178,10 @@ class JavaBackend(Backend):
             self.compiler.synthesize_interface(callback_interface)
             self.context.add_sister_class(callback_interface)
 
-    def typename(self, namespace, clazz, method, argument, typename):
+            self.clazz_pre(namespace, callback_interface)
+
+    def typename(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, argument: IDLMethodArgument,
+                 typename: IDLTypename):
         # remap to Java type
         typename.java_cpp_type = typename.linked_type.get_bridge_name()
 
@@ -185,15 +189,15 @@ class JavaBackend(Backend):
             typename.java_jni_type = typename.linked_type.jni_type
         elif typename.linked_type and isinstance(typename.linked_type, UserDefinedType):
             typename.java_jni_type = 'jobject'
-            typename.linked_type.java_signature = 'L'+('/'.join(typename.linked_type.user_type.java_packages))+'/'+typename.name+';'
+            typename.linked_type.java_signature = 'L' + (
+            '/'.join(typename.linked_type.user_type.java_packages)) + '/' + typename.name + ';'
         else:
             typename.java_jni_type = 'jobject'
-
 
         typename.java_type = typename.linked_type.get_target_name()
 
 
-def jni_method_name_mangling(clazz, package_name, method):
+def jni_method_name_mangling(clazz: IDLClass, package_name: str, method: IDLMethod):
     class_name = clazz.java_name.replace('_', '_1')
     method_name = method.java_name.replace('_', '_1')
 

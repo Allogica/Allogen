@@ -27,11 +27,13 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from allogen.bridge.backend.BridgeBackend import BridgeBackend
+from allogen.bridge.frontend.CompilerContext import CompilerContext
+from allogen.bridge.idl.Objects import IDLClass
 
 
 class ObjectiveCBridgeBackend(BridgeBackend):
-    def run(self, context):
+    def run(self, context: CompilerContext):
         pass
 
-    def codegen(self, context, cls):
+    def codegen(self, context: CompilerContext, cls: IDLClass):
         pass

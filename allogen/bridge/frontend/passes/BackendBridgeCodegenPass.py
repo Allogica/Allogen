@@ -25,13 +25,15 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+import allogen
 from allogen.bridge.backend.java.JavaBackend import JavaBackend
 from allogen.bridge.backend.java.JavaBridgeBackend import JavaBridgeBackend
 from allogen.bridge.frontend.CompilerPass import CompilerPass
 
 
 class BackendBridgeCodegenPass(CompilerPass):
-    def run(self, context):
+    def run(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext):
         """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
 
         bridge_backend = context.backend.create_bridge_backend()
@@ -41,5 +43,6 @@ class BackendBridgeCodegenPass(CompilerPass):
             bridge_backend.handle_class(context, cls)
         for cls in context.classes.values():
             bridge_backend.codegen(context, cls)
+
     def get_order(self):
         return 1100

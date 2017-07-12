@@ -27,6 +27,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from allogen.bridge.backend.TargetBackend import TargetBackend
+from allogen.bridge.frontend.CompilerContext import CompilerContext
+from allogen.bridge.idl.Objects import IDLClass
 from allogen.codegen.Constructs import Raw, Constructor, MethodArgument, TypeName
 from allogen.codegen.FileSourceCodeWriter import FileSourceCodeWriter
 from allogen.codegen.StreamSourceCodeWriter import StreamSourceCodeWriter
@@ -37,11 +39,11 @@ import sys, os
 
 
 class ObjectiveCTargetBackend(TargetBackend):
-    def full_pass(self, context):
+    def full_pass(self, context: CompilerContext):
         # Objective-C does not require any special full pass stage
         pass
 
-    def handle_class(self, context, cls):
+    def handle_class(self, context: CompilerContext, cls: IDLClass):
         cls.target_object.name = "AD" + cls.target_object.name
         # cls.target_object.body = cls.idl.body
 
@@ -59,7 +61,7 @@ class ObjectiveCTargetBackend(TargetBackend):
             ])
         ]
 
-    def codegen(self, context, cls):
+    def codegen(self, context: CompilerContext, cls: IDLClass):
         path = os.path.join(context.out_dir, cls.target_object.name)
 
         generator = ObjectiveCInterfaceLanguageSourceGenerator()

@@ -25,7 +25,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import allogen
 from allogen.bridge.frontend.CompilerPass import CompilerPass
 from allogen.bridge.idl.Objects import IDLConstructor, IDLDestructor, IDLMethod
 from allogen.codegen.Constructs import *
@@ -35,7 +35,7 @@ class CodegenConstructsCreationPass(CompilerPass):
     def __init__(self):
         self.namespace = ''
 
-    def run(self, context):
+    def run(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext):
         """:type context allogen.bridge.frontend.CompilerContext.CompilerContext"""
 
         for (name, clazz) in context.classes.items():
