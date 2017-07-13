@@ -240,8 +240,7 @@ def jni_method_overload_name_mangling(clazz, package_name, method):
 
     name = "Java_" + ("_".join(package + [class_name, method_name])) + '__'
 
-    i = 2
-    overloads = []
+    overloads = ['']
     for arg in method.arguments:
         arg_name = arg.type.name
 
@@ -251,9 +250,8 @@ def jni_method_overload_name_mangling(clazz, package_name, method):
 
         overload_name += mangled_name
         if use_numbered_separator and arg.type.linked_type.java_complex_mangling:
-            overload_name += '_' + str(i)
-            i = i + 1
+            overload_name += '_2'
 
         overloads.append(overload_name)
 
-    return name + ("__".join(overloads))
+    return name + ("".join(overloads))
