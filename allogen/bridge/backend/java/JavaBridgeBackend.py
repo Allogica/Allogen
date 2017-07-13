@@ -134,6 +134,7 @@ class JavaBridgeBackend(BridgeBackend):
     def create_jni_function(self, cls, method, context):
         # we need a return type remapping
         jni_return = method.ret.java_jni_type
+
         if method.ret is not None and method.ret.name in context.classes:
             cls.types_used += [method.ret.name]
 
@@ -143,8 +144,6 @@ class JavaBridgeBackend(BridgeBackend):
             jni_args += [
                 MethodArgument(name=arg.name, type=TypeName(name=arg.type.java_jni_type)),
             ]
-
-        package_name = ".".join(map(lambda ns: ns.lower(), cls.namespaces))
 
         return Function(
             name=method.java_jni_name, ret=jni_return + ' JNICALL', cpp_extern='extern "C" JNIEXPORT ',

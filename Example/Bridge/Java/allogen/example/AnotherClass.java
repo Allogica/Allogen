@@ -31,6 +31,23 @@ public class AnotherClass {
 	}
 
 	/**
+	 * 
+	 * 
+	 * @param str 
+	 */
+	public AnotherClass(String str) {
+		pointer = this._init(str);
+	}
+
+	/**
+	 * This method performs the object creation. This method should only be called
+	 * from the object constructor.
+	 * 
+	 * @param str 
+	 */
+	private native long _init(String str);
+
+	/**
 	 * This method performs the object creation. This method should only be called
 	 * from the object constructor.
 	 * 

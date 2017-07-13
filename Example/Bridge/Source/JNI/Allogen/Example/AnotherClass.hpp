@@ -10,8 +10,8 @@
 
 #include <Allogen/JNI.hpp>
 
-#include "Allogen/Example/AnotherClass.hpp"
 #include "Allogen/Example/ExampleClass.hpp"
+#include "Allogen/Example/AnotherClass.hpp"
 
 
 ALLOGEN_BRIDGED_CLASS_CONVERTER(Allogen::Example::AnotherClass, "allogen/example/AnotherClass")
