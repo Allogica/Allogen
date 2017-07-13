@@ -27,6 +27,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import allogen
+from allogen.bridge.frontend.CompilerType import UserDefinedType
 
 from allogen.bridge.frontend.types.Primitives import *
 from allogen.bridge.idl.Objects import *
@@ -48,6 +49,8 @@ class CompilerContext(object):
     idl = None  # type: IDL
     file = None  # type: str
     source = None  # type: str
+
+    user_defined_type_class = UserDefinedType
 
     def __init__(self):
         self.types = {}

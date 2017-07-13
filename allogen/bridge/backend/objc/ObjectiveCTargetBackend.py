@@ -25,11 +25,11 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+from allogen.bridge.backend.Constants import codegen_notice
 from allogen.bridge.backend.TargetBackend import TargetBackend
 from allogen.bridge.frontend.CompilerContext import CompilerContext
 from allogen.bridge.idl.Objects import IDLClass
-from allogen.codegen.Constructs import Raw, Constructor, MethodArgument, TypeName
+from allogen.codegen.Constructs import Raw, Constructor, MethodArgument, TypeName, Import, Comment
 from allogen.codegen.FileSourceCodeWriter import FileSourceCodeWriter
 from allogen.codegen.StreamSourceCodeWriter import StreamSourceCodeWriter
 from allogen.codegen.languages.ObjectiveCLanguage import ObjectiveCInterfaceLanguageSourceGenerator, \
@@ -43,31 +43,61 @@ class ObjectiveCTargetBackend(TargetBackend):
         # Objective-C does not require any special full pass stage
         pass
 
-    def handle_class(self, context: CompilerContext, cls: IDLClass):
-        cls.target_object.name = "AD" + cls.target_object.name
-        # cls.target_object.body = cls.idl.body
+    def handle_class(self, context: CompilerContext, clazz: IDLClass):
+        pass
 
-        for method in cls.target_object.members:
-            idl_method = cls.idl.get_method(method.name)
-            if not idl_method:
-                continue
+    def codegen(self, context: CompilerContext, clazz: IDLClass):
+        header_path = os.path.join(context.bridge_out_dir, clazz.objc_header_file_location)
+        dirname = os.path.dirname(header_path)
 
-            method.body = [Raw(idl_method.body)]
-
-        # add the conversion constructor
-        cls.target_object.members += [
-            Constructor(args=[
-                MethodArgument(name="cppObject", type=TypeName(name=cls.cpp_namespace+'::'+cls.idl.name, pointer=True))
-            ])
-        ]
-
-    def codegen(self, context: CompilerContext, cls: IDLClass):
-        path = os.path.join(context.out_dir, cls.target_object.name)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
 
         generator = ObjectiveCInterfaceLanguageSourceGenerator()
-        stream = FileSourceCodeWriter(path + '.h', generator=generator)
-        stream(cls.target_object)
 
-        generator = ObjectiveCImplementationLanguageSourceGenerator()
-        stream = FileSourceCodeWriter(path + '.mm', generator=generator)
-        stream(cls.target_object)
+        with open(header_path, 'w') as f:
+            writer = StreamSourceCodeWriter(stream=f, generator=generator)
+
+            writer(Comment(codegen_notice, multiline=True), writer.nl, writer.nl)
+            writer('#pragma once', writer.nl, writer.nl)
+            writer(Import('Foundation/Foundation.h', quoted=False), writer.nl)
+
+            writer(
+                map(
+                    lambda x: Import(x.objc_name + '.h', quoted=True),
+                    filter(lambda x: isinstance(x, IDLClass), clazz.types_used)
+                )
+            )
+            writer(writer.nl)
+
+            writer(clazz.target_object)
+
+        private_header_path = os.path.join(context.bridge_out_dir, clazz.objc_private_header_file_location)
+        with open(private_header_path, 'w') as f:
+            writer = StreamSourceCodeWriter(stream=f, generator=generator)
+
+            writer(Comment(codegen_notice, multiline=True), writer.nl, writer.nl)
+            writer(Import('Allogen/ObjectiveC.hpp', quoted=False), writer.nl)
+
+            writer('#pragma once', writer.nl, writer.nl)
+
+            writer(Import(clazz.objc_name + '.h', quoted=True))
+            writer(writer.nl)
+
+            writer(writer.nl)
+            writer(map(lambda x: Import(x.path, quoted=True), context.idl.includes))
+
+            writer(
+                map(
+                    lambda x: [
+                        Import(x.objc_name + '.h', quoted=True),
+                        Import(x.objc_name + '+Private.h', quoted=True)
+                    ],
+                    filter(lambda x: isinstance(x, IDLClass), clazz.types_used)
+                ),
+                writer.nl
+            )
+
+            writer('ALLOGEN_BRIDGED_CLASS(' + clazz.fully_qualified_name + ', "' + clazz.objc_name + '")', writer.nl, writer.nl)
+
+            writer(clazz.private_object)

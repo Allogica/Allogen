@@ -30,10 +30,52 @@
 
 #pragma once
 
-#include <Foundation/Foundation.h>
-
 #include "Allogen/ObjectiveC/Converter.hpp"
-#include "Allogen/ObjectiveC/Converter/IntegralTypes.hpp"
-#include "Allogen/ObjectiveC/BridgedClass.hpp"
-#include "Allogen/ObjectiveC/BridgedConstructor.hpp"
-#include "Allogen/ObjectiveC/BridgedMethod.hpp"
+
+namespace Allogen {
+	namespace ObjectiveC {
+		
+		/**
+		 * A converter specialization for C++ integral types
+		 *
+		 * @tparam IntegralType the integral type to be converted
+		 */
+		template<typename IntegralType>
+		struct Converter<IntegralType> {
+			/**
+			 * The C++ type this converter is operating on
+			 */
+			using Type = IntegralType;
+
+			/**
+			 * The JNI type this converter supports
+			 */
+			using ObjectiveCType = IntegralType;
+
+			/**
+			 * Converts a C++ integer into a ObjectiveC integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the C++ integer
+			 *
+			 * @return the ObjectiveC integer
+			 */
+			static ObjectiveCType toObjectiveC(Type i) {
+				return i;
+			}
+
+			/**
+			 * Converts a ObjectiveC integer into a C++ integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the ObjectiveC integer
+			 *
+			 * @return the C++ integer
+			 */
+			static Type fromObjectiveC(ObjectiveCType i) {
+				return i;
+			}
+		};
+
+	}
+}

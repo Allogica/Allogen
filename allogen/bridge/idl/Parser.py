@@ -108,9 +108,14 @@ method_argument = Group(
     )
 )
 
+method_keywords = Group(
+    Optional(Keyword('static')('static'))
+)
+
 method_prototype = Group(
     documentation('documentation') +
     annotations('annotations') +
+    method_keywords('keywords') +
     typename('return') + Word(cpp_ident)('name') +
     Literal('(').suppress() + Optional(
         InterfaceDict(delimitedList(method_argument), param='name')('arguments')
@@ -285,6 +290,7 @@ class Parser:
             body=decl.body,
             annotations=self.parse_annotations(decl),
             arguments=self.parse_arguments(decl),
+            static='static' in decl.keywords,
             description=decl.documentation
         )
 

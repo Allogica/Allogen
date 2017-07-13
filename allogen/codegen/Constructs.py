@@ -55,6 +55,12 @@ class LanguageConstruct(object):
         return newone
 
 
+class Import(LanguageConstruct):
+    def __init__(self, symbol, **kwargs):
+        super(Import, self).__init__(**kwargs)
+        self.symbol = symbol
+
+
 class Class(LanguageConstruct):
     def __init__(self, name, members, parents=None, visibility=VisibilityPublic, **kwargs):
         super(Class, self).__init__(**kwargs)

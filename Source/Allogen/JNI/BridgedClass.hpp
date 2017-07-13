@@ -30,123 +30,11 @@
 
 #pragma once
 
+#include <jni.h>
+#include <memory>
+
 namespace Allogen {
 	namespace JNI {
-
-		/**
-		 * A undefined template class that represents a wrapped clas method.
-		 *
-		 * @tparam Class the class whose method is being wrapped
-		 * @tparam MethodSignature the method signature being wrapped
-		 */
-		template<typename Class, typename MethodSignature>
-		struct WrappedMethod;
-
-		/**
-		 * This class represents a standard method wrapper. This class is
-		 * able to automatically convert Java JNI types like jobject, jlong, etc
-		 * into a C++ data type.
-		 *
-		 * New data types can be defined by specializing the Conversion template.
-		 *
-		 * @tparam Class the wrapped class whose method is being called
-		 * @tparam R the C++ method return type
-		 * @tparam Args the C++ method argument types
-		 */
-		template<typename Class, typename R, typename... Args>
-		struct WrappedMethod<Class, R(Args...)> {
-		public:
-			/**
-			 * Calls a wrapped C++ function from Java code
-			 *
-			 * @tparam Executor the executor type
-			 *
-			 * @param env the JNI environment
-			 * @param jthis the "this" Java object calling the wrapped method
-			 * @param executor the code generated executor used to dispatch the method to the C++ object
-			 * @param args the JNI arguments of the method call
-			 *
-			 * @return the already java-converted object returned by the C++ method
-			 */
-			template<typename Executor>
-			static inline typename Converter<R>::JavaType call(JNIEnv* env, jobject jthis, Executor&& executor,
-															   typename Converter<Args>::JavaType... args) {
-				return Converter<R>::toJava(
-						env,
-						executor(
-								Converter<Class*>::fromJava(env, jthis),
-								Converter<Args>::fromJava(
-										env, std::move(args)
-								)...
-						)
-				);
-			}
-		};
-
-		/**
-		 * A WrappedMethod method specialization for <tt>void</tt> return types.
-		 *
-		 * @tparam Class the wrapped class whose method is being called
-		 * @tparam Args the C++ method argument types
-		 */
-		template<typename Class, typename... Args>
-		struct WrappedMethod<Class, void(Args...)> {
-		public:
-			/**
-			 * Calls a wrapped C++ function from Java code.
-			 *
-			 * @tparam Executor the executor type
-			 *
-			 * @param env the JNI environment
-			 * @param jthis the "this" Java object calling the wrapped method
-			 * @param executor the code generated executor used to dispatch the method to the C++ object
-			 * @param args the JNI arguments of the method call
-			 */
-			template<typename Executor>
-			static inline void call(JNIEnv* env, jobject jthis, Executor&& executor,
-									typename Converter<Args>::JavaType... args) {
-				return executor(
-						Converter<Class*>::fromJava(env, jthis),
-						Converter<Args>::fromJava(
-								env, std::move(args)
-						)...
-
-				);
-			}
-		};
-
-		/**
-		 * A WrappedMethod specialization for class constructors.
-		 *
-		 * This class automatically sets the Java class "pointer" property
-		 * to the newly allocated object.
-		 *
-		 * @tparam R the return type
-		 * @tparam Args the contructor argument types
-		 */
-		template<typename R, typename... Args>
-		struct WrappedMethod<void, R(Args...)> {
-		public:
-			/**
-			 * Calls a wrapped C++ function from Java code
-			 *
-			 * @tparam Executor the executor type
-			 *
-			 * @param env the JNI environment
-			 * @param jthis the "this" Java object calling the wrapped method
-			 * @param executor the code generated executor used to dispatch the method to the C++ object
-			 * @param args the JNI arguments of the method call
-			 *
-			 * @return the already java-converted object returned by the C++ method
-			 */
-			template<typename Executor>
-			static inline jlong call(JNIEnv* env, jobject jthis, Executor&& executor,
-									 typename Converter<Args>::JavaType& ... args) {
-				return reinterpret_cast<jlong>(
-						executor(Converter<Args>::fromJava(env, args)...)
-				);
-			}
-		};
 
 		/**
 		 * A template variable that indicates the Java fully qualified
@@ -166,7 +54,7 @@ namespace Allogen {
 		 * @tparam T the bridged class type
 		 */
 		template<typename T>
-		struct BridgeConversion {
+		struct BridgeClass {
 			/**
 			 * The C++ type being converted
 			 */
@@ -186,7 +74,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T object) {
-				return BridgeConversion<T*>::toJava(env, new T(std::move(object)));
+				return BridgeClass<T*>::toJava(env, new T(std::move(object)));
 			}
 
 			/**
@@ -198,7 +86,7 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static T fromJava(JNIEnv* env, JavaType jthis) {
-				return *(BridgeConversion<T*>::fromJava(env, jthis));
+				return *(BridgeClass<T*>::fromJava(env, jthis));
 			}
 		};
 
@@ -211,7 +99,7 @@ namespace Allogen {
 		 * @tparam T the bridged class type
 		 */
 		template<typename T>
-		struct BridgeConversion<T*> {
+		struct BridgeClass<T*> {
 			/**
 			 * The C++ type being converted
 			 */
@@ -267,7 +155,7 @@ namespace Allogen {
 		 * @tparam T the bridged class type
 		 */
 		template<typename T>
-		struct BridgeConversion<T&> {
+		struct BridgeClass<T&> {
 			/**
 			 * The C++ type being converted
 			 */
@@ -287,7 +175,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T& object) {
-				return BridgeConversion<T*>::toJava(env, new T(object));
+				return BridgeClass<T*>::toJava(env, new T(object));
 			}
 
 			/**
@@ -299,7 +187,7 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static T& fromJava(JNIEnv* env, JavaType jthis) {
-				return *(BridgeConversion<T*>::fromJava(env, jthis));
+				return *(BridgeClass<T*>::fromJava(env, jthis));
 			}
 		};
 
@@ -312,7 +200,7 @@ namespace Allogen {
 		 * @tparam T the bridged class type
 		 */
 		template<typename T>
-		struct BridgeConversion<const T&> {
+		struct BridgeClass<const T&> {
 			/**
 			 * The C++ type being converted
 			 */
@@ -332,7 +220,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T& object) {
-				return BridgeConversion<T*>::toJava(env, new T(object));
+				return BridgeClass<T*>::toJava(env, new T(object));
 			}
 
 			/**
@@ -344,7 +232,7 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static const T& fromJava(JNIEnv* env, JavaType jthis) {
-				return *(BridgeConversion<T*>::fromJava(env, jthis));
+				return *(BridgeClass<T*>::fromJava(env, jthis));
 			}
 		};
 
@@ -357,7 +245,7 @@ namespace Allogen {
 		 * @tparam T the bridged class type
 		 */
 		template<typename T>
-		struct BridgeConversion<T&&> {
+		struct BridgeClass<T&&> {
 			/**
 			 * The C++ type being converted
 			 */
@@ -377,7 +265,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T&& object) {
-				return BridgeConversion<T*>::toJava(env, new T(std::move(object)));
+				return BridgeClass<T*>::toJava(env, new T(std::move(object)));
 			}
 
 			/**
@@ -389,16 +277,24 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static const T& fromJava(JNIEnv* env, JavaType jthis) {
-				return *(BridgeConversion<T*>::fromJava(env, jthis));
+				return *(BridgeClass<T*>::fromJava(env, jthis));
 			}
 		};
 
-#define ALLOGEN_BRIDGED_CLASS_CONVERTER(ClassName, JavaClassName)                                                      \
-template<> constexpr const char ::Allogen::JNI::JAVA_CLASS_NAME<ClassName>[] = JavaClassName;                          \
-template<> struct ::Allogen::JNI::Converter<ClassName>   : public ::Allogen::JNI::BridgeConversion<ClassName>   {};    \
-template<> struct ::Allogen::JNI::Converter<ClassName*>  : public ::Allogen::JNI::BridgeConversion<ClassName*>  {};    \
-template<> struct ::Allogen::JNI::Converter<ClassName&>  : public ::Allogen::JNI::BridgeConversion<ClassName&>  {};    \
-template<> struct ::Allogen::JNI::Converter<ClassName&&> : public ::Allogen::JNI::BridgeConversion<ClassName&&> {};    \
+#define ALLOGEN_BRIDGED_CLASS(ClassName, JavaClassName)                                                      		\
+template<> constexpr const char ::Allogen::JNI::JAVA_CLASS_NAME<ClassName>[] = JavaClassName;                       \
+template<> struct ::Allogen::JNI::Converter<ClassName>   : public ::Allogen::JNI::BridgeClass<ClassName>   {};    	\
+template<> struct ::Allogen::JNI::Converter<ClassName*>  : public ::Allogen::JNI::BridgeClass<ClassName*>  {};    	\
+template<> struct ::Allogen::JNI::Converter<ClassName&>  : public ::Allogen::JNI::BridgeClass<ClassName&>  {};    	\
+template<> struct ::Allogen::JNI::Converter<ClassName&&> : public ::Allogen::JNI::BridgeClass<ClassName&&> {};   	\
+template<> struct ::Allogen::JNI::Converter<std::shared_ptr<ClassName>> : 											\
+				public ::Allogen::JNI::BridgeClass<std::shared_ptr<ClassName>> {};									\
+template<> struct ::Allogen::JNI::Converter<std::shared_ptr<ClassName>*> : 											\
+				public ::Allogen::JNI::BridgeClass<std::shared_ptr<ClassName>*> {};									\
+template<> struct ::Allogen::JNI::Converter<std::shared_ptr<ClassName>&> : 											\
+				public ::Allogen::JNI::BridgeClass<std::shared_ptr<ClassName>&> {};									\
+template<> struct ::Allogen::JNI::Converter<std::shared_ptr<ClassName>&&> : 										\
+				public ::Allogen::JNI::BridgeClass<std::shared_ptr<ClassName>&&> {};								\
 
 	}
 }

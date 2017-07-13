@@ -287,7 +287,7 @@ class IDLMethod(IDLAnnotatedObject):
     ret = None  # type: TypeName
     arguments = None  # type: IDLMethodArgument
 
-    def __init__(self, name, ret, arguments=None, body=None, description=None, **kwargs):
+    def __init__(self, name, ret, arguments=None, body=None, static=False, description=None, **kwargs):
         super(IDLMethod, self).__init__(**kwargs)
         self.name = name
 
@@ -303,6 +303,8 @@ class IDLMethod(IDLAnnotatedObject):
             self.arguments = []
 
         self.body = body
+        self.static = static
+
         self.description = description
 
         self.clazz = None

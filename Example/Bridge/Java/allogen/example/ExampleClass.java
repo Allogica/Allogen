@@ -143,4 +143,14 @@ public class ExampleClass {
 	 */
 	public native void printAnotherAsync(AnotherClass another, PrintAnotherAsyncCallback callback);
 
+	/**
+	 * 
+	 */
+	public native static int getStaticInt();
+
+	/**
+	 * 
+	 */
+	public native static ExampleClass shared();
+
 }

@@ -53,6 +53,7 @@ class LanguageSourceGenerator(object):
     def codegen(self, writer, node):
         impl_mapping = {
             TypeName: self.typename,
+            Import: self.import_,
 
             Class: self.clazz,
             TemplateSpecializationClass: self.template_spec_class,
@@ -95,6 +96,9 @@ class LanguageSourceGenerator(object):
 
     def typename(self, writer, type):
         writer(type.name)
+
+    def import_(self, writer, imp):
+        raise Exception("Imports are not supported by the generator implementation")
 
     def clazz(self, writer, cls):
         raise Exception("Classes are not supported by the generator implementation")

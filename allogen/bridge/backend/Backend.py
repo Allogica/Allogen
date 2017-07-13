@@ -36,7 +36,7 @@ class Backend(object):
     context = None  # type: allogen.bridge.frontend.CompilerContext.CompilerContext
     compiler = None  # type: allogen.bridge.frontend.Compiler.Compiler
 
-    def register_builtins(self, builtins):
+    def register_builtins(self, context, builtins):
         pass
 
     def create_target_backend(self):
@@ -76,10 +76,10 @@ class Backend(object):
     def destructor_post(self, namespace: IDLNamespace, clazz: IDLClass, destructor: IDLDestructor):
         pass
 
-    def method(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, constructor=False):
+    def method(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod):
         pass
 
-    def method_post(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, constructor=False):
+    def method_post(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod):
         pass
 
     def argument(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, argument: IDLMethodArgument):

@@ -44,15 +44,19 @@ T_init_new = Template(
 )
 
 T_init = Template(
-    """return WrappedMethod<void, ${cpp_class_name}(${cpp_signature})>::call(_env_, _jthis_, [](${cpp_args}) {${cpp_body}}${cpp_arg_names_comma});"""
+    """return BridgedConstructor<${cpp_class_name}(${cpp_signature})>::call(_env_, [](${cpp_args}) {${cpp_body}}${cpp_arg_names_comma});"""
 )
 
 T_bridge = Template(
-    """return WrappedMethod<${cpp_class_name}, ${cpp_return_type}(${cpp_signature})>::call(_env_, _jthis_, [](${cpp_class_name}* wself${cpp_args}) {${cpp_body}}${cpp_arg_names});"""
+    """return BridgedMethod<${cpp_class_name}, ${cpp_return_type}(${cpp_signature})>::call(_env_, _jthis_, [](${cpp_class_name}* wself${cpp_args}) {${cpp_body}}${cpp_arg_names});"""
+)
+
+T_bridge_static = Template(
+    """return BridgedMethod<${cpp_class_name}, ${cpp_return_type}(${cpp_signature})>::call(_env_, [](${cpp_args}) {${cpp_body}}${cpp_arg_names});"""
 )
 
 T_destroy = Template(
-    """return WrappedMethod<${cpp_class_name}, void()>::call(_env_, _jthis_, [](${cpp_class_name} *wself) { delete wself; });"""
+    """return BridgedMethod<${cpp_class_name}, void()>::call(_env_, _jthis_, [](${cpp_class_name} *wself) { delete wself; });"""
 )
 
 T_forward = Template(
@@ -117,19 +121,34 @@ class JavaBridgeBackend(BridgeBackend):
                         'method_args': ", ".join(map(lambda a: a.name, method.arguments)),
                     })
 
-                jni_impl.body = [
-                    Raw(T_bridge.substitute({
-                        'cpp_class_name': cls.fully_qualified_name,
-                        'cpp_return_type': method.ret.java_cpp_type,
-                        'cpp_signature': ", ".join(map(lambda a: a.type.java_cpp_type, method.arguments)),
-                        'cpp_args': ", ".join(
-                            [''] + list(map(lambda a: a.type.java_cpp_type + " " + a.name, method.arguments))),
-                        'cpp_arg_names': ", ".join(
-                            [''] + list(map(lambda a: a.type.linked_type.bridge_argument(jni_impl, cls, method, a),
-                                       method.arguments))),
-                        'cpp_body': cls.get_method(method.name).body
-                    }))
-                ]
+                if not method.static:
+                    jni_impl.body = [
+                        Raw(T_bridge.substitute({
+                            'cpp_class_name': cls.fully_qualified_name,
+                            'cpp_return_type': method.ret.java_cpp_type,
+                            'cpp_signature': ", ".join(map(lambda a: a.type.java_cpp_type, method.arguments)),
+                            'cpp_args': ", ".join(
+                                [''] + list(map(lambda a: a.type.java_cpp_type + " " + a.name, method.arguments))),
+                            'cpp_arg_names': ", ".join(
+                                [''] + list(map(lambda a: a.type.linked_type.bridge_argument(jni_impl, cls, method, a),
+                                           method.arguments))),
+                            'cpp_body': cls.get_method(method.name).body
+                        }))
+                    ]
+                else:
+                    jni_impl.body = [
+                        Raw(T_bridge_static.substitute({
+                            'cpp_class_name': cls.fully_qualified_name,
+                            'cpp_return_type': method.ret.java_cpp_type,
+                            'cpp_signature': ", ".join(map(lambda a: a.type.java_cpp_type, method.arguments)),
+                            'cpp_args': ", ".join(
+                                map(lambda a: a.type.java_cpp_type + " " + a.name, method.arguments)),
+                            'cpp_arg_names': ", ".join(
+                                map(lambda a: a.type.linked_type.bridge_argument(jni_impl, cls, method, a),
+                                                method.arguments)),
+                            'cpp_body': cls.get_method(method.name).body
+                        }))
+                    ]
 
     def create_jni_function(self, cls, method, context):
         # we need a return type remapping
@@ -139,7 +158,13 @@ class JavaBridgeBackend(BridgeBackend):
             cls.types_used += [method.ret.name]
 
         # we also need to remap and append all function arguments...
-        jni_args = []
+        jni_args = [MethodArgument(name="_env_", type=TypeName(name="JNIEnv", pointer=True))]
+
+        if not method.static:
+            jni_args += [
+                MethodArgument(name="_jthis_", type=TypeName(name="jobject"))
+            ]
+
         for arg in method.arguments:
             jni_args += [
                 MethodArgument(name=arg.name, type=TypeName(name=arg.type.java_jni_type)),
@@ -147,10 +172,7 @@ class JavaBridgeBackend(BridgeBackend):
 
         return Function(
             name=method.java_jni_name, ret=jni_return + ' JNICALL', cpp_extern='extern "C" JNIEXPORT ',
-            args=[
-                     MethodArgument(name="_env_", type=TypeName(name="JNIEnv", pointer=True)),
-                     MethodArgument(name="_jthis_", type=TypeName(name="jobject"))
-                 ] + jni_args,
+            args=jni_args,
             body=[method.body])
 
     def codegen(self, context: CompilerContext, cls: IDLClass):
@@ -189,7 +211,7 @@ class JavaBridgeBackend(BridgeBackend):
                                 list(map(lambda x: '#include "' + x.name + '.hpp"',
                                     filter(lambda x: isinstance(x, IDLClass), cls.types_used))) + [
                                     '',
-                                    'ALLOGEN_BRIDGED_CLASS_CONVERTER(' + cls.fully_qualified_name + ', "' + cls.java_class_file + '")',
+                                    'ALLOGEN_BRIDGED_CLASS(' + cls.fully_qualified_name + ', "' + cls.java_class_file + '")',
                                     ''
                                 ])))
 

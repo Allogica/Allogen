@@ -7,6 +7,19 @@ public class Test {
     public static void main(String[] args) throws InterruptedException {
         ExampleClass n = new ExampleClass(200);
 
+        {
+            ExampleClass shared1 = ExampleClass.shared();
+            shared1.setInteger(123);
+
+            ExampleClass shared2 = ExampleClass.shared();
+            System.out.println(shared2.getInteger());
+
+            shared2.setInteger(124);
+            System.out.println(shared1.getInteger());
+        }
+
+        System.out.println(ExampleClass.getStaticInt());
+
         n.sayHello("Allogen Bridge");
 
         n.doAsync(() -> {

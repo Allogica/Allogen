@@ -38,4 +38,6 @@
 #include "Allogen/JNI/Converter.hpp"
 #include "Allogen/JNI/Converter/IntegralTypes.hpp"
 #include "Allogen/JNI/Converter/Function.hpp"
-#include "Allogen/JNI/WrappedMethod.hpp"
+#include "Allogen/JNI/BridgedClass.hpp"
+#include "Allogen/JNI/BridgedConstructor.hpp"
+#include "Allogen/JNI/BridgedMethod.hpp"

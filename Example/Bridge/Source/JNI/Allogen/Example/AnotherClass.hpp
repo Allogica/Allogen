@@ -14,5 +14,5 @@
 #include "Allogen/Example/AnotherClass.hpp"
 
 
-ALLOGEN_BRIDGED_CLASS_CONVERTER(Allogen::Example::AnotherClass, "allogen/example/AnotherClass")
+ALLOGEN_BRIDGED_CLASS(Allogen::Example::AnotherClass, "allogen/example/AnotherClass")
 

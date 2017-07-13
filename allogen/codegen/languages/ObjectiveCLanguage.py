@@ -74,8 +74,10 @@ class ObjectiveCLanguageSourceGenerator(LanguageSourceGenerator):
 
     def _objc_method_signature(self, writer, method, with_colon=True):
         self.first_parameter = True
+
         writer(
-            '- (', method.ret, ')', method.name, (len(method.args) > 0, 'With'),
+            (method.static, '+', '-'),
+            ' (', method.ret, ')', method.name, (len(method.args) > 0, 'With'),
             writer.indented(writer.joined(
                 [writer.nl, writer.tab, ' ' * (4 + len(method.name))], method.args
             )),
@@ -96,6 +98,15 @@ class ObjectiveCLanguageSourceGenerator(LanguageSourceGenerator):
             type.name,
             (type.pointer, '*'),
             (type.reference, '*')  # this is not very accurate, but this is the closest thing to a reference
+        )
+
+    def import_(self, writer, imp):
+        writer(
+            '#import ',
+            (imp.quoted, '"', '<'),
+            imp.symbol,
+            (imp.quoted, '"', '>'),
+            writer.nl
         )
 
     def clazz(self, writer, cls):
@@ -216,7 +227,9 @@ class ObjectiveCInterfaceLanguageSourceGenerator(ObjectiveCLanguageSourceGenerat
         doc_nl = write_doxygen_like_documentation_block(writer, cls)
         writer(
             writer.tab,
-            '@interface ', cls.name, writer.nl,
+            '@interface ', cls.name, [
+                (cls.parents, [' : ', cls.parents])
+            ], writer.nl,
 
             writer.joined(
                 [writer.nl], cls.members
@@ -325,7 +338,23 @@ class ObjectiveCImplementationLanguageSourceGenerator(ObjectiveCLanguageSourceGe
         doc_nl = write_doxygen_like_documentation_block(writer, cls)
         writer(
             writer.tab,
-            '@implementation ', cls.name, writer.nl,
+            '@implementation ', cls.name
+        )
+
+        if cls.objc_vars:
+            writer([
+                ' {', writer.nl,
+                writer.indented(
+                map(
+                    lambda x: [writer.tab, x.type, ' ', x.name, ';', writer.nl],
+                    cls.objc_vars
+                )
+                ),
+                writer.tab, '}', writer.nl
+            ])
+
+        writer(
+            writer.nl,
 
             writer.joined(
                 [writer.nl], cls.members

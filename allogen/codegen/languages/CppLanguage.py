@@ -54,6 +54,15 @@ class CppLanguageSourceGenerator(LanguageSourceGenerator):
             (type.pointer, '*')
         )
 
+    def import_(self, writer, imp):
+        writer(
+            '#include ',
+            (imp.quoted, '"', '<'),
+            imp.symbol,
+            (imp.quoted, '"', '>'),
+            writer.nl
+        )
+
     def func_body(self, writer, func, forced=False):
         if func.body is not None:
             writer(

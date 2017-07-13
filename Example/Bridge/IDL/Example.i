@@ -118,5 +118,14 @@ namespace Allogen::Example {
             callback: lambda<void()>
         );
 
+        static uint32_t getStaticInt() {
+            return 100;
+        }
+
+        static ExampleClass shared() {
+            static ExampleClass shared;
+            return &shared;
+        }
+
     }
 }

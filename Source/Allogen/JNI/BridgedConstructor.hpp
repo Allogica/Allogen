@@ -30,10 +30,51 @@
 
 #pragma once
 
-#include <Foundation/Foundation.h>
+#include <jni.h>
 
-#include "Allogen/ObjectiveC/Converter.hpp"
-#include "Allogen/ObjectiveC/Converter/IntegralTypes.hpp"
-#include "Allogen/ObjectiveC/BridgedClass.hpp"
-#include "Allogen/ObjectiveC/BridgedConstructor.hpp"
-#include "Allogen/ObjectiveC/BridgedMethod.hpp"
+namespace Allogen {
+	namespace JNI {
+
+		/**
+		 * A template class that represents a bridged constructor.
+		 *
+		 * @tparam Class the class whose method is being wrapped
+		 * @tparam MethodSignature the method signature being wrapped
+		 */
+		template<typename MethodSignature>
+		struct BridgedConstructor;
+
+		/**
+		 * A BridgedConstructor specialization for class constructors.
+		 *
+		 * This class automatically sets the Java class "pointer" property
+		 * to the newly allocated object.
+		 *
+		 * @tparam R the return type
+		 * @tparam Args the contructor argument types
+		 */
+		template<typename R, typename... Args>
+		struct BridgedConstructor<R(Args...)> {
+		public:
+			/**
+			 * Calls a wrapped C++ function from Java code
+			 *
+			 * @tparam Executor the executor type
+			 *
+			 * @param env the JNI environment
+			 * @param executor the code generated executor used to dispatch the method to the C++ object
+			 * @param args the JNI arguments of the method call
+			 *
+			 * @return the already java-converted object returned by the C++ method
+			 */
+			template<typename Executor>
+			static inline jlong call(JNIEnv* env, Executor&& executor,
+									 typename Converter<Args>::JavaType& ... args) {
+				return reinterpret_cast<jlong>(
+						executor(Converter<Args>::fromJava(env, args)...)
+				);
+			}
+		};
+
+	}
+}

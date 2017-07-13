@@ -12,11 +12,11 @@ using namespace Allogen::JNI;
 
 namespace Allogen { namespace Example {
 	extern "C" JNIEXPORT jlong Java_allogen_example_ExampleClass__1init__(JNIEnv* _env_, jobject _jthis_) {
-		return WrappedMethod<void, Allogen::Example::ExampleClass()>::call(_env_, _jthis_, []() {return new Allogen::Example::ExampleClass();});
+		return BridgedConstructor<Allogen::Example::ExampleClass()>::call(_env_, []() {return new Allogen::Example::ExampleClass();});
 	}
 
 	extern "C" JNIEXPORT jlong Java_allogen_example_ExampleClass__1init__I(JNIEnv* _env_, jobject _jthis_, jint initialValue) {
-		return WrappedMethod<void, Allogen::Example::ExampleClass(uint32_t)>::call(_env_, _jthis_, [](uint32_t initialValue) {{
+		return BridgedConstructor<Allogen::Example::ExampleClass(uint32_t)>::call(_env_, [](uint32_t initialValue) {{
             // Our C++ class does not implement this method. By Using a {} block we
             // can define any code that will be called by the bridge implementation.
             //
@@ -32,54 +32,67 @@ namespace Allogen { namespace Example {
 	}
 
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_finalize(JNIEnv* _env_, jobject _jthis_) {
-		return WrappedMethod<Allogen::Example::ExampleClass, void()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass *wself) { delete wself; });
+		return BridgedMethod<Allogen::Example::ExampleClass, void()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass *wself) { delete wself; });
 	}
 
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_setInteger(JNIEnv* _env_, jobject _jthis_, jint aInteger) {
-		return WrappedMethod<Allogen::Example::ExampleClass, void(uint32_t)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, uint32_t aInteger) {return wself->setInteger(aInteger);}, aInteger);
+		return BridgedMethod<Allogen::Example::ExampleClass, void(uint32_t)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, uint32_t aInteger) {return wself->setInteger(aInteger);}, aInteger);
 	}
 
 	extern "C" JNIEXPORT jint JNICALL Java_allogen_example_ExampleClass_getInteger(JNIEnv* _env_, jobject _jthis_) {
-		return WrappedMethod<Allogen::Example::ExampleClass, uint32_t()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {return wself->getInteger();});
+		return BridgedMethod<Allogen::Example::ExampleClass, uint32_t()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {return wself->getInteger();});
 	}
 
 	extern "C" JNIEXPORT jobject JNICALL Java_allogen_example_ExampleClass_copy(JNIEnv* _env_, jobject _jthis_) {
-		return WrappedMethod<Allogen::Example::ExampleClass, ExampleClass()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {{
+		return BridgedMethod<Allogen::Example::ExampleClass, Allogen::Example::ExampleClass()>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself) {{
             return ExampleClass(*wself);
         }});
 	}
 
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_doAsync(JNIEnv* _env_, jobject _jthis_, jobject callback) {
-		return WrappedMethod<Allogen::Example::ExampleClass, void(std::function<void()>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<void()> callback) {return wself->doAsync(callback);}, Lambda::make(_env_, callback, "onCallback", "()V"));
+		return BridgedMethod<Allogen::Example::ExampleClass, void(std::function<void()>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<void()> callback) {return wself->doAsync(callback);}, Lambda::make(_env_, callback, "onCallback", "()V"));
 	}
 
 	extern "C" JNIEXPORT jint JNICALL Java_allogen_example_ExampleClass_anotherCallback(JNIEnv* _env_, jobject _jthis_, jobject callback) {
-		return WrappedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint16_t, uint16_t)>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint16_t, uint16_t)> callback) {return wself->anotherCallback(callback);}, Lambda::make(_env_, callback, "onCallback", "(SS)I"));
+		return BridgedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint16_t, uint16_t)>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint16_t, uint16_t)> callback) {return wself->anotherCallback(callback);}, Lambda::make(_env_, callback, "onCallback", "(SS)I"));
 	}
 
 	extern "C" JNIEXPORT jint JNICALL Java_allogen_example_ExampleClass_virtualCallback(JNIEnv* _env_, jobject _jthis_, jobject callback, jshort a, jshort b) {
-		return WrappedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint16_t, uint16_t)>, uint16_t, uint16_t)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint16_t, uint16_t)> callback, uint16_t a, uint16_t b) {{
+		return BridgedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint16_t, uint16_t)>, uint16_t, uint16_t)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint16_t, uint16_t)> callback, uint16_t a, uint16_t b) {{
             return callback(a, b);
         }}, Lambda::make(_env_, callback, "onCallback", "(SS)I"), a, b);
 	}
 
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_sayHello(JNIEnv* _env_, jobject _jthis_, jstring name) {
-		return WrappedMethod<Allogen::Example::ExampleClass, void(std::string)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->sayHello(name);}, name);
+		return BridgedMethod<Allogen::Example::ExampleClass, void(std::string)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->sayHello(name);}, name);
 	}
 
 	extern "C" JNIEXPORT jobject JNICALL Java_allogen_example_ExampleClass_createAnother(JNIEnv* _env_, jobject _jthis_, jstring name) {
-		return WrappedMethod<Allogen::Example::ExampleClass, AnotherClass(std::string)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->createAnother(name);}, name);
+		return BridgedMethod<Allogen::Example::ExampleClass, Allogen::Example::AnotherClass(std::string)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->createAnother(name);}, name);
 	}
 
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_createAnotherAsync(JNIEnv* _env_, jobject _jthis_, jstring name, jobject callback) {
-		return WrappedMethod<Allogen::Example::ExampleClass, void(std::string, std::function<void(AnotherClass)>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::string name, std::function<void(AnotherClass)> callback) {return wself->createAnotherAsync(name, callback);}, name, Lambda::make(_env_, callback, "createAnother", "(Lallogen/example/AnotherClass;)V"));
+		return BridgedMethod<Allogen::Example::ExampleClass, void(std::string, std::function<void(Allogen::Example::AnotherClass)>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, std::string name, std::function<void(Allogen::Example::AnotherClass)> callback) {return wself->createAnotherAsync(name, callback);}, name, Lambda::make(_env_, callback, "createAnother", "(Lallogen/example/AnotherClass;)V"));
 	}
 
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_printAnother(JNIEnv* _env_, jobject _jthis_, jobject another) {
-		return WrappedMethod<Allogen::Example::ExampleClass, void(AnotherClass)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, AnotherClass another) {return wself->printAnother(another);}, another);
+		return BridgedMethod<Allogen::Example::ExampleClass, void(Allogen::Example::AnotherClass)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, Allogen::Example::AnotherClass another) {return wself->printAnother(another);}, another);
 	}
 
 	extern "C" JNIEXPORT void JNICALL Java_allogen_example_ExampleClass_printAnotherAsync(JNIEnv* _env_, jobject _jthis_, jobject another, jobject callback) {
-		return WrappedMethod<Allogen::Example::ExampleClass, void(AnotherClass, std::function<void()>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, AnotherClass another, std::function<void()> callback) {return wself->printAnotherAsync(another, callback);}, another, Lambda::make(_env_, callback, "printAnother", "()V"));
+		return BridgedMethod<Allogen::Example::ExampleClass, void(Allogen::Example::AnotherClass, std::function<void()>)>::call(_env_, _jthis_, [](Allogen::Example::ExampleClass* wself, Allogen::Example::AnotherClass another, std::function<void()> callback) {return wself->printAnotherAsync(another, callback);}, another, Lambda::make(_env_, callback, "printAnother", "()V"));
+	}
+
+	extern "C" JNIEXPORT jint JNICALL Java_allogen_example_ExampleClass_getStaticInt(JNIEnv* _env_) {
+		return BridgedMethod<Allogen::Example::ExampleClass, uint32_t()>::call(_env_, []() {{
+            return 100;
+        }});
+	}
+
+	extern "C" JNIEXPORT jobject JNICALL Java_allogen_example_ExampleClass_shared(JNIEnv* _env_) {
+		return BridgedMethod<Allogen::Example::ExampleClass, Allogen::Example::ExampleClass()>::call(_env_, []() {{
+            static ExampleClass shared;
+            return &shared;
+        }});
 	}
 }}

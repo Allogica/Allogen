@@ -18,5 +18,6 @@ namespace Allogen::Example {
 
         string getName();
         void setName(newName: string);
+
     }
 }

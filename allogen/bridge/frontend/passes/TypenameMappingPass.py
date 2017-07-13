@@ -56,7 +56,8 @@ class TypenameMappingPass(CompilerPass):
                 self.create_class(context, decl, None)
 
         for clazz in context.all_classes.values():
-            clazz.typename = UserDefinedType(user_type=clazz, context=context, typename=None)
+            udtc = context.user_defined_type_class
+            clazz.typename = udtc(user_type=clazz, context=context, typename=None)
 
         self.create_type_tree(context)
         self.resolve_types(context)

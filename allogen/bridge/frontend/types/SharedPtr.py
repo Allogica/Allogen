@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2017, Allogica
 #
 # All rights reserved.
@@ -27,36 +25,29 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from string import Template
 
-import os, sys
+from allogen.bridge.frontend.CompilerType import BuiltinType
+from allogen.bridge.idl.Parser import *
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+shared_ptr_syntax = typename
 
-from allogen.bridge.frontend.Compiler import *
-import os
-import argparse
+class SharedPtrType(BuiltinType):
+    def __init__(self, context, typename, **kwargs):
+        super(SharedPtrType, self).__init__(context=context, typename=typename, **kwargs)
 
-parser = argparse.ArgumentParser()
+        parsed = shared_ptr_syntax.parseString(typename.template_arguments)
+        parser = Parser()
 
-parser.add_argument('sources', nargs='+', type=str)
+        self.ptr_type = parser.parse_typename(parsed[0])
 
-parser.add_argument('-I', metavar='dir', nargs='+', type=str, dest='include_path', default=[])
-parser.add_argument('--target-dir', metavar='dir', nargs='?', type=str, dest='target_dir',
-                    default=os.path.join(os.path.curdir, 'target'))
-parser.add_argument('--bridge-dir', metavar='dir', nargs='?', type=str, dest='bridge_dir',
-                    default=os.path.join(os.path.curdir, 'bridge'))
+    def lookup(self, context):
+        self.context.resolve(self.ptr_type, scope=self.scope)
 
-parser.add_argument('--target', metavar='language', required=True, type=str, dest='language')
+    def get_bridge_name(self):
+        return Template('std::shared_ptr<${type}>').substitute(
+            type=self.ptr_type.linked_type.name
+        )
 
-parser.add_argument('--print-products', action='store_const', const='print_products', dest='action')
-
-args = parser.parse_args()
-
-compiler = Compiler()
-compiler.compile_files(
-    args.sources,
-    target_out_dir=os.path.join(os.path.dirname(__file__), args.target_dir),
-    bridge_out_dir=os.path.join(os.path.dirname(__file__), args.bridge_dir),
-    # include_directories=args.include_path,
-    language=args.language
-)
+    def get_target_name(self):
+        return self.ptr_type.linked_type.name

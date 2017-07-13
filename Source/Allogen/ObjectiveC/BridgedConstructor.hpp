@@ -30,10 +30,49 @@
 
 #pragma once
 
-#include <Foundation/Foundation.h>
+#include "BridgedClass.hpp"
 
-#include "Allogen/ObjectiveC/Converter.hpp"
-#include "Allogen/ObjectiveC/Converter/IntegralTypes.hpp"
-#include "Allogen/ObjectiveC/BridgedClass.hpp"
-#include "Allogen/ObjectiveC/BridgedConstructor.hpp"
-#include "Allogen/ObjectiveC/BridgedMethod.hpp"
+namespace Allogen {
+	namespace ObjectiveC {
+
+		/**
+		 * A template class that represents a bridged constructor.
+		 *
+		 * @tparam Class the class whose method is being wrapped
+		 * @tparam MethodSignature the method signature being wrapped
+		 */
+		template<typename MethodSignature>
+		struct BridgedConstructor;
+
+		/**
+		 * A BridgedConstructor specialization for class constructors.
+		 *
+		 * This class automatically sets the ObjectiveC class "pointer" property
+		 * to the newly allocated object.
+		 *
+		 * @tparam R the return type
+		 * @tparam Args the contructor argument types
+		 */
+		template<typename R, typename... Args>
+		struct BridgedConstructor<R(Args...)> {
+		public:
+			/**
+			 * Calls a wrapped C++ function from ObjectiveC code
+			 *
+			 * @tparam Executor the executor type
+			 *
+			 * @param env the ObjectiveC environment
+			 * @param executor the code generated executor used to dispatch the method to the C++ object
+			 * @param args the ObjectiveC arguments of the method call
+			 *
+			 * @return the already ObjectiveC-converted object returned by the C++ method
+			 */
+			template<typename ObjCT, typename Executor>
+			static inline void call(ObjCT* wself, Executor&& executor,
+									 typename Converter<Args>::ObjectiveCType... args) {
+				[wself initWithCppObject: executor(Converter<Args>::fromObjectiveC(args)...)];
+			}
+		};
+
+	}
+}

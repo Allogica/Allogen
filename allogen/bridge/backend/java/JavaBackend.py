@@ -34,6 +34,7 @@ from allogen.bridge.backend.java.JavaTargetBackend import JavaTargetBackend
 from allogen.bridge.backend.java.types.JavaLambda import JavaLambda
 from allogen.bridge.frontend.CompilerType import UserDefinedType, CompilerType
 from allogen.bridge.frontend.types.Primitives import PrimitiveType
+from allogen.bridge.frontend.types.SharedPtr import SharedPtrType
 from allogen.bridge.idl.Objects import *
 
 
@@ -49,7 +50,7 @@ class JavaBackend(Backend):
     # L fully-qualified-class;  fully-qualified-class
     # [ type	                type[]
     # ( arg-types ) ret-type	method type
-    def register_builtins(self, builtins: typing.List[CompilerType]):
+    def register_builtins(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext, builtins: typing.List[CompilerType]):
         builtins['void'] = lambda context, typename: PrimitiveType(
             context=context, typename=typename,
             jni_type='void', bridge_type='void', target_type='void',
@@ -81,6 +82,7 @@ class JavaBackend(Backend):
                 java_signature=java_signature_names[bits], java_complex_mangling=False)
 
         builtins['lambda'] = lambda context, typename: JavaLambda(context, typename)
+        builtins['shared_ptr'] = lambda context, typename: SharedPtrType(context, typename)
 
     def create_target_backend(self):
         return JavaTargetBackend()
@@ -112,6 +114,11 @@ class JavaBackend(Backend):
         clazz.java_jni_file_location = "/".join(clazz.namespaces + ['']) + clazz.name
         clazz.java_cpp_file_location = "/".join(clazz.namespaces + ['']) + clazz.name + '.cpp'
         clazz.java_header_file_location = "/".join(clazz.namespaces + ['']) + clazz.name + '.hpp'
+
+        clazz.java_signature = 'L' + (
+            '/'.join(clazz.java_packages)
+        ) + '/' + clazz.name + ';'
+        clazz.java_complex_mangling = True
 
     def interface(self, namespace: IDLNamespace, interface: IDLInterface):
         self.clazz(namespace, interface)
@@ -245,9 +252,10 @@ def jni_method_overload_name_mangling(clazz, package_name, method):
     overloads = []
     for arg in method.arguments:
         overload_name = ''
+
         mangled_name = arg.type.linked_type.java_signature
         mangled_name = mangled_name.replace('/', '_')
-        if isinstance(arg.type.linked_type, UserDefinedType):
+        if mangled_name[-1] == ';':
             mangled_name = mangled_name[:-1]
 
         overload_name += mangled_name

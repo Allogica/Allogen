@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright (c) 2017, Allogica
 #
 # All rights reserved.
@@ -27,36 +25,9 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from allogen.bridge.frontend.CompilerType import UserDefinedType
+from allogen.bridge.frontend.types.Function import FunctionType
 
-import os, sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-from allogen.bridge.frontend.Compiler import *
-import os
-import argparse
-
-parser = argparse.ArgumentParser()
-
-parser.add_argument('sources', nargs='+', type=str)
-
-parser.add_argument('-I', metavar='dir', nargs='+', type=str, dest='include_path', default=[])
-parser.add_argument('--target-dir', metavar='dir', nargs='?', type=str, dest='target_dir',
-                    default=os.path.join(os.path.curdir, 'target'))
-parser.add_argument('--bridge-dir', metavar='dir', nargs='?', type=str, dest='bridge_dir',
-                    default=os.path.join(os.path.curdir, 'bridge'))
-
-parser.add_argument('--target', metavar='language', required=True, type=str, dest='language')
-
-parser.add_argument('--print-products', action='store_const', const='print_products', dest='action')
-
-args = parser.parse_args()
-
-compiler = Compiler()
-compiler.compile_files(
-    args.sources,
-    target_out_dir=os.path.join(os.path.dirname(__file__), args.target_dir),
-    bridge_out_dir=os.path.join(os.path.dirname(__file__), args.bridge_dir),
-    # include_directories=args.include_path,
-    language=args.language
-)
+class ObjectiveCUserDefinedType(UserDefinedType):
+    pass

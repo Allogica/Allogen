@@ -28,6 +28,7 @@
 
 import allogen
 from allogen.bridge.backend.java.JavaBackend import JavaBackend
+from allogen.bridge.backend.objc.ObjectiveCBackend import ObjectiveCBackend
 from allogen.bridge.frontend.CompilerContext import CompilerContext
 import allogen.bridge.frontend.passes as p
 from allogen.bridge.idl.Objects import *
@@ -36,6 +37,11 @@ from allogen.bridge.idl.Parser import Parser
 
 class Compiler(object):
     parser = Parser()
+
+    languages = {
+        'java': JavaBackend,
+        'objc': ObjectiveCBackend
+    }
 
     def __init__(self, passes=None):
         self.passes = passes
@@ -53,7 +59,7 @@ class Compiler(object):
     def add_compiler_pass(self, compiler_pass: allogen.bridge.frontend.CompilerPass.CompilerPass):
         self.passes.append(compiler_pass)
 
-    def compile_files(self, files, **kwargs):
+    def compile_files(self, files, language: str, **kwargs):
         self.context = CompilerContext()
         self.context.__dict__.update(kwargs)
 
@@ -67,19 +73,21 @@ class Compiler(object):
         self.context.idl_classes = self.context.idl.get_classes()
         self.context.all_classes = dict(self.context.idl_classes)
 
-        self.compile(self.context)
+        self.compile(self.context, language=language)
 
     def parse_file(self, source: str):
         self.context.idl.merge(self.parser.parse(source))
         pass
 
-    def compile(self, context: CompilerContext):
-        context.backend = JavaBackend()
+    def compile(self, context: CompilerContext, language: str):
+        backend_class = self.languages[language.lower()]
+
+        context.backend = backend_class()
         context.backend.context = context
         context.backend.compiler = self
 
         # register backend types
-        context.backend.register_builtins(context.builtin_types)
+        context.backend.register_builtins(context, context.builtin_types)
 
         for compiler_pass in sorted(self.passes, key=lambda p: p.get_order()):
             compiler_pass.context = context
@@ -156,7 +164,8 @@ class Compiler(object):
             args=list(map(lambda a: self.synthesize_argument(a), method.arguments)),
             ret=self.synthesize_typename(method.ret),
             documentation=method.description,
-            idl=method
+            idl=method,
+            static=method.static
         )
         method.target_object = m
         return m

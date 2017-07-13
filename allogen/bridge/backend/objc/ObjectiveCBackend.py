@@ -27,11 +27,128 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from allogen.bridge.backend.Backend import Backend
+from allogen.bridge.backend.objc.ObjectiveCBridgeBackend import ObjectiveCBridgeBackend
+from allogen.bridge.backend.objc.ObjectiveCTargetBackend import ObjectiveCTargetBackend
+from allogen.bridge.backend.objc.types.ObjectiveCBlock import ObjectiveCBlock
+from allogen.bridge.backend.objc.types.ObjectiveCUserDefinedType import ObjectiveCUserDefinedType
+from allogen.bridge.frontend.CompilerType import UserDefinedType
+from allogen.bridge.frontend.types.Primitives import PrimitiveType
+from allogen.bridge.idl.Objects import *
 
 
 class ObjectiveCBackend(Backend):
+    def register_builtins(self, context: allogen.bridge.frontend.CompilerContext.CompilerContext, builtins):
+        context.user_defined_type_class = ObjectiveCUserDefinedType
+
+        builtins['void'] = lambda context, typename: PrimitiveType(
+            context=context, typename=typename,
+            bridge_type='void', target_type='void')
+        builtins['bool'] = lambda context, typename: PrimitiveType(
+            context=context, typename=typename,
+            bridge_type='bool', target_type='boolean')
+
+        builtins['string'] = lambda context, typename: PrimitiveType(
+            context=context, typename=typename,
+            bridge_type='std::string', target_type='NSString*')
+
+        for bits in [8, 16, 32, 64]:
+            builtins['int' + str(bits) + '_t'] = lambda context, typename, bits=bits: PrimitiveType(
+                context=context, typename=typename,
+                bridge_type='int' + str(bits) + '_t', target_type='int' + str(bits) + '_t')
+            builtins['uint' + str(bits) + '_t'] = lambda context, typename, bits=bits: PrimitiveType(
+                context=context, typename=typename,
+                bridge_type='uint' + str(bits) + '_t', target_type='uint' + str(bits) + '_t')
+
+        builtins['lambda'] = lambda context, typename: ObjectiveCBlock(context, typename)
+        # builtins['shared_ptr'] = lambda context, typename: SharedPtrType(context, typename)
+
     def create_target_backend(self):
-        return
+        return ObjectiveCTargetBackend()
 
     def create_bridge_backend(self):
-        return
+        return ObjectiveCBridgeBackend()
+
+    def namespace(self, namespace: IDLNamespace):
+        pass
+
+    def clazz_pre(self, namespace: IDLNamespace, clazz: IDLClass):
+        clazz.objc_name = 'AE'+clazz.name
+
+        clazz.target_object.name = clazz.objc_name
+        clazz.target_object.parents = ['NSObject']
+
+        clazz.objc_cpp_typename = TypeName(name=clazz.fully_qualified_name, pointer=True)
+
+        clazz.objc_header_file_location = "/".join(clazz.namespaces + ['']) + clazz.objc_name + '.h'
+        clazz.objc_private_header_file_location = "/".join(clazz.namespaces + ['']) + clazz.objc_name + '+Private.h'
+        clazz.objc_impl_file_location = "/".join(clazz.namespaces + ['']) + clazz.objc_name + '.mm'
+
+        clazz.private_object = Class(
+            name=clazz.objc_name+'(Private)',
+            members=[
+                Constructor(args=[
+                    MethodArgument(name='cppObject', type=TypeName(clazz.fully_qualified_name, pointer=True))
+                ]),
+                Method(name='toCppObject', ret=TypeName(clazz.fully_qualified_name, pointer=True))
+            ]
+        )
+
+    def interface(self, namespace: IDLNamespace, interface: IDLInterface):
+        interface.objc_name = interface.name
+
+    def constructor(self, namespace: IDLNamespace, clazz: IDLClass, constructor: IDLConstructor):
+        constructor.objc_name = constructor.name
+
+    def destructor(self, namespace: IDLNamespace, clazz: IDLClass, destructor: IDLDestructor):
+        destructor.objc_name = destructor.name
+
+    def method(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod):
+        method.objc_name = method.name
+        self.typename(namespace, clazz, method, None, method.ret)
+
+        if isinstance(method.ret.linked_type, UserDefinedType):
+            method.target_object.ret.pointer = True
+            method.target_object.ret.name = method.ret.linked_type.objc_name
+
+    def argument(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, argument: IDLMethodArgument):
+        argument.objc_name = argument.name
+        self.typename(namespace, clazz, method, argument, argument.type)
+
+        if isinstance(argument.type.linked_type, UserDefinedType):
+            argument.target_object.type.pointer = True
+            argument.target_object.type.name = argument.type.linked_type.objc_name
+
+            # if 'Callback' in argument.annotations:
+            #     callback = argument.annotations['Callback']
+            #     callback_function = argument.type.linked_type
+            #
+            #     # register a new helper interface
+            #     callback_interface = IDLInterface(
+            #         name=callback.attributes['interface'],
+            #         methods=[
+            #             IDLMethod(
+            #                 name=callback.attributes['method'],
+            #                 ret=callback_function.lambda_return_type,
+            #                 arguments=callback_function.lambda_arguments
+            #             )
+            #         ]
+            #     )
+            #
+            #     callback_interface.namespaces = clazz.namespaces
+            #     callback_interface.for_class = clazz
+            #     callback_interface.for_method = method
+            #     callback_interface.for_argument = argument
+            #
+            #     argument.callback_interface = callback_interface
+            #     argument.type.name = callback_interface.name
+            #     argument.target_object.type.name = callback_interface.name
+            #
+            #     self.compiler.synthesize_interface(callback_interface)
+            #     self.context.add_sister_class(callback_interface)
+            #
+            #     self.clazz_pre(namespace, callback_interface)
+
+    def typename(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, argument: IDLMethodArgument,
+                 typename: IDLTypename):
+        typename.objc_name = typename.name
+        self.context.resolve(typename)
