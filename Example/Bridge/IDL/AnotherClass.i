@@ -9,6 +9,11 @@ namespace Allogen::Example {
         ) {
             return nullptr;
         }
+        constructor(
+            str: string
+        ) {
+            return nullptr;
+        }
         destructor();
 
         string getName();

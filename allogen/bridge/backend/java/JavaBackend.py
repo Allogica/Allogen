@@ -194,7 +194,8 @@ class JavaBackend(Backend):
         elif typename.linked_type and isinstance(typename.linked_type, UserDefinedType):
             typename.java_jni_type = 'jobject'
             typename.linked_type.java_signature = 'L' + (
-            '/'.join(typename.linked_type.user_type.java_packages)) + '/' + typename.name + ';'
+                '/'.join(typename.linked_type.user_type.java_packages)
+            ) + '/' + typename.name + ';'
             typename.linked_type.java_complex_mangling = True
         else:
             typename.java_jni_type = 'jobject'
@@ -243,11 +244,11 @@ def jni_method_overload_name_mangling(clazz, package_name, method):
     i = 2
     overloads = []
     for arg in method.arguments:
-        arg_name = arg.type.name
-
         overload_name = ''
         mangled_name = arg.type.linked_type.java_signature
-        mangled_name = mangled_name.replace('/', '_')[:-1]
+        mangled_name = mangled_name.replace('/', '_')
+        if isinstance(arg.type.linked_type, UserDefinedType):
+            mangled_name = mangled_name[:-1]
 
         overload_name += mangled_name
         if use_numbered_separator and arg.type.linked_type.java_complex_mangling:
