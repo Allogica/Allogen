@@ -102,8 +102,18 @@ using namespace Allogen::Example;
 	return BridgedMethod<Allogen::Example::ExampleClass, Allogen::Example::AnotherClass(std::string)>::call(self, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->createAnother(name);}, name);
 }
 
+- (void)createAnotherAsyncWithName:(NSString*)name
+	                      callback:(void(^)(AEAnotherClass*))callback {
+	return BridgedMethod<Allogen::Example::ExampleClass, void(std::string, std::function<void(Allogen::Example::AnotherClass)>)>::call(self, [](Allogen::Example::ExampleClass* wself, std::string name, std::function<void(Allogen::Example::AnotherClass)> callback) {return wself->createAnotherAsync(name, callback);}, name, callback);
+}
+
 - (void)printAnotherWithAnother:(AEAnotherClass*)another {
 	return BridgedMethod<Allogen::Example::ExampleClass, void(Allogen::Example::AnotherClass)>::call(self, [](Allogen::Example::ExampleClass* wself, Allogen::Example::AnotherClass another) {return wself->printAnother(another);}, another);
+}
+
+- (void)printAnotherAsyncWithAnother:(AEAnotherClass*)another
+	                     callback:(void(^)())callback {
+	return BridgedMethod<Allogen::Example::ExampleClass, void(Allogen::Example::AnotherClass, std::function<void()>)>::call(self, [](Allogen::Example::ExampleClass* wself, Allogen::Example::AnotherClass another, std::function<void()> callback) {return wself->printAnotherAsync(another, callback);}, another, callback);
 }
 
 + (uint32_t)getStaticInt {

@@ -118,35 +118,12 @@ class ObjectiveCBackend(Backend):
             argument.target_object.type.pointer = True
             argument.target_object.type.name = argument.type.linked_type.objc_name
 
-            # if 'Callback' in argument.annotations:
-            #     callback = argument.annotations['Callback']
-            #     callback_function = argument.type.linked_type
-            #
-            #     # register a new helper interface
-            #     callback_interface = IDLInterface(
-            #         name=callback.attributes['interface'],
-            #         methods=[
-            #             IDLMethod(
-            #                 name=callback.attributes['method'],
-            #                 ret=callback_function.lambda_return_type,
-            #                 arguments=callback_function.lambda_arguments
-            #             )
-            #         ]
-            #     )
-            #
-            #     callback_interface.namespaces = clazz.namespaces
-            #     callback_interface.for_class = clazz
-            #     callback_interface.for_method = method
-            #     callback_interface.for_argument = argument
-            #
-            #     argument.callback_interface = callback_interface
-            #     argument.type.name = callback_interface.name
-            #     argument.target_object.type.name = callback_interface.name
-            #
-            #     self.compiler.synthesize_interface(callback_interface)
-            #     self.context.add_sister_class(callback_interface)
-            #
-            #     self.clazz_pre(namespace, callback_interface)
+            if 'Callback' in argument.annotations:
+                # workaround for ObjectiveC prefix
+                argument.target_object.type.name = argument.type.linked_type.get_target_name()
+
+        if isinstance(argument.type.linked_type, ObjectiveCBlock):
+            argument.target_object.type.name = argument.type.linked_type.get_target_name()
 
     def typename(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, argument: IDLMethodArgument,
                  typename: IDLTypename):

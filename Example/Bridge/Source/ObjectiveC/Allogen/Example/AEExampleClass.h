@@ -12,6 +12,7 @@
 
 #import "AEAnotherClass.h"
 #import "AEAnotherClass.h"
+#import "AEAnotherClass.h"
 #import "AEExampleClass.h"
 
 /**
@@ -99,9 +100,27 @@
 /**
  * 
  * 
+ * @param name 
+ * @param callback 
+ */
+- (void)createAnotherAsyncWithName:(NSString*)name
+	                      callback:(void(^)(AEAnotherClass*))callback;
+
+/**
+ * 
+ * 
  * @param another 
  */
 - (void)printAnotherWithAnother:(AEAnotherClass*)another;
+
+/**
+ * 
+ * 
+ * @param another 
+ * @param callback 
+ */
+- (void)printAnotherAsyncWithAnother:(AEAnotherClass*)another
+	                     callback:(void(^)())callback;
 
 /**
  * 

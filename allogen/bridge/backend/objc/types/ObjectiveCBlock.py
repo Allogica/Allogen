@@ -31,7 +31,15 @@ from allogen.bridge.frontend.types.Function import FunctionType
 
 class ObjectiveCBlock(FunctionType):
     def get_target_name(self):
-        arg_types = ", ".join(map(lambda t: t.type.linked_type.get_target_name(), self.lambda_arguments))
+        def get_name(t):
+            print("Trying")
+            if isinstance(t.type.linked_type, UserDefinedType) and t.type.linked_type.user_type.objc_name:
+                return t.type.linked_type.user_type.objc_name + '*'
+            else:
+                return t.type.linked_type.get_target_name()
+
+
+        arg_types = ", ".join(map(lambda t: get_name(t), self.lambda_arguments))
         return self.lambda_return_type.linked_type.get_target_name()+'(^)(' + arg_types + ')'
 
     def filter_bridge(self, object):

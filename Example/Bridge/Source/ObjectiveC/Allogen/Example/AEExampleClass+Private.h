@@ -6,9 +6,9 @@
  * interface declaration file and regenerate the bridge code.
  */
 
-#import <Allogen/ObjectiveC.hpp>
-
 #pragma once
+
+#import <Allogen/ObjectiveC.hpp>
 
 #import "AEExampleClass.h"
 
@@ -19,11 +19,12 @@
 #import "AEAnotherClass+Private.h"
 #import "AEAnotherClass.h"
 #import "AEAnotherClass+Private.h"
+#import "AEAnotherClass.h"
+#import "AEAnotherClass+Private.h"
 #import "AEExampleClass.h"
 #import "AEExampleClass+Private.h"
 
-ALLOGEN_BRIDGED_CLASS(Allogen::Example::ExampleClass, "AEExampleClass")
-
+ALLOGEN_BRIDGED_CLASS(Allogen::Example::ExampleClass, AEExampleClass)
 
 @interface AEExampleClass(Private)
 - (id)initWithCppObject:(Allogen::Example::ExampleClass*)cppObject;

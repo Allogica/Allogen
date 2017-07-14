@@ -63,17 +63,11 @@ int main(int argc, const char** argv) {
     AEAnotherClass* anotherClass = [n createAnotherWithName: @"Testing"];
     [n printAnotherWithAnother: anotherClass];
 
-/*
-            AnotherClass anotherClass = n.createAnother("Testing");
-            n.printAnother(anotherClass);
-
-            ExampleClass finalN = n;
-            n.createAnotherAsync("Testing2", (AnotherClass another) -> {
-                System.out.println("Received a async another: " + another.getName());
-                finalN.printAnotherAsync(another, () -> {
-                    System.out.println("Printing complete");
-                });
-            });
-            */
+    [n createAnotherAsyncWithName: @"Testing2" callback: ^(AEAnotherClass* another) {
+        NSLog(@"%@", [another getName]);
+        [n printAnotherAsyncWithAnother: another callback: ^() {
+            NSLog(@"Printing complete");
+        }];
+    }];
 
 }

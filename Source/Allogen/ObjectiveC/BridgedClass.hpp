@@ -31,13 +31,14 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <objc/objc.h>
 
 namespace Allogen {
 	namespace ObjectiveC {
 
 		template<typename T>
-		constexpr const char OBJC_CLASS[] = {0};
+		const std::string OBJC_CLASS = {0};
 
 		/**
 		 * A Conversion implementation for classes bridged between C++ and ObjectiveC.
@@ -113,7 +114,7 @@ namespace Allogen {
 			 * @return the corresponding ObjectiveC type
 			 */
 			static ObjectiveCType toObjectiveC(T* object) {
-				auto c = NSClassFromString([NSString stringWithCString:OBJC_CLASS<T>
+				auto c = NSClassFromString([NSString stringWithCString:OBJC_CLASS<T>.data()
 									encoding:[NSString defaultCStringEncoding]]);
 				return [[c alloc] initWithCppObject: object];
 			}
@@ -268,7 +269,7 @@ namespace Allogen {
 		};
 
 #define ALLOGEN_BRIDGED_CLASS(ClassName, ObjectiveCClass)                                                      		\
-template<> constexpr const char ::Allogen::ObjectiveC::OBJC_CLASS<ClassName>[] = #ObjectiveCClass;                       \
+template<> const std::string Allogen::ObjectiveC::OBJC_CLASS<ClassName> = ::Allogen::ObjectiveC::Converter<std::string>::fromObjectiveC(NSStringFromClass([ObjectiveCClass class]));                       \
 template<> struct ::Allogen::ObjectiveC::Converter<ClassName>   : public ::Allogen::ObjectiveC::BridgeClass<ClassName>   {};    	\
 template<> struct ::Allogen::ObjectiveC::Converter<ClassName*>  : public ::Allogen::ObjectiveC::BridgeClass<ClassName*>  {};    	\
 template<> struct ::Allogen::ObjectiveC::Converter<ClassName&>  : public ::Allogen::ObjectiveC::BridgeClass<ClassName&>  {};    	\

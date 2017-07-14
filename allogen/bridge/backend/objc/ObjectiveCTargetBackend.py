@@ -77,10 +77,9 @@ class ObjectiveCTargetBackend(TargetBackend):
             writer = StreamSourceCodeWriter(stream=f, generator=generator)
 
             writer(Comment(codegen_notice, multiline=True), writer.nl, writer.nl)
-            writer(Import('Allogen/ObjectiveC.hpp', quoted=False), writer.nl)
-
             writer('#pragma once', writer.nl, writer.nl)
 
+            writer(Import('Allogen/ObjectiveC.hpp', quoted=False), writer.nl)
             writer(Import(clazz.objc_name + '.h', quoted=True))
             writer(writer.nl)
 
@@ -98,6 +97,6 @@ class ObjectiveCTargetBackend(TargetBackend):
                 writer.nl
             )
 
-            writer('ALLOGEN_BRIDGED_CLASS(' + clazz.fully_qualified_name + ', "' + clazz.objc_name + '")', writer.nl, writer.nl)
+            writer('ALLOGEN_BRIDGED_CLASS(' + clazz.fully_qualified_name + ', ' + clazz.objc_name + ')', writer.nl, writer.nl)
 
             writer(clazz.private_object)
