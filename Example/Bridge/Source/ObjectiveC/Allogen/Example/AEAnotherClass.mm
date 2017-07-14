@@ -58,7 +58,7 @@ using namespace Allogen::Example;
 	return BridgedMethod<Allogen::Example::AnotherClass, std::string()>::call(self, [](Allogen::Example::AnotherClass* wself) {return wself->getName();});
 }
 
-- (void)setNameWithNewName:(NSString*)newName {
+- (void)setName:(NSString*)newName {
 	return BridgedMethod<Allogen::Example::AnotherClass, void(std::string)>::call(self, [](Allogen::Example::AnotherClass* wself, std::string newName) {return wself->setName(newName);}, newName);
 }
 

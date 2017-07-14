@@ -46,6 +46,6 @@
  * 
  * @param newName 
  */
-- (void)setNameWithNewName:(NSString*)newName;
+- (void)setName:(NSString*)newName;
 
 @end

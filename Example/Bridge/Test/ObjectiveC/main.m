@@ -7,7 +7,7 @@ int main(int argc, const char** argv) {
 
     NSLog(@"%i", [exampleClass getInteger]);
 
-    [exampleClass setIntegerWithAInteger: 100];
+    [exampleClass setInteger: 100];
     NSLog(@"%i", [exampleClass getInteger]);*/
 
 
@@ -15,29 +15,29 @@ int main(int argc, const char** argv) {
 
     {
         AEExampleClass* shared1 = [AEExampleClass shared];
-        [shared1 setIntegerWithAInteger: 123];
+        [shared1 setInteger: 123];
 
         AEExampleClass* shared2 = [AEExampleClass shared];
         NSLog(@"%i", [shared2 getInteger]);
 
-        [shared2 setIntegerWithAInteger: 124];
+        [shared2 setInteger: 124];
         NSLog(@"%i", [shared1 getInteger]);
     }
 
     NSLog(@"%i", [AEExampleClass getStaticInt]);
 
-    [n sayHelloWithName: @"Allogen Bridge"];
+    [n sayHello: @"Allogen Bridge"];
 
-    [n doAsyncWithCallback: ^() {
+    [n doAsync: ^() {
         NSLog(@"Done async!!!!");
     }];
 
-    uint32_t r = [n anotherCallbackWithCallback: ^uint32_t (uint16_t a, uint16_t b) {
+    uint32_t r = [n anotherCallback: ^uint32_t (uint16_t a, uint16_t b) {
         return a + b;
     }];
     NSLog(@"%i", r);
 
-    r = [n virtualCallbackWithCallback: ^uint32_t (uint16_t a, uint16_t b) {
+    r = [n virtualCallback: ^uint32_t (uint16_t a, uint16_t b) {
         return a + b;
     } a: 100 b: 200];
     NSLog(@"%i", r);
@@ -46,26 +46,26 @@ int main(int argc, const char** argv) {
     NSLog(@"%i", [n getInteger]);
 
     NSLog(@"Setting to 10000...");
-    [n setIntegerWithAInteger: 10000];
+    [n setInteger: 10000];
     NSLog(@"%i", [n getInteger]);
 
     NSLog(@"Setting to 200...");
-    [n setIntegerWithAInteger: 200];
-    NSLog(@"%i", [n getInteger]);
+    n.aInteger = 200;
+    NSLog(@"%i", n.aInteger);
 
     NSLog(@"Setting copy to 300...");
     AEExampleClass* copy = [n copy];
-    [copy setIntegerWithAInteger: 300];
+    [copy setInteger: 300];
 
     NSLog(@"Original: %i", [n getInteger]);
     NSLog(@"Copy: %i", [copy getInteger]);
 
-    AEAnotherClass* anotherClass = [n createAnotherWithName: @"Testing"];
-    [n printAnotherWithAnother: anotherClass];
+    AEAnotherClass* anotherClass = [n createAnother: @"Testing"];
+    [n printAnother: anotherClass];
 
-    [n createAnotherAsyncWithName: @"Testing2" callback: ^(AEAnotherClass* another) {
+    [n createAnotherAsync: @"Testing2" callback: ^(AEAnotherClass* another) {
         NSLog(@"%@", [another getName]);
-        [n printAnotherAsyncWithAnother: another callback: ^() {
+        [n printAnotherAsync: another callback: ^() {
             NSLog(@"Printing complete");
         }];
     }];

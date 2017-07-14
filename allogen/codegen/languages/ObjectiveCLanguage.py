@@ -52,6 +52,7 @@ class ObjectiveCLanguageSourceGenerator(LanguageSourceGenerator):
     def __init__(self):
         super(ObjectiveCLanguageSourceGenerator, self).__init__()
         self.first_parameter = False
+        self.first_parameter_constructor = False
 
         # Objective-C has no nesting neither namespaces. If we find a nested class or enum,
         # we move it to the root and generate it again.
@@ -72,12 +73,13 @@ class ObjectiveCLanguageSourceGenerator(LanguageSourceGenerator):
             ]
         )
 
-    def _objc_method_signature(self, writer, method, with_colon=True):
+    def _objc_method_signature(self, writer, method, with_colon=True, constructor=False):
         self.first_parameter = True
+        self.first_parameter_constructor = constructor
 
         writer(
             (method.static, '+', '-'),
-            ' (', method.ret, ')', method.name, (len(method.args) > 0, 'With'),
+            ' (', method.ret, ')', method.name, (len(method.args) > 0 and constructor, 'With'),
             writer.indented(writer.joined(
                 [writer.nl, writer.tab, ' ' * (4 + len(method.name))], method.args
             )),
@@ -127,8 +129,11 @@ class ObjectiveCLanguageSourceGenerator(LanguageSourceGenerator):
         message_arg_name = arg.name
         if arg.objc_in_message_name:
             message_arg_name = arg.objc_in_message_name
-        if self.first_parameter:
+        if self.first_parameter and self.first_parameter_constructor:
             message_arg_name = message_arg_name[0].capitalize() + message_arg_name[1:]
+            self.first_parameter = False
+        elif self.first_parameter and not self.first_parameter_constructor:
+            message_arg_name = ''
             self.first_parameter = False
 
         writer(
@@ -257,7 +262,7 @@ class ObjectiveCInterfaceLanguageSourceGenerator(ObjectiveCLanguageSourceGenerat
         const.name = 'init'
         const.ret = 'id'
 
-        self._objc_method_signature(writer, const)
+        self._objc_method_signature(writer, const, constructor=True)
 
         writer(
             doc_nl
@@ -373,7 +378,7 @@ class ObjectiveCImplementationLanguageSourceGenerator(ObjectiveCLanguageSourceGe
         const.name = 'init'
         const.ret = 'id'
 
-        self._objc_method_signature(writer, const, with_colon=False)
+        self._objc_method_signature(writer, const, with_colon=False, constructor=True)
         self._objc_method_body(writer, const)
         writer(writer.nl)
 

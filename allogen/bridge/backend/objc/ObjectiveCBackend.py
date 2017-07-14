@@ -72,7 +72,7 @@ class ObjectiveCBackend(Backend):
         pass
 
     def clazz_pre(self, namespace: IDLNamespace, clazz: IDLClass):
-        clazz.objc_name = 'AE'+clazz.name
+        clazz.objc_name = 'AE' + clazz.name
 
         clazz.target_object.name = clazz.objc_name
         clazz.target_object.parents = ['NSObject']
@@ -84,7 +84,7 @@ class ObjectiveCBackend(Backend):
         clazz.objc_impl_file_location = "/".join(clazz.namespaces + ['']) + clazz.objc_name + '.mm'
 
         clazz.private_object = Class(
-            name=clazz.objc_name+'(Private)',
+            name=clazz.objc_name + '(Private)',
             members=[
                 Constructor(args=[
                     MethodArgument(name='cppObject', type=TypeName(clazz.fully_qualified_name, pointer=True))
@@ -92,6 +92,8 @@ class ObjectiveCBackend(Backend):
                 Method(name='toCppObject', ret=TypeName(clazz.fully_qualified_name, pointer=True))
             ]
         )
+
+        clazz.objc_properties = dict()
 
     def interface(self, namespace: IDLNamespace, interface: IDLInterface):
         interface.objc_name = interface.name
@@ -109,6 +111,28 @@ class ObjectiveCBackend(Backend):
         if isinstance(method.ret.linked_type, UserDefinedType):
             method.target_object.ret.pointer = True
             method.target_object.ret.name = method.ret.linked_type.objc_name
+
+        if 'Getter' in method.annotations:
+            getter = method.annotations['Getter']
+            property = getter.attributes['property']
+
+            if not property in clazz.objc_properties:
+                clazz.objc_properties[property] = {
+                    'type': method.ret
+                }
+            clazz.objc_properties[property]['getter'] = method
+
+            pass
+        elif 'Setter' in method.annotations:
+            setter = method.annotations['Setter']
+            property = setter.attributes['property']
+
+            if not property in clazz.objc_properties:
+                clazz.objc_properties[property] = {
+                    'type': method.arguments[0].type
+                }
+            clazz.objc_properties[property]['setter'] = method
+            pass
 
     def argument(self, namespace: IDLNamespace, clazz: IDLClass, method: IDLMethod, argument: IDLMethodArgument):
         argument.objc_name = argument.name

@@ -55,6 +55,25 @@ class ObjectiveCTargetBackend(TargetBackend):
 
         generator = ObjectiveCInterfaceLanguageSourceGenerator()
 
+        # synthesize the Objective-C properties
+
+        all_properties = []
+        for (name, property) in clazz.objc_properties.items():
+            args = []
+            if 'getter' in property:
+                args += ['getter=' + property['getter'].objc_name]
+
+            if 'setter' in property:
+                args += ['setter=' + property['setter'].objc_name + ':']
+
+            type = property['type']
+
+            objc_property = '@property (' + (', '.join(['nonatomic']+args)) + ') ' + type.linked_type.get_target_name() + ' ' + name + ';\n'
+            all_properties += [Raw(objc_property)]
+
+        before_members = clazz.target_object.members
+        clazz.target_object.members = all_properties + clazz.target_object.members
+
         with open(header_path, 'w') as f:
             writer = StreamSourceCodeWriter(stream=f, generator=generator)
 
@@ -71,6 +90,8 @@ class ObjectiveCTargetBackend(TargetBackend):
             writer(writer.nl)
 
             writer(clazz.target_object)
+
+        clazz.target_object.members = before_members
 
         private_header_path = os.path.join(context.bridge_out_dir, clazz.objc_private_header_file_location)
         with open(private_header_path, 'w') as f:

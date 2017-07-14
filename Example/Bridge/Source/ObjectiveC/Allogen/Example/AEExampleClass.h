@@ -22,6 +22,8 @@
  * code as documentation strings.
  */
 @interface AEExampleClass : NSObject
+@property (nonatomic, getter=getInteger, setter=setInteger:) uint32_t aInteger;
+
 /**
  * Creates a new ExampleClass object with the default value of 0.
  */
@@ -44,7 +46,7 @@
  * 
  * @param aInteger The integer to be set
  */
-- (void)setIntegerWithAInteger:(uint32_t)aInteger;
+- (void)setInteger:(uint32_t)aInteger;
 
 /**
  * The previously set integer
@@ -61,14 +63,14 @@
  * 
  * @param callback The callback function
  */
-- (void)doAsyncWithCallback:(void(^)())callback;
+- (void)doAsync:(void(^)())callback;
 
 /**
  * Executes a callback function returning a integer with two integer arguments
  * 
  * @param callback The callback function
  */
-- (uint32_t)anotherCallbackWithCallback:(uint32_t(^)(uint16_t, uint16_t))callback;
+- (uint32_t)anotherCallback:(uint32_t(^)(uint16_t, uint16_t))callback;
 
 /**
  * Executes a callback function returning a integer with two integer arguments.
@@ -79,7 +81,7 @@
  * @param a The "a" integer
  * @param b The "b" integer
  */
-- (uint32_t)virtualCallbackWithCallback:(uint32_t(^)(uint16_t, uint16_t))callback
+- (uint32_t)virtualCallback:(uint32_t(^)(uint16_t, uint16_t))callback
 	                   a:(uint16_t)a
 	                   b:(uint16_t)b;
 
@@ -88,14 +90,14 @@
  * 
  * @param name 
  */
-- (void)sayHelloWithName:(NSString*)name;
+- (void)sayHello:(NSString*)name;
 
 /**
  * 
  * 
  * @param name 
  */
-- (AEAnotherClass*)createAnotherWithName:(NSString*)name;
+- (AEAnotherClass*)createAnother:(NSString*)name;
 
 /**
  * 
@@ -103,7 +105,7 @@
  * @param name 
  * @param callback 
  */
-- (void)createAnotherAsyncWithName:(NSString*)name
+- (void)createAnotherAsync:(NSString*)name
 	                      callback:(void(^)(AEAnotherClass*))callback;
 
 /**
@@ -111,7 +113,7 @@
  * 
  * @param another 
  */
-- (void)printAnotherWithAnother:(AEAnotherClass*)another;
+- (void)printAnother:(AEAnotherClass*)another;
 
 /**
  * 
@@ -119,7 +121,7 @@
  * @param another 
  * @param callback 
  */
-- (void)printAnotherAsyncWithAnother:(AEAnotherClass*)another
+- (void)printAnotherAsync:(AEAnotherClass*)another
 	                     callback:(void(^)())callback;
 
 /**

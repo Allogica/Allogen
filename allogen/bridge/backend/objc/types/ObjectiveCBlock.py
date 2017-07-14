@@ -32,7 +32,6 @@ from allogen.bridge.frontend.types.Function import FunctionType
 class ObjectiveCBlock(FunctionType):
     def get_target_name(self):
         def get_name(t):
-            print("Trying")
             if isinstance(t.type.linked_type, UserDefinedType) and t.type.linked_type.user_type.objc_name:
                 return t.type.linked_type.user_type.objc_name + '*'
             else:

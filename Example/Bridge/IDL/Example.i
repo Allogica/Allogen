@@ -35,12 +35,14 @@ namespace Allogen::Example {
         destructor();
 
         /// Sets a integer that can later be retrieved
+        @Setter(property="aInteger")
         void setInteger(
             /// The integer to be set
             aInteger: uint32_t
         );
 
         /// The previously set integer
+        @Getter(property="aInteger")
         uint32_t getInteger();
 
         /// Creates a copy of the object

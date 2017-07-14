@@ -64,7 +64,7 @@ using namespace Allogen::Example;
 
 }
 
-- (void)setIntegerWithAInteger:(uint32_t)aInteger {
+- (void)setInteger:(uint32_t)aInteger {
 	return BridgedMethod<Allogen::Example::ExampleClass, void(uint32_t)>::call(self, [](Allogen::Example::ExampleClass* wself, uint32_t aInteger) {return wself->setInteger(aInteger);}, aInteger);
 }
 
@@ -78,15 +78,15 @@ using namespace Allogen::Example;
         }});
 }
 
-- (void)doAsyncWithCallback:(void(^)())callback {
+- (void)doAsync:(void(^)())callback {
 	return BridgedMethod<Allogen::Example::ExampleClass, void(std::function<void()>)>::call(self, [](Allogen::Example::ExampleClass* wself, std::function<void()> callback) {return wself->doAsync(callback);}, callback);
 }
 
-- (uint32_t)anotherCallbackWithCallback:(uint32_t(^)(uint16_t, uint16_t))callback {
+- (uint32_t)anotherCallback:(uint32_t(^)(uint16_t, uint16_t))callback {
 	return BridgedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint16_t, uint16_t)>)>::call(self, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint16_t, uint16_t)> callback) {return wself->anotherCallback(callback);}, callback);
 }
 
-- (uint32_t)virtualCallbackWithCallback:(uint32_t(^)(uint16_t, uint16_t))callback
+- (uint32_t)virtualCallback:(uint32_t(^)(uint16_t, uint16_t))callback
 	                   a:(uint16_t)a
 	                   b:(uint16_t)b {
 	return BridgedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint16_t, uint16_t)>, uint16_t, uint16_t)>::call(self, [](Allogen::Example::ExampleClass* wself, std::function<uint32_t(uint16_t, uint16_t)> callback, uint16_t a, uint16_t b) {{
@@ -94,24 +94,24 @@ using namespace Allogen::Example;
         }}, callback, a, b);
 }
 
-- (void)sayHelloWithName:(NSString*)name {
+- (void)sayHello:(NSString*)name {
 	return BridgedMethod<Allogen::Example::ExampleClass, void(std::string)>::call(self, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->sayHello(name);}, name);
 }
 
-- (AEAnotherClass*)createAnotherWithName:(NSString*)name {
+- (AEAnotherClass*)createAnother:(NSString*)name {
 	return BridgedMethod<Allogen::Example::ExampleClass, Allogen::Example::AnotherClass(std::string)>::call(self, [](Allogen::Example::ExampleClass* wself, std::string name) {return wself->createAnother(name);}, name);
 }
 
-- (void)createAnotherAsyncWithName:(NSString*)name
+- (void)createAnotherAsync:(NSString*)name
 	                      callback:(void(^)(AEAnotherClass*))callback {
 	return BridgedMethod<Allogen::Example::ExampleClass, void(std::string, std::function<void(Allogen::Example::AnotherClass)>)>::call(self, [](Allogen::Example::ExampleClass* wself, std::string name, std::function<void(Allogen::Example::AnotherClass)> callback) {return wself->createAnotherAsync(name, callback);}, name, callback);
 }
 
-- (void)printAnotherWithAnother:(AEAnotherClass*)another {
+- (void)printAnother:(AEAnotherClass*)another {
 	return BridgedMethod<Allogen::Example::ExampleClass, void(Allogen::Example::AnotherClass)>::call(self, [](Allogen::Example::ExampleClass* wself, Allogen::Example::AnotherClass another) {return wself->printAnother(another);}, another);
 }
 
-- (void)printAnotherAsyncWithAnother:(AEAnotherClass*)another
+- (void)printAnotherAsync:(AEAnotherClass*)another
 	                     callback:(void(^)())callback {
 	return BridgedMethod<Allogen::Example::ExampleClass, void(Allogen::Example::AnotherClass, std::function<void()>)>::call(self, [](Allogen::Example::ExampleClass* wself, Allogen::Example::AnotherClass another, std::function<void()> callback) {return wself->printAnotherAsync(another, callback);}, another, callback);
 }
