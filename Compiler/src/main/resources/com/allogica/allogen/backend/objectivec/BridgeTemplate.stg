@@ -1,0 +1,98 @@
+/*
+ * Copyright (c) 2017, Allogica
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of Allogen nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import "ObjectiveC.stg"
+
+header(class) ::= <<
+<codegen_notice()>
+
+#pragma once
+
+#include \<Allogen/ObjectiveC.hpp>
+
+<class.usedTypes:{usedType|
+<if(usedType.userDefinedClass)>#import "<usedType.userDefinedClass.bridgeHeaderOutputFile>"
+#import "<usedType.userDefinedClass.targetOutputFile>"<\n><endif>}>
+
+<class.idlClass.includes:{include|
+#include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><endif>}>
+
+ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>, <class.objcName>)
+
+@interface <class.objcName>()
+-(id)initWithCppObject:(<class.fullyQualifiedName>*)cppObject;
+-(<class.fullyQualifiedName>*)toCppObject;
+@end
+>>
+
+implementation(class) ::= <<
+<codegen_notice()>
+
+#import "<class.bridgeHeaderOutputFile>"
+#import "<class.targetOutputFile>"
+
+using namespace Allogen::ObjectiveC;
+
+@implementation <class.objcName> {
+    <class.fullyQualifiedName>* _cppObject;
+}
+
+<class.constructors:constructor(class); separator="\n\n">
+<destructor(class.destructor, class)>
+<class.methods:method(class); separator="\n\n">
+
+-(id)initWithCppObject:(<class.fullyQualifiedName>*)cppObject {
+    _cppObject = cppObject;
+    return self;
+}
+
+-(<class.fullyQualifiedName>*)toCppObject {
+    return _cppObject;
+}
+@end
+>>
+
+constructor(constructor, class) ::= <<
+<methodSignature(constructor)> {
+    <bridgedConstructor(constructor, class)>
+}
+>>
+
+destructor(destructor, class) ::= <<
+-(void)dealloc {
+    <bridgedDestructor(destructor, class)>
+}
+>>
+
+method(method, class) ::= <<
+<methodSignature(method)> {
+    <if(!method.static)><bridgedMethod(method, class)><else><bridgedStaticMethod(method, class)><endif>
+}
+>>

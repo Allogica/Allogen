@@ -52,6 +52,10 @@ public class Test {
 
         AnotherClass anotherClass = n.createAnother("Testing");
         n.printAnother(anotherClass);
+        n.printAnotherAsync(anotherClass, () -> {
+            System.out.println("Printed async!!!");
+        });
+
 
         ExampleClass finalN = n;
         n.createAnotherAsync("Testing2", (AnotherClass another) -> {

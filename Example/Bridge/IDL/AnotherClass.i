@@ -1,8 +1,7 @@
-
-#include "Allogen/Example/AnotherClass.hpp"
-
-namespace Allogen::Example {
+namespace Allogen { namespace Example {
     class AnotherClass {
+        #include "Allogen/Example/AnotherClass.hpp"
+
         constructor(
             parent: AnotherClass,
             sub: string
@@ -20,4 +19,4 @@ namespace Allogen::Example {
         void setName(newName: string);
 
     }
-}
+}}

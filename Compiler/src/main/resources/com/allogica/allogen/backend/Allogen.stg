@@ -1,0 +1,102 @@
+/*
+ * Copyright (c) 2017, Allogica
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of Allogen nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+codegen_notice() ::= <<
+/*
+ * THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT CHANGE IT!
+ *
+ * This file was generated using the Allogen bridge tool. If
+ * you wish to make changes to it, you must edit the original
+ * interface declaration file and regenerate the bridge code.
+ */
+>>
+
+cppTypeMapping ::= [
+       "void": "void",
+       "bool": "bool",
+
+       "int8": "int8_t",
+       "uint8":"uint8_t",
+
+       "int16": "int16_t",
+       "uint16":"uint16_t",
+
+       "int32": "int32_t",
+       "uint32":"uint32_t",
+
+       "int64": "int64_t",
+       "uint64":"uint64_t",
+
+       "float": "float",
+       "double": "double"
+]
+
+typename(type) ::= "<(type.resolvedType.templateName)(type)>"
+
+argumentNameTemplateName_(argument) ::= "<argument.type.resolvedType.templateName>ArgumentName"
+argumentName(argument) ::= "<(argumentNameTemplateName_(argument))(argument)>"
+forwardArgumentTemplateName_(argument) ::= "<argument.type.resolvedType.templateName>ForwardArgument"
+forwardArgument(argument) ::= "<(forwardArgumentTemplateName_(argument))(argument)>"
+
+nativeTemplateName_(type) ::= "<type.resolvedType.templateName>Native"
+nativeType(type) ::= "<(nativeTemplateName_(type))(type)>"
+
+primitiveTypeNative(type) ::= "<cppTypeMapping.(type.name)>"
+primitiveTypeArgumentName(argument) ::= "<argument.name>"
+primitiveTypeForwardArgument(argument) ::= "<primitiveTypeArgumentName(argument)>"
+
+userDefinedTypeNative(type) ::= "<type.resolvedType.userDefinedClass.fullyQualifiedName>"
+userDefinedTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+userDefinedTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
+stringTypeNative(type) ::= "std::string"
+stringTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+stringTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
+lambdaTypeNative(type) ::= <% std::function\<<if(type.resolvedType.returnType)><nativeType(type.resolvedType.returnType)><else>void<endif>(<type.resolvedType.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)> %>
+lambdaTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+lambdaTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
+documentation(object) ::= <%
+/**
+<\n>
+<if(object.documentation)>
+<\ >* <object.documentation>
+<else>
+<\ >* Calls the C++ <object.name>(<object.arguments:{arg|<nativeType(arg.type)>}; separator=", ">) native method
+<endif>
+<\n>
+<if(object.arguments)>
+<\ >*<\n>
+<object.arguments:{argument|<\ >* @param <argument.name> <if(argument.documentation)><argument.documentation><else>the <argument.name> parameter<endif>}; separator="\n">
+<\n>
+<endif>
+<\ >*/
+%>

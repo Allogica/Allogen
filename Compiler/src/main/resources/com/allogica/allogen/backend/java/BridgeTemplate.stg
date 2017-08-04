@@ -1,0 +1,96 @@
+/*
+ * Copyright (c) 2017, Allogica
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of Allogen nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import "Java.stg"
+
+header(class) ::= <<
+<codegen_notice()>
+
+#pragma once
+
+#include \<Allogen/JNI.hpp>
+
+<class.idlClass.includes:{include|
+#include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<else>\><\n><endif>}>
+<class.usedTypes:{usedType|<if(usedType.userDefinedClass)>#include "<usedType.userDefinedClass.bridgeHeaderOutputFile>"<\n><endif>}>
+<class.usedTypes:{usedType|<if(usedType.userDefinedClass)>#include "<usedType.userDefinedClass.name>.hpp"<\n><endif>}>
+
+ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>, "<class.javaClassPath>")
+>>
+
+implementation(class) ::= <<
+<codegen_notice()>
+
+#include "<class.name>.hpp"
+
+using namespace Allogen::JNI;
+
+<class.namespaces:namespace_begin(); separator=" ">
+
+    <class.constructors:constructor(class); separator="\n\n">
+    <destructor(class.destructor, class)>
+    <class.methods:method(class); separator="\n\n">
+
+<class.namespaces:namespace_end()>
+>>
+
+namespace_begin(ns) ::= "namespace <ns> {"
+namespace_end(ns) ::= "}"
+
+constructor(constructor, class) ::= <<
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_<constructor.jniSignature>(JNIEnv* _env_, jobject _jthis_<if(constructor.arguments)>,
+        <constructor.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", "><endif>) {
+    <bridgedConstructor(constructor, class)>
+}
+>>
+
+destructor(destructor, class) ::= <<
+JNIEXPORT void JNICALL
+Java_<destructor.jniSignature>(JNIEnv* _env_, jobject _jthis_) {
+    <bridgedDestructor(destructor, class)>
+}
+>>
+
+method(method, class) ::= <<
+extern "C"
+JNIEXPORT <typename(method.returnType)> JNICALL
+Java_<method.jniSignature>(JNIEnv* _env_<if(!method.static)>, jobject _jthis_<endif><if(method.arguments)>,
+        <method.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", "><endif>) {
+    <if(!method.static)><bridgedMethod(method, class)><else><bridgedStaticMethod(method, class)><endif>
+}
+>>
+
+primitiveType(type) ::= "<jniTypeMapping.(type.name)>"
+userDefinedType(type) ::= "jobject"
+stringType(type) ::= "jstring"
+lambdaType(type) ::= "jobject"
+lambdaTypeForwardArgument(argument) ::= <% Lambda::make(_env_, <lambdaTypeArgumentName(argument)>, "<argument.javaLambdaMethodName>", "(<argument.type.resolvedType.arguments:{argument|<javaSignature(argument.type)>}>)<argument.type.resolvedType.returnType:javaSignature()>") %>

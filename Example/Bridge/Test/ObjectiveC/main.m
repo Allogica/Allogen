@@ -1,30 +1,30 @@
-#import <Allogen/Example/AEExampleClass.h>
+#import <Allogen/Example/AExampleClass.h>
 
 int main(int argc, const char** argv) {
-    /*
-    AEExampleClass* exampleClass = [[AEExampleClass alloc] init];
+    AExampleClass* exampleClass = [[AExampleClass alloc] init];
     NSLog(@"%@", exampleClass);
 
     NSLog(@"%i", [exampleClass getInteger]);
 
     [exampleClass setInteger: 100];
-    NSLog(@"%i", [exampleClass getInteger]);*/
+    NSLog(@"%i", [exampleClass getInteger]);
 
 
-    AEExampleClass* n = [[AEExampleClass alloc] initWithInitialValue: 200];
-
+    AExampleClass* n = [[AExampleClass alloc] initWithInitialValue: 200];
+/*
     {
-        AEExampleClass* shared1 = [AEExampleClass shared];
+        AExampleClass* shared1 = [AExampleClass shared];
         [shared1 setInteger: 123];
 
-        AEExampleClass* shared2 = [AEExampleClass shared];
+        AExampleClass* shared2 = [AExampleClass shared];
         NSLog(@"%i", [shared2 getInteger]);
 
         [shared2 setInteger: 124];
         NSLog(@"%i", [shared1 getInteger]);
     }
 
-    NSLog(@"%i", [AEExampleClass getStaticInt]);
+    NSLog(@"%i", [AExampleClass getStaticInt]);
+*/
 
     [n sayHello: @"Allogen Bridge"];
 
@@ -54,16 +54,16 @@ int main(int argc, const char** argv) {
     NSLog(@"%i", n.aInteger);
 
     NSLog(@"Setting copy to 300...");
-    AEExampleClass* copy = [n copy];
+    AExampleClass* copy = [n copy];
     [copy setInteger: 300];
 
     NSLog(@"Original: %i", [n getInteger]);
     NSLog(@"Copy: %i", [copy getInteger]);
 
-    AEAnotherClass* anotherClass = [n createAnother: @"Testing"];
+    AAnotherClass* anotherClass = [n createAnother: @"Testing"];
     [n printAnother: anotherClass];
 
-    [n createAnotherAsync: @"Testing2" callback: ^(AEAnotherClass* another) {
+    [n createAnotherAsync: @"Testing2" callback: ^(AAnotherClass* another) {
         NSLog(@"%@", [another getName]);
         [n printAnotherAsync: another callback: ^() {
             NSLog(@"Printing complete");

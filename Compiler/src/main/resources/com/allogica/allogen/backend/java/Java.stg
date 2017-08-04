@@ -1,0 +1,123 @@
+/*
+ * Copyright (c) 2017, Allogica
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of Allogen nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import "../Allogen.stg"
+
+javaTypeMapping ::= [
+    "void": "void",
+    "bool": "boolean",
+
+    "int8": "byte",     "uint8":"byte",
+    "int16": "short",   "uint16":"short",
+    "int32": "int",     "uint32":"int",
+    "int64": "long",    "uint64":"long",
+    "float": "float",   "double": "double"
+]
+
+jniTypeMapping ::= [
+    "void": "void",
+    "bool": "jboolean",
+
+    "int8": "jbyte",    "uint8":"jbyte",
+    "int16": "jshort",  "uint16":"jshort",
+    "int32": "jint",    "uint32":"jint",
+    "int64": "jlong",   "uint64":"jlong",
+    "float": "jfloat",  "double": "jdouble"
+]
+
+javaSignatureTypes ::= [
+    "void": "V",
+    "bool": "B",
+
+    "int8": "B",    "uint8":"B",
+    "int16": "S",   "uint16":"S",
+    "int32": "I",   "uint32":"I",
+    "int64": "J",   "uint64":"J",
+    "float": "F",   "double": "D"
+]
+
+javaSignature(type) ::= <%
+<if(javaSignatureTypes.(type.name))>
+    <javaSignatureTypes.(type.name)>
+<else>
+    <type.resolvedType.userDefinedClass.javaSignature>
+<endif>
+%> // FIXME!!!
+
+bridgedConstructor(constructor, class) ::= <<
+return BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+    _env_, [](<constructor.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) {
+    <if(constructor.body)>
+        <constructor.body>
+    <else>
+        return new <class.name>(<constructor.arguments:{argument|<argument.name>}; separator=", ">);
+    <endif>
+    }<if(constructor.arguments)>, <constructor.arguments:forwardArgument(); separator=", "><endif>
+);
+>>
+
+bridgedDestructor(destructor, class) ::= <<
+BridgedMethod\<<class.name>, void()>::call(
+    _env_, _jthis_,
+    [](<class.name> *wself) {
+    <if(destructor.body)>
+        <destructor.body>
+    <else>
+        delete wself;
+    <endif>
+    }
+);
+>>
+
+bridgedMethod(method, class) ::= <<
+return BridgedMethod\<<class.name>, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+    _env_, _jthis_,
+    [](<class.name> *wself<if(method.arguments)>, <method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", "><endif>) {
+    <if(method.body)>
+        <method.body>
+    <else>
+        return wself-><method.name>(<method.arguments:{argument|<argument.name>}; separator=", ">);
+    <endif>
+    }<if(method.arguments)>, <method.arguments:forwardArgument(); separator=", "><endif>
+);
+>>
+
+bridgedStaticMethod(method, class) ::= <<
+return BridgedMethod\<void, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+    _env_,
+    [](<method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", ">) {
+    <if(method.body)>
+        <method.body>
+    <else>
+        return <class.fullyQualifiedName>::<method.name>(<method.arguments:{argument|<argument.name>}; separator=", ">);
+    <endif>
+    }<if(method.arguments)>, <method.arguments:forwardArgument(); separator=", "><endif>
+);
+>>
