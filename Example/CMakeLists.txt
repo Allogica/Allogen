@@ -29,8 +29,6 @@
 project(Allogen)
 cmake_minimum_required(VERSION 3.2)
 
-set(ALLOGEN_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../)
-
 file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp)
 add_library(Allogen.Example STATIC ${SRCS})
 

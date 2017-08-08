@@ -32,11 +32,20 @@ endif ()
 set(ADD_ALLOGEN_INTERFACE_INCLUDED)
 
 include(CMakeParseArguments)
-find_package(PythonInterp)
+
+find_package(Java 1.8)
+if(NOT Java_FOUND)
+    message(WARNING "Java not found. Allogen compiler will be unavailable.")
+endif()
+
+find_package(Maven)
+if(NOT Maven_FOUND)
+    message(WARNING "Maven not found. Allogen compiler will be unavailable.")
+endif()
 
 if (NOT ALLOGEN_COMPILER)
-    find_file(ALLOGEN_COMPILER allogenc
-            HINTS ${ALLOGEN_ROOT}/bin
+    find_file(ALLOGEN_COMPILER pom.xml
+            HINTS ${ALLOGEN_ROOT}/Compiler
             DOC "The Allogen compiler path"
     )
     if (ALLOGEN_COMPILER)
@@ -48,11 +57,11 @@ endif ()
 
 function(add_allogen_interface target_name)
     set(options)
-    set(oneValueArgs LANGUAGE TARGET_DIR BRIDGE_DIR)
+    set(oneValueArgs LANGUAGE TARGET_DIR BRIDGE_DIR BRIDGE_NAMESPACE)
     set(multiValueArgs IDL INCLUDE_DIRS)
     cmake_parse_arguments(IFT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
-    if (NOT PYTHONINTERP_FOUND OR NOT ALLOGEN_COMPILER)
+    if (NOT Java_FOUND OR NOT ALLOGEN_COMPILER)
         return()
     endif ()
     
@@ -61,14 +70,15 @@ function(add_allogen_interface target_name)
         list(APPEND -I${dir})
     endforeach()
     
+    set(ns_attr "")
+    if(IFT_BRIDGE_NAMESPACE)
+        set(ns_attr --base-bridge-namespace "${IFT_BRIDGE_NAMESPACE}")
+    endif()
+    
     add_custom_target(${target_name} SOURCES ${IFT_IDL}
             DEPENDS ${IFT_IDL}
-            COMMAND ${PYTHON_EXECUTABLE} ${ALLOGEN_COMPILER}
-                --target ${IFT_LANGUAGE}
-                --target-dir ${IFT_TARGET_DIR}
-                --bridge-dir ${IFT_BRIDGE_DIR}
-                ${INCLUDE_LIST}
-                ${IFT_IDL}
+            COMMAND ${Maven_EXECUTABLE} compile exec:java -f ${ALLOGEN_COMPILER}
+            -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${INCLUDE_LIST} ${IFT_IDL}\"
             COMMENT "Compiling Allogen interface files..."
     )
 

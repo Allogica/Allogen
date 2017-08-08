@@ -1,0 +1,137 @@
+/*
+ * Copyright (c) 2017, Allogica
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of Allogen nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import "Java.stg"
+
+class(class) ::= <<
+<codegen_notice()>
+
+<if(class.javaPackage)>package <class.javaPackage>;
+<endif>
+
+<documentation(class)>
+class <class.name> {
+    /**
+	 * A numeric value that represents the pointer used to access the wrapped object.
+	 *
+	 * This value should not be changed by the user and is automatically initialized by the _init
+	 * or when used as a return value from another method.
+	 */
+    private long pointer;
+
+    <if(class.constructors)><class.constructors:constructor(class); separator="\n\n"><\ ><endif>
+    <if(class.destructor)><class.destructor:destructor(class); separator="\n\n"><\n><endif>
+    <if(class.methods)><class.methods:method(class); separator="\n\n"><endif>
+}
+>>
+
+interface(interface) ::= <<
+<if(interface.javaPackage)>package <interface.javaPackage>;
+<endif>
+
+<documentation(interface)>
+interface <interface.name> {
+    <interface.methods:method(interface, false); separator="\n\n">
+}
+>>
+
+constructor(constructor, class) ::= <<
+<documentation(constructor)>
+public <class.javaName>(<arguments(constructor, class)>) {
+    pointer = this._init(<constructor.arguments:{argument|<argument.name>}; separator=", ">);
+}
+
+/**
+ * This method performs the object creation. This method should only be called
+ * from the object constructor.
+ *
+<if(constructor.arguments)>
+<constructor.arguments:{argument|  * @param <argument.name> <if(argument.documentation)><argument.documentation><else>the <argument.name> parameter<endif>}; separator="\n">
+ *
+<endif>
+ * @return a pointer to the C++ native object
+ */
+public native long _init(<arguments(constructor, class)>);
+>>
+
+destructor(destructor, class) ::= <<
+/**
+ * This method deletes the wrapped C++ object. This method should
+ * not be called directly by the user, but must be called by the GC.
+ *
+ * Note that since Java does not require the GC to call finalize() at all
+ * it is recommended to not wrap any RAII objects that could lock or unlock
+ * resources that are system wide.
+ */
+@Override
+protected native void finalize() throws Throwable;
+>>
+
+method(method, class, native=true) ::= <<
+<method.arguments:{argument|<if(argument.javaHasLambdaInterface)><javaLambda(method, argument)><endif>}>
+<documentation(method)>
+public<if(native)> native<endif><if(method.static)> static<endif> <typename(method.returnType)> <method.javaName>(<arguments(method, class)>);
+>>
+
+documentation(object) ::= <%
+/**
+<\n>
+<if(object.documentation)>
+<\ >* <object.documentation>
+<else>
+<\ >* Calls the C++ <object.name>(<object.arguments:{arg|<nativeType(arg.type)>}; separator=", ">) native method
+<endif>
+<\n>
+<if(object.arguments)>
+<\ >*<\n>
+<object.arguments:{argument|<\ >* @param <argument.name> <if(argument.documentation)><argument.documentation><else>the <argument.name> parameter<endif>}; separator="\n">
+<\n>
+<endif>
+<\ >*/
+%>
+
+arguments(method, class) ::= <%
+    <method.arguments:argument(method, class); separator=", ">
+%>
+
+argument(argument, method, class) ::= "<typename(argument.type)> <argument.name>"
+
+javaLambda(method, argument) ::= <<
+interface <argument.javaLambdaInterfaceName> {
+    <typename(argument.type.resolvedType.returnType)> <argument.javaLambdaMethodName>(<argument.type.resolvedType.arguments:argument(method, method); separator=", ">);
+}
+>>
+
+typename(type) ::= "<type:(type.resolvedType.templateName)()>"
+
+primitiveType(type) ::= "<javaTypeMapping.(type.name)>"
+userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.javaName>"
+stringType(type) ::= "String"
+lambdaType(type) ::= "<type.javaLambdaInterfaceName>"

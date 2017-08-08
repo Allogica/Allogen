@@ -33,6 +33,12 @@ if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 14)
 endif()
 
+if(NOT ALLOGEN_ROOT)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bin/allogenc)
+        set(ALLOGEN_ROOT ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "The root path to the Allogen tool")
+    endif()
+endif()
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 
 find_package(JNI)
