@@ -114,6 +114,10 @@ namespace Allogen {
 			 * @return the corresponding ObjectiveC type
 			 */
 			static ObjectiveCType toObjectiveC(T* object) {
+				if(object == nullptr) {
+					return nullptr;
+				}
+
 				auto c = NSClassFromString([NSString stringWithCString:OBJC_CLASS<T>.data()
 									encoding:[NSString defaultCStringEncoding]]);
 				return [[c alloc] initWithCppObject: object];
@@ -128,6 +132,10 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static T* fromObjectiveC(ObjectiveCType wself) {
+				if(wself == nullptr) {
+					return nullptr;
+				}
+
 				return reinterpret_cast<T*>([wself performSelector: @selector(toCppObject)]);
 			}
 

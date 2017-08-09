@@ -57,11 +57,9 @@ public class CodegenPass implements CompilerPass<Class, Class> {
         final ST targetClassTemplate = targetTemplate.getInstanceOf("class");
         targetClassTemplate.add("class", clazz);
 
-        final String targetOutputFilename = compiler.getBackend().getTargetOutputFile(compiler, context, clazz);
+        final String targetOutputFilename = clazz.getAttribute("targetOutputFile");
         final File targetOutputFile = new File(context.getTargetDir(), targetOutputFilename);
         createParentIfNotExists(targetOutputFile);
-
-        clazz.setAttribute("targetOutputFile", targetOutputFilename);
 
         final FileOutputStream targetOutputStream = new FileOutputStream(targetOutputFile);
         final OutputStreamWriter targetWriter = new OutputStreamWriter(targetOutputStream);
@@ -77,11 +75,9 @@ public class CodegenPass implements CompilerPass<Class, Class> {
         final ST bridgeHeaderClassTemplate = bridgeTemplate.getInstanceOf("header");
         bridgeHeaderClassTemplate.add("class", clazz);
 
-        final String bridgeHeaderOutputFilename = compiler.getBackend().getBridgeOutputHeaderFile(compiler, context, clazz);
+        final String bridgeHeaderOutputFilename = clazz.getAttribute("bridgeHeaderOutputFile");
         final File bridgeHeaderOutputFile = new File(context.getBridgeDir(), bridgeHeaderOutputFilename);
         createParentIfNotExists(bridgeHeaderOutputFile);
-
-        clazz.setAttribute("bridgeHeaderOutputFile", bridgeHeaderOutputFilename);
 
         final FileOutputStream bridgeHeaderOutputStream = new FileOutputStream(bridgeHeaderOutputFile);
         final OutputStreamWriter bridgeHeaderWriter = new OutputStreamWriter(bridgeHeaderOutputStream);
@@ -93,11 +89,9 @@ public class CodegenPass implements CompilerPass<Class, Class> {
         final ST bridgeImplementationClassTemplate = bridgeTemplate.getInstanceOf("implementation");
         bridgeImplementationClassTemplate.add("class", clazz);
 
-        final String bridgeImplementationOutputFilename = compiler.getBackend().getBridgeOutputImplementationFile(compiler, context, clazz);
+        final String bridgeImplementationOutputFilename = clazz.getAttribute("bridgeImplementationOutputFile");
         final File bridgeImplementationOutputFile = new File(context.getBridgeDir(), bridgeImplementationOutputFilename);
         createParentIfNotExists(bridgeImplementationOutputFile);
-
-        clazz.setAttribute("bridgeImplementationOutputFile", bridgeImplementationOutputFilename);
 
         final FileOutputStream bridgeImplementationOutputStream = new FileOutputStream(bridgeImplementationOutputFile);
         final OutputStreamWriter bridgeImplementationWriter = new OutputStreamWriter(bridgeImplementationOutputStream);

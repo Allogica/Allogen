@@ -33,11 +33,20 @@ package com.allogica.allogen.types;
 import com.allogica.allogen.Compiler;
 import com.allogica.allogen.CompilerContext;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public abstract class AbstractType implements Type {
 
     @Override
     public void link(Compiler<?, ?> compiler, CompilerContext compilerContext) {
 
+    }
+
+    @Override
+    public List<Type> getDependantTypes() {
+        return Collections.emptyList();
     }
 
 }

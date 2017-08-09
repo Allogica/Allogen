@@ -31,17 +31,18 @@
 package com.allogica.allogen;
 
 import com.allogica.allogen.backend.CompilerBackend;
+import com.allogica.allogen.backend.csharp.CSharpBackend;
 import com.allogica.allogen.backend.java.JavaBackend;
 import com.allogica.allogen.backend.objectivec.ObjectiveCBackend;
 import com.allogica.allogen.idl.ParsedIDL;
 import com.allogica.allogen.idl.Parser;
 import com.allogica.allogen.idl.model.IDLClass;
 import com.allogica.allogen.model.Class;
+import com.allogica.allogen.modules.Module;
 import com.allogica.allogen.passes.*;
 import com.beust.jcommander.JCommander;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,32 +60,8 @@ public class AllogenMain {
         System.out.println("Target dir: " + args.targetDir);
         System.out.println("Bridge dir: " + args.bridgeDir);
         System.out.println("Parameters: " + args.idlFiles);
-
-        final String input = "namespace Teste {\n" +
-                "    class MyClass {\n" +
-                "        #include \"Core/MyClass.hpp\"\n" +
-                "        constructor();\n" +
-                "        constructor(a: int32);\n" +
-                "        constructor(name: string);\n" +
-                "        constructor(name1: string, name2: string);\n" +
-                "        destructor();\n" +
-                "        @Callback\n" +
-                "        uint32 call(a: int32) { return a; }\n" +
-                "        void call2();\n" +
-                "        void call2(overload: int32);\n" +
-                "        void call2(overload: string);\n" +
-                "        void call2(overload: string, overload2: string);\n" +
-                "        void call2(a: int32, overload: string, overload2: string);\n" +
-                "        int32 call2(a: int32, overload: string, overload2: string, b: int32);\n" +
-                "        void doAsync(callback: lambda<void(int32)>);\n" +
-                "    };\n" +
-                "\n" +
-                "    class MyClass2 {\n" +
-                "        #include \"Core/MyClass2.hpp\"\n" +
-                "        string call();\n" +
-                "        MyClass call2();\n" +
-                "    };\n" +
-                "}";
+        System.out.println("Module: " + args.moduleFile);
+        System.out.println("Imports: " + args.imports);
 
         CompilerBackend backend;
         switch (args.target.toLowerCase()) {
@@ -95,6 +72,11 @@ public class AllogenMain {
 
             case "java":
                 backend = new JavaBackend();
+                break;
+
+            case "cs":
+            case "csharp":
+                backend = new CSharpBackend();
                 break;
 
             default:
@@ -115,6 +97,8 @@ public class AllogenMain {
                 new TypeResolutionPass(),
                 new TypeLinkingPass(),
 
+                new PropertiesPass(),
+
                 new PreBackendPass(),
                 new BackendPass(),
                 new PostBackendPass(),
@@ -122,20 +106,30 @@ public class AllogenMain {
                 new CodegenPass()
         );
 
+        // import modules!
+        for (final File moduleName : args.imports) {
+            System.out.println("Importing module " + moduleName);
+
+            final ObjectInputStream ois = new ObjectInputStream(new FileInputStream(moduleName));
+            final Module module = (Module) ois.readObject();
+            compiler.importModule(module);
+        }
+
         List<IDLClass> classes = new ArrayList<>();
         Parser parser = new Parser();
-
         for (final File idlFile : args.idlFiles) {
             ParsedIDL idl = parser.parse(new FileInputStream(idlFile));
             classes.addAll(idl.getGlobalNamespace().getAllClasses());
         }
-//        classes.addAll(parser.parse(input).getGlobalNamespace().getAllClasses());
+        final List<Class> compiledClasses = compiler.compile(classes);
 
-        compiler.compile(classes);
-
-//        for (IDLClass clazz : classes) {
-//            Class compiledClass = compiler.compile(clazz);
-//        }
+        // Write the module file!
+        if (args.moduleFile != null) {
+            final ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(args.moduleFile));
+            oos.writeObject(
+                    new Module(compiledClasses)
+            );
+        }
     }
 
 }

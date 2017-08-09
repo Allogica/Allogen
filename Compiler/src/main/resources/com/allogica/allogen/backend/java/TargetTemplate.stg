@@ -37,7 +37,7 @@ class(class) ::= <<
 <endif>
 
 <documentation(class)>
-class <class.name> {
+public class <class.name> {
     /**
 	 * A numeric value that represents the pointer used to access the wrapped object.
 	 *
@@ -99,23 +99,6 @@ method(method, class, native=true) ::= <<
 <documentation(method)>
 public<if(native)> native<endif><if(method.static)> static<endif> <typename(method.returnType)> <method.javaName>(<arguments(method, class)>);
 >>
-
-documentation(object) ::= <%
-/**
-<\n>
-<if(object.documentation)>
-<\ >* <object.documentation>
-<else>
-<\ >* Calls the C++ <object.name>(<object.arguments:{arg|<nativeType(arg.type)>}; separator=", ">) native method
-<endif>
-<\n>
-<if(object.arguments)>
-<\ >*<\n>
-<object.arguments:{argument|<\ >* @param <argument.name> <if(argument.documentation)><argument.documentation><else>the <argument.name> parameter<endif>}; separator="\n">
-<\n>
-<endif>
-<\ >*/
-%>
 
 arguments(method, class) ::= <%
     <method.arguments:argument(method, class); separator=", ">

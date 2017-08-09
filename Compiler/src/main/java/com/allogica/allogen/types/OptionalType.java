@@ -32,16 +32,27 @@ package com.allogica.allogen.types;
 
 import com.allogica.allogen.Compiler;
 import com.allogica.allogen.CompilerContext;
+import com.allogica.allogen.Scope;
 import com.allogica.allogen.idl.grammar.IDLLexer;
 import com.allogica.allogen.idl.grammar.IDLParser;
+import com.allogica.allogen.idl.model.IDLTypeName;
+import com.allogica.allogen.model.MethodArgument;
 import com.allogica.allogen.model.TypeName;
+import com.allogica.allogen.util.TypeUtils;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class OptionalType extends AbstractType {
 
     private TypeName containedType;
+    private Scope scope;
 
     public OptionalType(final TypeName typeName) {
         IDLLexer lexer = new IDLLexer(CharStreams.fromString(typeName.getTemplateArguments().get(0).getName()));
@@ -49,13 +60,25 @@ public class OptionalType extends AbstractType {
         IDLParser parser = new IDLParser(tokens);
         ParseTree tree = parser.typename();
 
+        scope = typeName.getScope();
+
         IDLParser.TypenameContext ctx = (IDLParser.TypenameContext) tree.getPayload();
-        containedType = new TypeName(ctx.regulartypename().getText());
+        IDLTypeName idlReturnType = new IDLTypeName(ctx.regulartypename());
+        containedType = handleTypeName(idlReturnType).setScope(scope);
+    }
+
+    private TypeName handleTypeName(IDLTypeName typeName) {
+        return new TypeName(typeName.getName(), typeName.getTemplateArguments().stream().map(this::handleTypeName).collect(Collectors.toList()), typeName.getNamespaces())
+                .setIdlTypeName(typeName);
     }
 
     @Override
     public void link(Compiler<?, ?> compiler, CompilerContext compilerContext) {
-        containedType.setResolvedType(compilerContext.resolve(containedType));
+        containedType.setResolvedType(compilerContext.resolve(containedType, scope));
+        if (containedType.getResolvedType() == null) {
+            throw new RuntimeException(String.format("Type '%s' not found in scope '%s'",
+                    containedType, scope));
+        }
         containedType.getResolvedType().link(compiler, compilerContext);
     }
 
@@ -64,4 +87,26 @@ public class OptionalType extends AbstractType {
         return "optionalType";
     }
 
+    @Override
+    public List<Type> getDependantTypes() {
+        return TypeUtils.getAllDependantTypes(containedType.getResolvedType());
+    }
+
+    public TypeName getContainedType() {
+        return containedType;
+    }
+
+    public OptionalType setContainedType(TypeName containedType) {
+        this.containedType = containedType;
+        return this;
+    }
+
+    public Scope getScope() {
+        return scope;
+    }
+
+    public OptionalType setScope(Scope scope) {
+        this.scope = scope;
+        return this;
+    }
 }

@@ -35,103 +35,75 @@ import com.allogica.allogen.CompilerContext;
 import com.allogica.allogen.Scope;
 import com.allogica.allogen.idl.grammar.IDLLexer;
 import com.allogica.allogen.idl.grammar.IDLParser;
-import com.allogica.allogen.idl.model.IDLClass;
 import com.allogica.allogen.idl.model.IDLTypeName;
-import com.allogica.allogen.model.Class;
-import com.allogica.allogen.model.MethodArgument;
 import com.allogica.allogen.model.TypeName;
 import com.allogica.allogen.util.TypeUtils;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.omg.CORBA.IDLType;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class LambdaType extends AbstractType {
+public class SharedPtrType extends AbstractType {
 
-    private TypeName returnType;
-    private List<MethodArgument> arguments = new ArrayList<>();
-
+    private TypeName containedType;
     private Scope scope;
 
-    public LambdaType(TypeName typeName) {
+    public SharedPtrType(final TypeName typeName) {
         IDLLexer lexer = new IDLLexer(CharStreams.fromString(typeName.getTemplateArguments().get(0).getName()));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         IDLParser parser = new IDLParser(tokens);
-        ParseTree tree = parser.lambdatype();
+        ParseTree tree = parser.typename();
 
         scope = typeName.getScope();
 
-        IDLParser.LambdatypeContext ctx = (IDLParser.LambdatypeContext) tree.getPayload();
+        IDLParser.TypenameContext ctx = (IDLParser.TypenameContext) tree.getPayload();
         IDLTypeName idlReturnType = new IDLTypeName(ctx.regulartypename());
-        returnType = handleTypeName(idlReturnType).setScope(scope);
-
-        if (ctx.methodarguments() != null) {
-            for (final IDLParser.MethodargumentContext id : ctx.methodarguments().methodargument()) {
-                arguments.add(new MethodArgument(id.argumentname().getText(), handleTypeName(new IDLTypeName(id.argumenttype().typename())).setScope(scope)));
-            }
-        }
+        containedType = handleTypeName(idlReturnType).setScope(scope);
     }
 
     private TypeName handleTypeName(IDLTypeName typeName) {
-        return new TypeName(typeName.getName(), typeName.getTemplateArguments().stream()
-                .map(this::handleTypeName).collect(Collectors.toList()), typeName.getNamespaces())
+        return new TypeName(typeName.getName(), typeName.getTemplateArguments().stream().map(this::handleTypeName).collect(Collectors.toList()), typeName.getNamespaces())
                 .setIdlTypeName(typeName);
     }
 
     @Override
     public void link(Compiler<?, ?> compiler, CompilerContext compilerContext) {
-        returnType.setResolvedType(compilerContext.resolve(returnType, scope));
-        if (returnType.getResolvedType() == null) {
+        containedType.setResolvedType(compilerContext.resolve(containedType, scope));
+        if (containedType.getResolvedType() == null) {
             throw new RuntimeException(String.format("Type '%s' not found in scope '%s'",
-                    returnType, scope));
+                    containedType, scope));
         }
-        returnType.getResolvedType().link(compiler, compilerContext);
-
-        for (MethodArgument argument : arguments) {
-            argument.getType().setResolvedType(compilerContext.resolve(argument.getType(), scope));
-            if (argument.getType().getResolvedType() == null) {
-                throw new RuntimeException(String.format("Type '%s' not found in scope '%s'",
-                        argument.getType(), scope));
-            }
-            argument.getType().getResolvedType().link(compiler, compilerContext);
-        }
+        containedType.getResolvedType().link(compiler, compilerContext);
     }
 
     @Override
     public String getTemplateName() {
-        return "lambdaType";
-    }
-
-    public TypeName getReturnType() {
-        return returnType;
-    }
-
-    public LambdaType setReturnType(TypeName returnType) {
-        this.returnType = returnType;
-        return this;
-    }
-
-    public List<MethodArgument> getArguments() {
-        return arguments;
-    }
-
-    public LambdaType setArguments(List<MethodArgument> arguments) {
-        this.arguments = arguments;
-        return this;
+        return "sharedPtrType";
     }
 
     @Override
     public List<Type> getDependantTypes() {
-        List<Type> types = new ArrayList<>();
-        types.addAll(TypeUtils.getAllDependantTypes(returnType.getResolvedType()));
-        for (final MethodArgument argument : arguments) {
-            types.addAll(TypeUtils.getAllDependantTypes(argument.getType().getResolvedType()));
-        }
-        return types;
+        return TypeUtils.getAllDependantTypes(containedType.getResolvedType());
+    }
+
+    public TypeName getContainedType() {
+        return containedType;
+    }
+
+    public SharedPtrType setContainedType(TypeName containedType) {
+        this.containedType = containedType;
+        return this;
+    }
+
+    public Scope getScope() {
+        return scope;
+    }
+
+    public SharedPtrType setScope(Scope scope) {
+        this.scope = scope;
+        return this;
     }
 }

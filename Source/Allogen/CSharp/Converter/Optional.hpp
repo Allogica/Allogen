@@ -28,9 +28,61 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.allogica.allogen.idl.model;
+#pragma once
 
-import java.io.Serializable;
+#include "Allogen/CSharp/Converter.hpp"
+#include <Juice/Utility/Optional.hpp>
 
-public class IDLObject implements Serializable {
+namespace Allogen {
+	namespace CSharp {
+		
+		/**
+		 * A converter specialization for C++ optional types
+		 *
+		 * @tparam IntegralType the integral type to be converted
+		 */
+		template<typename ContainedType>
+		struct Converter<std::experimental::optional<ContainedType>> {
+			/**
+			 * The C++ type this converter is operating on
+			 */
+			using Type = std::experimental::optional<ContainedType>;
+
+			/**
+			 * The JNI type this converter supports
+			 */
+			using CSharpType = typename Converter<ContainedType>::CSharpType;
+
+			/**
+			 * Converts a C++ integer into a CSharp integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the C++ integer
+			 *
+			 * @return the CSharp integer
+			 */
+			static CSharpType toCSharp(Type object) {
+				if(object) {
+					return Converter<ContainedType>::toCSharp(object.value());
+				}
+				return nullptr;
+			}
+
+			/**
+			 * Converts a CSharp integer into a C++ integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the CSharp integer
+			 *
+			 * @return the C++ integer
+			 */
+			static Type fromCSharp(CSharpType object) {
+				if(object) {
+					return Converter<ContainedType>::fromCSharp(object.value());
+				}
+				return nullptr;
+			}
+		};
+
+	}
 }

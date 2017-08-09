@@ -51,6 +51,12 @@ class CompilerArgs {
     @Parameter(names = {"--base-bridge-namespace"}, required = false, description = "The root namespaced directory to be used when generating bridged files")
     String baseNamespace = "";
 
+    @Parameter(names = {"--import"}, required = false, description = "Imports a module")
+    List<File> imports = new ArrayList<>();
+
+    @Parameter(names = {"--module"}, required = false, description = "The file to export the module name")
+    File moduleFile = null;
+
     @Parameter(required = true, listConverter = FileConverter.class)
     List<File> idlFiles = new ArrayList<>();
 

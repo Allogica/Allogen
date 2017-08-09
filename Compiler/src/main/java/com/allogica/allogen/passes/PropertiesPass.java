@@ -32,48 +32,57 @@ package com.allogica.allogen.passes;
 
 import com.allogica.allogen.Compiler;
 import com.allogica.allogen.CompilerContext;
+import com.allogica.allogen.Scope;
+import com.allogica.allogen.idl.model.*;
 import com.allogica.allogen.model.Class;
-import com.allogica.allogen.model.Constructor;
-import com.allogica.allogen.model.Method;
-import com.allogica.allogen.model.MethodArgument;
+import com.allogica.allogen.model.*;
+import com.allogica.allogen.types.UserDefinedType;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class BackendPass implements CompilerPass<Class, Class> {
+public class PropertiesPass implements CompilerPass<Class, Class> {
 
     @Override
     public Class pass(Compiler compiler, CompilerContext context, Class clazz) {
-        compiler.getBackend().handle(compiler, context, clazz);
-
-        // iterate over each constructor
-        for(final Constructor constructor : clazz.getConstructors()) {
-            compiler.getBackend().handle(compiler, context, clazz, constructor);
-            for (final MethodArgument argument : constructor.getArguments()) {
-                compiler.getBackend().handle(compiler, context, clazz, constructor, argument);
-            }
-        }
-
-        if(clazz.getDestructor() != null) {
-            compiler.getBackend().handle(compiler, context, clazz, clazz.getDestructor());
-        }
-        
         for (final Method method : clazz.getMethods()) {
-            compiler.getBackend().handle(compiler, context, clazz, method);
-            for (final MethodArgument argument : method.getArguments()) {
-                compiler.getBackend().handle(compiler, context, clazz, method, argument);
-            }
+            handleMethod(context, clazz, method);
         }
 
-        final String targetOutputFilename = compiler.getBackend().getTargetOutputFile(compiler, context, clazz);
-        clazz.setAttribute("targetOutputFile", targetOutputFilename);
-
-        final String bridgeHeaderOutputFilename = compiler.getBackend().getBridgeOutputHeaderFile(compiler, context, clazz);
-        clazz.setAttribute("bridgeHeaderOutputFile", bridgeHeaderOutputFilename);
-
-        final String bridgeImplementationOutputFilename = compiler.getBackend().getBridgeOutputImplementationFile(compiler, context, clazz);
-        clazz.setAttribute("bridgeImplementationOutputFile", bridgeImplementationOutputFilename);
+        clazz.getProperties().forEach((key, value) -> {
+            // properties must have getters
+            if (value.getGetter() == null) {
+                clazz.getProperties().remove(key);
+            }
+        });
 
         return clazz;
+    }
+
+    private void handleMethod(CompilerContext context, Class clazz, Method method) {
+        final Map<String, Property> properties = clazz.getProperties();
+
+        final IDLAnnotation getter = method.getIdlMethod().getAnnotation("Getter");
+        if (getter != null) {
+            final String name = getter.getProperty("property");
+            if (!properties.containsKey(name)) {
+                properties.put(name, new Property(name));
+            }
+            final Property property = properties.get(name);
+            property.setGetter(method);
+        }
+
+        final IDLAnnotation setter = method.getIdlMethod().getAnnotation("Setter");
+        if (setter != null) {
+            final String name = setter.getProperty("property");
+            if (!properties.containsKey(name)) {
+                properties.put(name, new Property(name));
+            }
+            final Property property = properties.get(name);
+            property.setSetter(method);
+        }
     }
 
 }

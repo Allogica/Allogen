@@ -42,18 +42,16 @@ declaration:
 ;
 
 regulartypename:
-    Identifier
+    Identifier ('::' Identifier)*
 ;
 
-lambdareturn: Identifier;
 
 lambdatype:
-    lambdareturn '(' methodarguments? ')'
+    regulartypename '(' methodarguments? ')'
 ;
 
 typename:
-    (regulartypename | lambdatype)
-    typenametemplateargs?
+    (regulartypename typenametemplateargs? | lambdatype)
 ;
 
 typenametemplateargs:

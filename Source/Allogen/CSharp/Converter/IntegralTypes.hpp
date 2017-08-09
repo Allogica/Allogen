@@ -28,50 +28,54 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.allogica.allogen.backend.objectivec;
+#pragma once
 
-import com.allogica.allogen.model.Method;
+#include "Allogen/CSharp/Converter.hpp"
 
-public class Property {
+namespace Allogen {
+	namespace CSharp {
+		
+		/**
+		 * A converter specialization for C++ integral types
+		 *
+		 * @tparam IntegralType the integral type to be converted
+		 */
+		template<typename IntegralType>
+		struct Converter<IntegralType, typename std::enable_if<std::is_integral<IntegralType>::value>::type> {
+			/**
+			 * The C++ type this converter is operating on
+			 */
+			using Type = IntegralType;
 
-    private String name;
-    private Method getter;
-    private Method setter;
+			/**
+			 * The JNI type this converter supports
+			 */
+			using CSharpType = IntegralType;
 
-    public Property(String name) {
-        this.name = name;
-    }
+			/**
+			 * Converts a C++ integer into a CSharp integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the C++ integer
+			 *
+			 * @return the CSharp integer
+			 */
+			static CSharpType toCSharp(Type i) {
+				return i;
+			}
 
-    public Property(String name, Method getter, Method setter) {
-        this.name = name;
-        this.getter = getter;
-        this.setter = setter;
-    }
+			/**
+			 * Converts a CSharp integer into a C++ integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the CSharp integer
+			 *
+			 * @return the C++ integer
+			 */
+			static Type fromCSharp(CSharpType i) {
+				return i;
+			}
+		};
 
-    public String getName() {
-        return name;
-    }
-
-    public Property setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public Method getGetter() {
-        return getter;
-    }
-
-    public Property setGetter(Method getter) {
-        this.getter = getter;
-        return this;
-    }
-
-    public Method getSetter() {
-        return setter;
-    }
-
-    public Property setSetter(Method setter) {
-        this.setter = setter;
-        return this;
-    }
+	}
 }

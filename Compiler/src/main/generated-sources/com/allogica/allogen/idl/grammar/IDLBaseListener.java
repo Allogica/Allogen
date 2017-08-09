@@ -64,18 +64,6 @@ public class IDLBaseListener implements IDLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLambdareturn(IDLParser.LambdareturnContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLambdareturn(IDLParser.LambdareturnContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterLambdatype(IDLParser.LambdatypeContext ctx) { }
 	/**
 	 * {@inheritDoc}

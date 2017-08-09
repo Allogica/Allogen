@@ -28,73 +28,64 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import "ObjectiveC.stg"
+import "CSharp.stg"
 
 header(class) ::= <<
 <codegen_notice()>
 
 #pragma once
 
-#include \<Allogen/ObjectiveC.hpp>
-
-#import "<class.targetOutputFile>"
-
-<class.usedTypes:{usedType|
-<if(usedType.userDefinedClass)>#import "<usedType.userDefinedClass.bridgeHeaderOutputFile>"
-#import "<usedType.userDefinedClass.targetOutputFile>"<\n><endif>}>
+#include \<Allogen/CSharp.hpp>
 
 <class.idlClass.includes:{include|
-#include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><endif>}>
+#include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><else>\><endif>}>
+<class.usedTypes:{usedType|<if(usedType.userDefinedClass)>#include "<usedType.userDefinedClass.bridgeHeaderOutputFile>"<\n><endif>}>
 
-ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>, <class.objcName>)
-
-@interface <class.objcName>()
--(id)initWithCppObject:(<class.fullyQualifiedName>*)cppObject;
--(<class.fullyQualifiedName>*)toCppObject;
-@end
+// ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>)
 >>
 
 implementation(class) ::= <<
 <codegen_notice()>
 
-#import "<class.targetOutputFile>"
-#import "<class.bridgeHeaderOutputFile>"
+#include "<class.bridgeHeaderOutputFile>"
 
-using namespace Allogen::ObjectiveC;
+using namespace Allogen::CSharp;
 
-@implementation <class.objcName> {
-    <class.fullyQualifiedName>* _cppObject;
-}
+<class.namespaces:namespace_begin(); separator=" ">
 
-<class.constructors:constructor(class); separator="\n\n">
-<destructor(class.destructor, class)>
-<class.methods:method(class); separator="\n\n">
+    <class.constructors:constructor(class); separator="\n\n">
+    <destructor(class.destructor, class)>
+    <class.methods:method(class); separator="\n\n">
 
--(id)initWithCppObject:(<class.fullyQualifiedName>*)cppObject {
-    _cppObject = cppObject;
-    return self;
-}
-
--(<class.fullyQualifiedName>*)toCppObject {
-    return _cppObject;
-}
-@end
+<class.namespaces:namespace_end()>
 >>
 
+namespace_begin(ns) ::= "namespace <ns> {"
+namespace_end(ns) ::= "}"
+
 constructor(constructor, class) ::= <<
-<methodSignature(constructor)> {
+extern "C" <class.fullyQualifiedName>*
+<constructor.csEntryPoint>(<constructor.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", ">) {
     <bridgedConstructor(constructor, class)>
 }
 >>
 
 destructor(destructor, class) ::= <<
--(void)dealloc {
+extern "C" void
+<destructor.csEntryPoint>(<class.fullyQualifiedName>* csthis) {
     <bridgedDestructor(destructor, class)>
 }
 >>
 
 method(method, class) ::= <<
-<methodSignature(method)> {
+extern "C" <typename(method.returnType)>
+<method.csEntryPoint>(<if(!method.static)><class.fullyQualifiedName>* csthis<endif><if(method.arguments)>, <method.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", "><endif>) {
     <if(!method.static)><bridgedMethod(method, class)><else><bridgedStaticMethod(method, class)><endif>
 }
 >>
+
+primitiveType(type) ::= "<nativeType(type)>"
+userDefinedType(type) ::= "<nativeType(type)>*"
+stringType(type) ::= "const char*"
+lambdaType(type) ::= "void*"
+// lambdaTypeForwardArgument(argument) ::= <% Lambda::make(_env_, <lambdaTypeArgumentName(argument)>, "<argument.javaLambdaMethodName>", "(<argument.type.resolvedType.arguments:{argument|<javaSignature(argument.type)>}>)<argument.type.resolvedType.returnType:javaSignature()>") %>

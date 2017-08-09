@@ -28,9 +28,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.allogica.allogen.idl.model;
+package com.allogica.allogen.model;
 
-import java.io.Serializable;
+public class Property extends ModelObject {
 
-public class IDLObject implements Serializable {
+    private String name;
+    private Method getter;
+    private Method setter;
+
+    public Property(String name) {
+        this.name = name;
+    }
+
+    public Property(String name, Method getter, Method setter) {
+        this.name = name;
+        this.getter = getter;
+        this.setter = setter;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Property setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Method getGetter() {
+        return getter;
+    }
+
+    public Property setGetter(Method getter) {
+        this.getter = getter;
+        return this;
+    }
+
+    public Method getSetter() {
+        return setter;
+    }
+
+    public Property setSetter(Method setter) {
+        this.setter = setter;
+        return this;
+    }
 }

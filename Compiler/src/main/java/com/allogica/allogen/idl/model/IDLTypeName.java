@@ -31,12 +31,14 @@
 package com.allogica.allogen.idl.model;
 
 import com.allogica.allogen.idl.grammar.IDLParser;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class IDLTypeName extends IDLObject {
 
+    private String[] namespaces = new String[]{};
     private String name;
     private List<IDLTypeName> templateArguments = new ArrayList<>();
 
@@ -50,17 +52,46 @@ public class IDLTypeName extends IDLObject {
     }
 
     public IDLTypeName(IDLParser.TypenameContext ctx) {
-        if(ctx.regulartypename() != null) {
-            this.name = ctx.regulartypename().getText();
-        } else if(ctx.lambdatype() != null) {
+        if (ctx.regulartypename() != null) {
+            final List<TerminalNode> identifiers = ctx.regulartypename().Identifier();
+
+            this.name = identifiers.get(identifiers.size() - 1).getText(); // the last identifier is the class name
+            if(identifiers.size() >= 2) {
+                this.namespaces = new String[identifiers.size() - 1];
+                for (int i = 0; i < identifiers.size() - 1; i++) {
+                    this.namespaces[i] = identifiers.get(i).getText();
+                }
+            }
+
+            if (ctx.typenametemplateargs() != null) {
+                for (IDLParser.TypenameContext targ : ctx.typenametemplateargs().typename()) {
+                    this.templateArguments.add(new IDLTypeName(targ));
+                }
+            }
+        } else if (ctx.lambdatype() != null) {
             this.name = ctx.lambdatype().getText();
         }
+    }
 
-        if(ctx.typenametemplateargs() != null) {
-            for (IDLParser.TypenameContext targ : ctx.typenametemplateargs().typename()) {
-                this.templateArguments.add(new IDLTypeName(targ));
+    public IDLTypeName(IDLParser.RegulartypenameContext ctx) {
+        final List<TerminalNode> identifiers = ctx.Identifier();
+
+        this.name = identifiers.get(identifiers.size() - 1).getText(); // the last identifier is the class name
+        if(identifiers.size() >= 2) {
+            this.namespaces = new String[identifiers.size() - 1];
+            for (int i = 0; i < identifiers.size() - 1; i++) {
+                this.namespaces[i] = identifiers.get(i).getText();
             }
         }
+    }
+
+    public String[] getNamespaces() {
+        return namespaces;
+    }
+
+    public IDLTypeName setNamespaces(String[] namespaces) {
+        this.namespaces = namespaces;
+        return this;
     }
 
     public String getName() {

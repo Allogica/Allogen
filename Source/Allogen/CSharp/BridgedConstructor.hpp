@@ -28,9 +28,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.allogica.allogen.idl.model;
+#pragma once
 
-import java.io.Serializable;
+namespace Allogen {
+	namespace CSharp {
 
-public class IDLObject implements Serializable {
+		/**
+		 * A template class that represents a bridged constructor.
+		 *
+		 * @tparam Class the class whose method is being wrapped
+		 * @tparam MethodSignature the method signature being wrapped
+		 */
+		template<typename MethodSignature>
+		struct BridgedConstructor;
+
+		/**
+		 * A BridgedConstructor specialization for class constructors.
+		 *
+		 * This class automatically sets the CSharp class "pointer" property
+		 * to the newly allocated object.
+		 *
+		 * @tparam R the return type
+		 * @tparam Args the contructor argument types
+		 */
+		template<typename R, typename... Args>
+		struct BridgedConstructor<R(Args...)> {
+		public:
+			/**
+			 * Calls a wrapped C++ function from CSharp code
+			 *
+			 * @tparam Executor the executor type
+			 *
+			 * @param executor the code generated executor used to dispatch the method to the C++ object
+			 * @param args the CSharp arguments of the method call
+			 *
+			 * @return the already CSharp-converted object returned by the C++ method
+			 */
+			template<typename Executor>
+			static inline R* call(Executor&& executor,
+									 typename Converter<Args>::CSharpType... args) {
+				return executor(Converter<Args>::fromCSharp(args)...);
+			}
+		};
+
+	}
 }

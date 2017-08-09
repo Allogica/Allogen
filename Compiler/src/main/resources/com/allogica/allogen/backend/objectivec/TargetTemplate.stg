@@ -41,7 +41,7 @@ class(class) ::= <<
 <documentation(class)>
 @interface <class.objcName> : NSObject
 
-<if(class.objcProperties)><class.objcProperties.values:property()><endif>
+<if(class.properties.values)><class.properties.values:property(); separator="\n"><endif>
 <if(class.constructors)><class.constructors:constructor(class); separator="\n\n"><\ ><endif>
 <if(class.destructor)><class.destructor:destructor(class); separator="\n\n"><\n><endif>
 <if(class.methods)><class.methods:method(class); separator="\n\n"><endif>
@@ -64,4 +64,4 @@ method(method, class, native=true) ::= <<
 <methodSignature(method)>;
 >>
 
-property(property) ::= "@property (<if(!property.setter)>readonly, <endif>nonatomic, assign, getter=<property.getter.objcName><if(!property.setter)>, getter=<property.setter.objcName><endif>) <typename(property.getter.returnType)> <property.name>;"
+property(property) ::= "@property (<if(!property.setter)>readonly, <endif>nonatomic, assign, getter=<property.getter.objcName><if(property.setter)>, setter=<property.setter.objcName>:<endif>) <typename(property.getter.returnType)> <property.name>;"

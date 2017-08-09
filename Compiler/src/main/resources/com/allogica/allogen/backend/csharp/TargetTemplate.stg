@@ -1,0 +1,171 @@
+/*
+ * Copyright (c) 2017, Allogica
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of Allogen nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import "CSharp.stg"
+
+class(class) ::= <<
+<codegen_notice()>
+
+using System;
+using System.Runtime.InteropServices;
+
+<class.csImports:{import|using <import>;<\n>}>
+
+namespace <class.csNamespace> {
+    <documentation(class)>
+    public class <class.name> {
+        /**
+         * A numeric value that represents the pointer used to access the wrapped object.
+         *
+         * This value should not be changed by the user and is automatically initialized by the _init
+         * or when used as a return value from another method.
+         */
+        internal IntPtr Pointer;
+
+        <if(class.properties.values)><class.properties.values:property(); separator="\n"><\n><endif>
+        public <class.csName>(IntPtr pointer) {
+            Pointer = pointer;
+        }
+
+        <if(class.constructors)><class.constructors:constructor(class); separator="\n\n"><\ ><endif>
+        <if(class.destructor)><class.destructor:destructor(class); separator="\n\n"><\n><endif>
+        <if(class.methods)><class.methods:method(class); separator="\n\n"><endif>
+    }
+}
+>>
+
+constructor(constructor, class) ::= <<
+<documentation(constructor)>
+public <class.csName>(<arguments(constructor, class)>) {
+    Pointer = _Constructor(<constructor.arguments:{argument|<wrapUnmanaged(argument.type, argument.name)>}; separator=", ">);
+}
+
+/**
+ * This method performs the object creation. This method should only be called
+ * from the object constructor.
+ *
+<if(constructor.arguments)>
+<constructor.arguments:{argument|  * @param <argument.name> <if(argument.documentation)><argument.documentation><else>the <argument.name> parameter<endif>}; separator="\n">
+ *
+<endif>
+ * @return a pointer to the C++ native object
+ */
+[DllImport("<class.csLibraryName>",
+    EntryPoint = "<constructor.csEntryPoint>",
+    CallingConvention = CallingConvention.Cdecl)]
+private static extern IntPtr _Constructor(<constructor.arguments:{arg|<unmanagedTypename(arg.type)> <arg.name>}; separator=", ">);
+>>
+
+destructor(destructor, class) ::= <<
+/**
+ * This method deletes the wrapped C++ object. This method should
+ * not be called directly by the user, but must be called by the GC.
+ *
+ * Note that since Java does not require the GC to call finalize() at all
+ * it is recommended to not wrap any RAII objects that could lock or unlock
+ * resources that are system wide.
+ */
+~<class.csName>() {
+    _Destructor(Pointer);
+}
+
+[DllImport("<class.csLibraryName>",
+    EntryPoint = "<destructor.csEntryPoint>",
+    CallingConvention = CallingConvention.Cdecl)]
+private static extern void _Destructor(IntPtr pointer);
+>>
+
+method(method, class) ::= <<
+<method.arguments:{argument|<if(argument.csHasDelegate)><delegate(method, argument)><endif>}>
+<documentation(method)>
+public<if(method.static)> static<endif><if(method.csOverride)> override<endif> <typename(method.returnType)> <method.csName>(<arguments(method, class)>) {
+<if(method.returnType.csIsVoid)>
+    _<method.csName>(<if(!method.static)>Pointer<endif><if(method.arguments)><if(!method.static)>, <endif><method.arguments:{arg|<wrapUnmanaged(arg.type, arg.name)>}; separator=", "><endif>);
+<else>
+    return <unwrapUnmanaged(method.returnType, nonvoidForward(method))>;
+<endif>
+}
+
+[DllImport("<class.csLibraryName>",
+    EntryPoint = "<method.csEntryPoint>",
+    CallingConvention = CallingConvention.Cdecl)]
+private static extern <unmanagedTypename(method.returnType)> _<method.csName>(<if(!method.static)>IntPtr pointer<endif><if(method.arguments)><if(!method.static)>, <endif><method.arguments:{arg|<unmanagedTypename(arg.type)>  <arg.name>}; separator=", "><endif>);
+>>
+
+property(property) ::= <%
+<if(!property.setter)>
+public <typename(property.getter.returnType)> <property.csName> => <property.getter.csName>();
+<else>
+public <typename(property.getter.returnType)> <property.name> {
+    get { return <property.getter.csName>(); }
+    set { return <property.setter.csName>(value); }
+}
+<endif>
+%>
+
+nonvoidForward(method) ::= <%
+_<method.csName>(<if(!method.static)>Pointer<endif><if(method.arguments)><if(!method.static)>, <endif><method.arguments:{arg|<wrapUnmanaged(arg.type, arg.name)>}; separator=", "><endif>)
+%>
+
+arguments(method, class) ::= <%
+    <method.arguments:argument(method, class); separator=", ">
+%>
+
+argument(argument, method, class) ::= "<typename(argument.type)> <argument.name>"
+
+delegate(method, argument) ::= <<
+public delegate <typename(argument.type.resolvedType.returnType)> <argument.csDelegateName>(<argument.type.resolvedType.arguments:argument(method, method); separator=", ">);
+>>
+
+primitiveType(type) ::= "<csTypeMapping.(type.name)>"
+userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.csName>"
+stringType(type) ::= "string"
+lambdaType(type) ::= "<type.csDelegateName>"
+
+unmanagedTypenameTemplateName_(type) ::= "<type.resolvedType.templateName>UnmanangedTypename"
+unmanagedTypename(type) ::= "<(unmanagedTypenameTemplateName_(type))(type)>"
+primitiveTypeUnmanangedTypename(type) ::= "<csTypeMapping.(type.name)>"
+stringTypeUnmanangedTypename(type) ::= "string"
+userDefinedTypeUnmanangedTypename(type) ::= "IntPtr"
+lambdaTypeUnmanangedTypename(type) ::= "<type.csDelegateName>"
+
+wrapUnmanagedTemplateName_(type) ::= "<type.resolvedType.templateName>Wrap"
+wrapUnmanaged(type, v) ::= "<(wrapUnmanagedTemplateName_(type))(type, v)>"
+primitiveTypeWrap(type, v) ::= "<v>"
+stringTypeWrap(type, v) ::= "<v>"
+userDefinedTypeWrap(type, v) ::= "<v>.Pointer"
+lambdaTypeWrap(type, v) ::= "<v>"
+
+unwrapUnmanagedTemplateName_(type) ::= "<type.resolvedType.templateName>Unwrap"
+unwrapUnmanaged(type, v) ::= "<(unwrapUnmanagedTemplateName_(type))(type, v)>"
+primitiveTypeUnwrap(type, v) ::= "<v>"
+stringTypeUnwrap(type, v) ::= "<v>"
+userDefinedTypeUnwrap(type, v) ::= "new <type.resolvedType.userDefinedClass.csName>(<v>)"
+lambdaUnwrap(type, v) ::= "<v>"

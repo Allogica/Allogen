@@ -59,18 +59,7 @@ public class IDLParserBaseListener implements IDLParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitRegulartypename(IDLParser.RegulartypenameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterLambdareturn(IDLParser.LambdareturnContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLambdareturn(IDLParser.LambdareturnContext ctx) { }
+
 	/**
 	 * {@inheritDoc}
 	 *

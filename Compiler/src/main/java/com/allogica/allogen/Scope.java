@@ -30,7 +30,9 @@
 
 package com.allogica.allogen;
 
-public class Scope {
+import java.io.Serializable;
+
+public class Scope implements Serializable {
 
     private String[] namespace;
 

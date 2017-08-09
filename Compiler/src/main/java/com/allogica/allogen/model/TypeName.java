@@ -31,6 +31,7 @@
 package com.allogica.allogen.model;
 
 import com.allogica.allogen.Scope;
+import com.allogica.allogen.idl.model.IDLTypeName;
 import com.allogica.allogen.types.Type;
 
 import java.util.ArrayList;
@@ -44,7 +45,8 @@ public class TypeName extends ModelObject {
 
     private List<TypeName> templateArguments = new ArrayList<>();
 
-    private Type resolvedType;
+    private IDLTypeName idlTypeName;
+    private transient Type resolvedType;
 
     public TypeName(String name) {
         this(name, new String[]{});
@@ -108,8 +110,17 @@ public class TypeName extends ModelObject {
         return this;
     }
 
+    public IDLTypeName getIdlTypeName() {
+        return idlTypeName;
+    }
+
+    public TypeName setIdlTypeName(IDLTypeName idlTypeName) {
+        this.idlTypeName = idlTypeName;
+        return this;
+    }
+
     @Override
     public String toString() {
-        return name;
+        return String.join("::", namespace) + "::" + name;
     }
 }

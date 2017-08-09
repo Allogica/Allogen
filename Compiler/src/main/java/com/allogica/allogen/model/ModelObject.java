@@ -30,10 +30,11 @@
 
 package com.allogica.allogen.model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ModelObject {
+public class ModelObject implements Serializable {
 
     private Map<String, Object> attributes = new HashMap<>();
 

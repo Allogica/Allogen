@@ -31,12 +31,11 @@
 package com.allogica.allogen;
 
 import com.allogica.allogen.backend.CompilerBackend;
+import com.allogica.allogen.model.Class;
 import com.allogica.allogen.model.TypeName;
+import com.allogica.allogen.modules.Module;
 import com.allogica.allogen.passes.CompilerPass;
-import com.allogica.allogen.types.LambdaType;
-import com.allogica.allogen.types.OptionalType;
-import com.allogica.allogen.types.PrimitiveType;
-import com.allogica.allogen.types.StringType;
+import com.allogica.allogen.types.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,8 +67,8 @@ public class Compiler<Input, Output> {
         context.registerType(new PrimitiveType(), new TypeName("int64"));
 
         context.registerTypeFactory(LambdaType::new, new TypeName("lambda"));
-//        context.registerType(new LambdaType(), new TypeName("lambda"));
         context.registerTypeFactory(OptionalType::new, new TypeName("optional"));
+        context.registerTypeFactory(SharedPtrType::new, new TypeName("shared_ptr"));
         context.registerType(new StringType(), new TypeName("string"));
 
         this.backend.registerTypes(this, this.context);
@@ -81,6 +80,14 @@ public class Compiler<Input, Output> {
 
     public void addPasses(CompilerPass<?, ?>... passes) {
         this.passes.addAll(Arrays.asList(passes));
+    }
+
+    public void importModule(Module module) {
+        for(final Class clazz : module.getExportedClasses()) {
+            // register the class with the compiler context
+            final UserDefinedType userDefinedType = getBackend().createUserDefinedType(this, context, clazz);
+            context.registerType(userDefinedType, new TypeName(clazz.getName(), clazz.getNamespaces()));
+        }
     }
 
     public List<Output> compile(List<Input> inputs) throws IOException {
@@ -98,14 +105,6 @@ public class Compiler<Input, Output> {
         }
         return objects;
     }
-
-//    public Output compile(Input clazz) throws IOException {
-//        Object object = clazz;
-//        for(CompilerPass pass : passes) {
-//            object = pass.pass(this, context, object);
-//        }
-//        return (Output) object;
-//    }
 
     public CompilerContext getContext() {
         return context;

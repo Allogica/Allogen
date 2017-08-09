@@ -84,6 +84,15 @@ lambdaTypeNative(type) ::= <% std::function\<<if(type.resolvedType.returnType)><
 lambdaTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
 lambdaTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
 
+optionalTypeNative(type) ::= <% std::experimental::optional\<<nativeType(type.resolvedType.containedType)>> %>
+//optionalTypeNative(type) ::= <% <nativeType(type.resolvedType.containedType)>* %>
+optionalTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+optionalTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
+sharedPtrTypeNative(type) ::= <% std::shared_ptr\<<nativeType(type.resolvedType.containedType)>> %>
+sharedPtrTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+sharedPtrTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
 documentation(object) ::= <%
 /**
 <\n>

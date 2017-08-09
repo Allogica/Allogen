@@ -34,13 +34,10 @@ import com.allogica.allogen.Compiler;
 import com.allogica.allogen.CompilerContext;
 import com.allogica.allogen.backend.AbstractCompilerBackend;
 import com.allogica.allogen.idl.model.IDLAnnotation;
+import com.allogica.allogen.model.*;
 import com.allogica.allogen.model.Class;
-import com.allogica.allogen.model.Constructor;
-import com.allogica.allogen.model.Method;
-import com.allogica.allogen.model.MethodArgument;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,9 +49,20 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
         return ObjectiveCBackend.class.getResource("TargetTemplate.stg");
     }
 
+    private String baseOutputName(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
+        String ns = null;
+        if (clazz.getNamespaces().length > 1) {
+            ns = clazz.getNamespaces()[0];
+        } else {
+            ns = compilerContext.getBasePath()[0];
+        }
+
+        return ns + "/" + clazz.getAttribute("objcName");
+    }
+
     @Override
     public String getTargetOutputFile(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
-        return String.join("/", clazz.getNamespaces()) + "/" + clazz.getAttribute("objcName") + ".h";
+        return baseOutputName(compiler, compilerContext, clazz) + ".h";
     }
 
     @Override
@@ -64,13 +72,12 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
 
     @Override
     public String getBridgeOutputHeaderFile(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
-        return compilerContext.getBridgePath(clazz.getNamespaces(), clazz.getName()) + "+Private.h";
+        return baseOutputName(compiler, compilerContext, clazz) + "+Private.h";
     }
 
     @Override
     public String getBridgeOutputImplementationFile(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
-        return compilerContext.getBridgePath(clazz.getNamespaces(), clazz.getName()) + ".mm";
-
+        return baseOutputName(compiler, compilerContext, clazz) + ".mm";
     }
 
     @Override
@@ -79,46 +86,11 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
 
         clazz.setAttribute("objPrefix", prefix);
         clazz.setAttribute("objcName", prefix + clazz.getName());
-
-        clazz.setAttribute("objcProperties", new HashMap<String, Property>());
-    }
-
-    @Override
-    public void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
-        final Map<String, Property> properties = clazz.getAttribute("objcProperties");
-        properties.forEach((key, value) -> {
-            // properties must have getters
-            if(value.getGetter() == null) {
-                properties.remove(key);
-            }
-        });
     }
 
     @Override
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Method method) {
         method.setAttribute("objcName", method.getName());
-
-        final Map<String, Property> properties = clazz.getAttribute("objcProperties");
-
-        final IDLAnnotation getter = method.getIdlMethod().getAnnotation("Getter");
-        if(getter != null) {
-            final String name = getter.getProperty("property");
-            if(!properties.containsKey(name)) {
-                properties.put(name, new Property(name));
-            }
-            final Property property = properties.get(name);
-            property.setGetter(method);
-        }
-
-        final IDLAnnotation setter = method.getIdlMethod().getAnnotation("Setter");
-        if(setter != null) {
-            final String name = setter.getProperty("property");
-            if(!properties.containsKey(name)) {
-                properties.put(name, new Property(name));
-            }
-            final Property property = properties.get(name);
-            property.setSetter(method);
-        }
     }
 
     @Override

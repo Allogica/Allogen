@@ -30,37 +30,36 @@
 
 import "../Allogen.stg"
 
-methodSignature(method) ::= "<if(method.static)>+<else>-<endif>(<if(method.returnType)><typename(method.returnType)><else>nonnull id<endif>)<method.objcName><arguments(method, class)>"
-arguments(method, class) ::= <%<method.arguments:argument(method, class); separator=" ">%>
-argument(argument, method, class) ::= "<argument.objSignatureName>:(<typename(argument.type)>)<argumentName(argument)>"
+csTypeMapping ::= [
+    "void": "void",
+    "bool": "bool",
 
-primitiveType(type) ::= "<cppTypeMapping.(type.name)>"
-userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.objcName>*"
-stringType(type) ::= "NSString*"
-lambdaType(type) ::= <% <if(type.resolvedType.returnType)><typename(type.resolvedType.returnType)><else>void<endif>(^)(<type.resolvedType.arguments:{arg|<typename(arg.type)>}; separator=", ">) %>
+    "int8": "byte",     "uint8":"byte",
+    "int16": "short",   "uint16":"short",
+    "int32": "int",     "uint32":"int",
+    "int64": "long",    "uint64":"long",
+    "float": "float",   "double": "double"
+]
+
 optionalType(type) ::= "<typename(type.resolvedType.containedType)>"
 sharedPtrType(type) ::= "<typename(type.resolvedType.containedType)>"
 
 bridgedConstructor(constructor, class) ::= <<
-if(self) {
-    BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
-        self,
-        [](<constructor.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) {
-        <if(constructor.body)>
-            <constructor.body>
-        <else>
-            return new <class.fullyQualifiedName>(<constructor.arguments:{argument|<argument.name>}; separator=", ">);
-        <endif>
-        }<if(constructor.arguments)>, <constructor.arguments:forwardArgument(); separator=", "><endif>
-    );
-}
-return self;
+return BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+    [](<constructor.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) {
+    <if(constructor.body)>
+        <constructor.body>
+    <else>
+        return new <class.name>(<constructor.arguments:{argument|<argument.name>}; separator=", ">);
+    <endif>
+    }<if(constructor.arguments)>, <constructor.arguments:forwardArgument(); separator=", "><endif>
+);
 >>
 
 bridgedDestructor(destructor, class) ::= <<
 BridgedMethod\<<class.fullyQualifiedName>, void()>::call(
-    self,
-    [](<class.fullyQualifiedName>* wself) {
+    csthis,
+    [](<class.fullyQualifiedName> *wself) {
     <if(destructor.body)>
         <destructor.body>
     <else>
@@ -68,13 +67,12 @@ BridgedMethod\<<class.fullyQualifiedName>, void()>::call(
     <endif>
     }
 );
-[super dealloc];
 >>
 
 bridgedMethod(method, class) ::= <<
 return BridgedMethod\<<class.fullyQualifiedName>, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
-    self,
-    [](<class.fullyQualifiedName>* wself<if(method.arguments)>, <method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", "><endif>) {
+    csthis,
+    [](<class.fullyQualifiedName> *wself<if(method.arguments)>, <method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", "><endif>) {
     <if(method.body)>
         <method.body>
     <else>
@@ -85,8 +83,8 @@ return BridgedMethod\<<class.fullyQualifiedName>, <nativeType(method.returnType)
 >>
 
 bridgedStaticMethod(method, class) ::= <<
-return BridgedMethod\<<class.fullyQualifiedName>, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
-    [](<method.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) {
+return BridgedMethod\<void, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+    [](<method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", ">) {
     <if(method.body)>
         <method.body>
     <else>

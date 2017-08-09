@@ -33,9 +33,13 @@ package com.allogica.allogen.types;
 import com.allogica.allogen.Compiler;
 import com.allogica.allogen.CompilerContext;
 
+import java.util.List;
+
 public interface Type {
 
     void link(Compiler<?, ?> compiler, CompilerContext compilerContext);
     String getTemplateName();
+
+    List<Type> getDependantTypes();
 
 }

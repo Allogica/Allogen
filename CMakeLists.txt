@@ -58,6 +58,11 @@ target_include_directories(Allogen.ObjectiveC
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Source
 )
 
+add_library(Allogen.CSharp INTERFACE)
+target_include_directories(Allogen.CSharp
+        INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Source
+)
+
 # Enables the Allogen example.
 # This is off by default so that the library is easier to integrate
 # using a add_directory.

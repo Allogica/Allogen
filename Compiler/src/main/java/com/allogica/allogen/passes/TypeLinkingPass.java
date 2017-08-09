@@ -43,22 +43,25 @@ public class TypeLinkingPass implements CompilerPass<Class, Class> {
         // now that every type as been loaded or imported, we can link complex types
         // like lambdas
 
-        for(final Method method : clazz.getMethods()) {
-            handleMethod(compiler, context, method);
+        for (final Method method : clazz.getMethods()) {
+            handleMethod(compiler, context, clazz, method);
         }
 
         return clazz;
     }
 
-    private void handleMethod(Compiler<?, ?> compiler, CompilerContext context, Method method) {
+    private void handleMethod(Compiler<?, ?> compiler, CompilerContext context, Class clazz, Method method) {
         method.getReturnType().getResolvedType().link(compiler, context);
-        for(final MethodArgument argument : method.getArguments()) {
-            handleArgument(compiler, context, argument);
+        clazz.getUsedTypes().addAll(method.getReturnType().getResolvedType().getDependantTypes());
+
+        for (final MethodArgument argument : method.getArguments()) {
+            handleArgument(compiler, context, clazz, argument);
         }
     }
 
-    private void handleArgument(Compiler<?, ?> compiler, CompilerContext context, MethodArgument argument) {
+    private void handleArgument(Compiler<?, ?> compiler, CompilerContext context, Class clazz, MethodArgument argument) {
         argument.getType().getResolvedType().link(compiler, context);
+        clazz.getUsedTypes().addAll(argument.getType().getResolvedType().getDependantTypes());
     }
 
 }

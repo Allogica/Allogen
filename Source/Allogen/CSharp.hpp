@@ -28,9 +28,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.allogica.allogen.idl.model;
+#pragma once
 
-import java.io.Serializable;
-
-public class IDLObject implements Serializable {
-}
+#include "Allogen/CSharp/Converter.hpp"
+#include "Allogen/CSharp/Converter/IntegralTypes.hpp"
+//#include "Allogen/CSharp/Converter/Function.hpp"
+//#include "Allogen/CSharp/Converter/Optional.hpp"
+//#include "Allogen/CSharp/BridgedClass.hpp"
+#include "Allogen/CSharp/BridgedConstructor.hpp"
+#include "Allogen/CSharp/BridgedMethod.hpp"

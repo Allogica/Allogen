@@ -48,16 +48,6 @@ public interface IDLListener extends ParseTreeListener {
 	 */
 	void exitRegulartypename(IDLParser.RegulartypenameContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link IDLParser#lambdareturn}.
-	 * @param ctx the parse tree
-	 */
-	void enterLambdareturn(IDLParser.LambdareturnContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link IDLParser#lambdareturn}.
-	 * @param ctx the parse tree
-	 */
-	void exitLambdareturn(IDLParser.LambdareturnContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link IDLParser#lambdatype}.
 	 * @param ctx the parse tree
 	 */

@@ -101,8 +101,9 @@ public class ObjectModelCreationPass implements CompilerPass<IDLClass, Class> {
 
     private TypeName handleTypeName(CompilerContext context, IDLClass clazz, IDLTypeName typeName) {
         return new TypeName(typeName.getName(), typeName.getTemplateArguments().stream().map((arg) ->
-                handleTypeName(context, clazz, arg)).collect(Collectors.toList()), new String[]{}).setScope(new Scope(clazz.getParent()
-                .getNamespaceChain().toArray(new String[clazz.getParent().getNamespaceChain().size()])));
+                handleTypeName(context, clazz, arg)).collect(Collectors.toList()), typeName.getNamespaces())
+                .setScope(new Scope(clazz.getParent()
+                        .getNamespaceChain().toArray(new String[clazz.getParent().getNamespaceChain().size()])));
     }
 
 }

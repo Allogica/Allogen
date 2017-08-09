@@ -38,9 +38,8 @@ header(class) ::= <<
 #include \<Allogen/JNI.hpp>
 
 <class.idlClass.includes:{include|
-#include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<else>\><\n><endif>}>
+#include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><else>\><endif>}>
 <class.usedTypes:{usedType|<if(usedType.userDefinedClass)>#include "<usedType.userDefinedClass.bridgeHeaderOutputFile>"<\n><endif>}>
-<class.usedTypes:{usedType|<if(usedType.userDefinedClass)>#include "<usedType.userDefinedClass.name>.hpp"<\n><endif>}>
 
 ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>, "<class.javaClassPath>")
 >>
@@ -48,7 +47,7 @@ ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>, "<class.javaClassPath>")
 implementation(class) ::= <<
 <codegen_notice()>
 
-#include "<class.name>.hpp"
+#include "<class.bridgeHeaderOutputFile>"
 
 using namespace Allogen::JNI;
 

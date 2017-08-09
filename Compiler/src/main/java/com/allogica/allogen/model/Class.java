@@ -34,10 +34,7 @@ import com.allogica.allogen.Scope;
 import com.allogica.allogen.idl.model.IDLClass;
 import com.allogica.allogen.types.Type;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Class extends ModelObject {
     private String name;
@@ -47,8 +44,10 @@ public class Class extends ModelObject {
     private Destructor destructor;
     private List<Method> methods = new ArrayList<>();
 
+    private Map<String, Property> properties = new HashMap<>();
+
     private IDLClass idlClass;
-    private Set<Type> usedTypes = new HashSet<>();
+    private transient Set<Type> usedTypes = new HashSet<>();
 
     public Class(String name, List<Method> methods) {
         this.name = name;
@@ -105,6 +104,15 @@ public class Class extends ModelObject {
 
     public void setMethods(List<Method> methods) {
         this.methods = methods;
+    }
+
+    public Map<String, Property> getProperties() {
+        return properties;
+    }
+
+    public Class setProperties(Map<String, Property> properties) {
+        this.properties = properties;
+        return this;
     }
 
     public String getFullyQualifiedName() {

@@ -122,7 +122,7 @@ public class CompilerContext {
                 return null;
             }
 
-            List<String> l = new ArrayList<String>(Arrays.asList(typeName.getNamespace()));
+            List<String> l = new ArrayList<>(Arrays.asList(typeName.getNamespace()));
             l.remove(0);
 
             return namespaces.get(typeName.getNamespace()[0]).resolve(
@@ -188,14 +188,18 @@ public class CompilerContext {
         List<String> namespaces = new ArrayList<>(Arrays.asList(namespacesArray));
         namespaces.add(className);
 
-        for (int i = 0; i < basePath.length; i++) {
-            if (!basePath[i].equals(namespaces.get(0))) {
+        for (String aBasePath : basePath) {
+            if (!aBasePath.equals(namespaces.get(0))) {
                 break;
             }
             namespaces.remove(0);
         }
 
         return String.join("/", basePath) + "/" + String.join("/", namespaces);
+    }
+
+    public String[] getBasePath() {
+        return basePath;
     }
 
     public File getTargetDir() {

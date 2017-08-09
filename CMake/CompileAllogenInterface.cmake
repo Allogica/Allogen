@@ -57,28 +57,35 @@ endif ()
 
 function(add_allogen_interface target_name)
     set(options)
-    set(oneValueArgs LANGUAGE TARGET_DIR BRIDGE_DIR BRIDGE_NAMESPACE)
-    set(multiValueArgs IDL INCLUDE_DIRS)
+    set(oneValueArgs LANGUAGE TARGET_DIR BRIDGE_DIR BRIDGE_NAMESPACE MODULE_NAME)
+    set(multiValueArgs IDL IMPORT)
     cmake_parse_arguments(IFT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
     if (NOT Java_FOUND OR NOT ALLOGEN_COMPILER)
         return()
     endif ()
     
-    set(INCLUDE_LIST)
-    foreach(${dir} ${IFT_INCLUDE_DIRS})
-        list(APPEND -I${dir})
-    endforeach()
+    set(import_args "")
+    if(IFT_IMPORT)
+        foreach(dir ${IFT_IMPORT})
+            set(import_args ${import_args} --import "${dir}")
+        endforeach()
+    endif()
     
     set(ns_attr "")
     if(IFT_BRIDGE_NAMESPACE)
         set(ns_attr --base-bridge-namespace "${IFT_BRIDGE_NAMESPACE}")
     endif()
-    
+
+    set(module_args "")
+    if(IFT_MODULE_NAME)
+        set(module_args --module ${IFT_MODULE_NAME})
+    endif()
+
     add_custom_target(${target_name} SOURCES ${IFT_IDL}
             DEPENDS ${IFT_IDL}
             COMMAND ${Maven_EXECUTABLE} compile exec:java -f ${ALLOGEN_COMPILER}
-            -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${INCLUDE_LIST} ${IFT_IDL}\"
+            -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${module_args} ${import_args} ${IFT_IDL}\"
             COMMENT "Compiling Allogen interface files..."
     )
 
