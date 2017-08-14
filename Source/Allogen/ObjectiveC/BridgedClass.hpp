@@ -69,7 +69,7 @@ namespace Allogen {
 			 * @return the corresponding ObjectiveC type
 			 */
 			static ObjectiveCType toObjectiveC(T object) {
-				return BridgeClass<T*>::toObjectiveC(new T(std::move(object)));
+				return BridgeClass<std::shared_ptr<T>>::toObjectiveC(std::make_shared<T>(std::move(object)));
 			}
 
 			/**
@@ -81,7 +81,7 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static T fromObjectiveC(ObjectiveCType wself) {
-				return *(BridgeClass<T*>::fromObjectiveC(wself));
+				return *(BridgeClass<std::shared_ptr<T>>::fromObjectiveC(wself));
 			}
 		};
 
@@ -113,14 +113,8 @@ namespace Allogen {
 			 *
 			 * @return the corresponding ObjectiveC type
 			 */
-			static ObjectiveCType toObjectiveC(T* object) {
-				if(object == nullptr) {
-					return nullptr;
-				}
-
-				auto c = NSClassFromString([NSString stringWithCString:OBJC_CLASS<T>.data()
-									encoding:[NSString defaultCStringEncoding]]);
-				return [[c alloc] initWithCppObject: object];
+			static ObjectiveCType toObjectiveC(Type object) {
+				return BridgeClass<std::shared_ptr<T>>::toObjectiveC(std::shared_ptr<T>(object, [](auto) { /* no-op */ }));
 			}
 
 			/**
@@ -131,12 +125,12 @@ namespace Allogen {
 			 *
 			 * @return the corresponding C++ type
 			 */
-			static T* fromObjectiveC(ObjectiveCType wself) {
-				if(wself == nullptr) {
+			static Type fromObjectiveC(ObjectiveCType wself) {
+				auto ptr = BridgeClass<std::shared_ptr<T>>::fromObjectiveC(wself);
+				if(ptr == nullptr) {
 					return nullptr;
 				}
-
-				return reinterpret_cast<T*>([wself performSelector: @selector(toCppObject)]);
+				return ptr.get();
 			}
 
 		};
@@ -169,8 +163,8 @@ namespace Allogen {
 			 *
 			 * @return the corresponding ObjectiveC type
 			 */
-			static ObjectiveCType toObjectiveC(T& object) {
-				return BridgeClass<T*>::toObjectiveC(new T(object));
+			static ObjectiveCType toObjectiveC(Type object) {
+				return BridgeClass<T*>::toObjectiveC(std::make_shared<T>(object));
 			}
 
 			/**
@@ -181,8 +175,8 @@ namespace Allogen {
 			 *
 			 * @return the corresponding C++ type
 			 */
-			static T& fromObjectiveC(ObjectiveCType wself) {
-				return *(BridgeClass<T*>::fromObjectiveC(wself));
+			static Type fromObjectiveC(ObjectiveCType wself) {
+				return *(BridgeClass<std::shared_ptr<T>>::fromObjectiveC(wself).get());
 			}
 		};
 
@@ -214,8 +208,8 @@ namespace Allogen {
 			 *
 			 * @return the corresponding ObjectiveC type
 			 */
-			static ObjectiveCType toObjectiveC(T& object) {
-				return BridgeClass<T*>::toObjectiveC(new T(object));
+			static ObjectiveCType toObjectiveC(Type object) {
+				return BridgeClass<std::shared_ptr<T>>::toObjectiveC(std::make_shared<T>(object));
 			}
 
 			/**
@@ -226,8 +220,8 @@ namespace Allogen {
 			 *
 			 * @return the corresponding C++ type
 			 */
-			static const T& fromObjectiveC(ObjectiveCType wself) {
-				return *(BridgeClass<T*>::fromObjectiveC(wself));
+			static const Type fromObjectiveC(ObjectiveCType wself) {
+				return *(BridgeClass<std::shared_ptr<T>>::fromObjectiveC(wself).get());
 			}
 		};
 
@@ -244,7 +238,7 @@ namespace Allogen {
 			/**
 			 * The C++ type being converted
 			 */
-			using Type = T&;
+			using Type = T&&;
 
 			/**
 			 * The ObjectiveC type this converter converts from/to
@@ -259,8 +253,8 @@ namespace Allogen {
 			 *
 			 * @return the corresponding ObjectiveC type
 			 */
-			static ObjectiveCType toObjectiveC(T&& object) {
-				return BridgeClass<T*>::toObjectiveC(new T(std::move(object)));
+			static ObjectiveCType toObjectiveC(Type object) {
+				return BridgeClass<std::shared_ptr<T>>::toObjectiveC(std::make_shared<T>(std::move(object)));
 			}
 
 			/**
@@ -271,9 +265,65 @@ namespace Allogen {
 			 *
 			 * @return the corresponding C++ type
 			 */
-			static const T& fromObjectiveC(ObjectiveCType wself) {
-				return *(BridgeClass<T*>::fromObjectiveC(wself));
+			static const Type fromObjectiveC(ObjectiveCType wself) {
+				return *(BridgeClass<std::shared_ptr<T>>::fromObjectiveC(wself));
 			}
+		};
+
+		/**
+		 * A Conversion implementation for classes bridged between C++ and ObjectiveC.
+		 *
+		 * This implementation deals with functions that return or use the object
+		 * by a pointer.
+		 *
+		 * @tparam T the bridged class type
+		 */
+		template<typename T>
+		struct BridgeClass<std::shared_ptr<T>> {
+			/**
+			 * The C++ type being converted
+			 */
+			using Type = std::shared_ptr<T>;
+
+			/**
+			 * The ObjectiveC type this converter converts from/to
+			 */
+			using ObjectiveCType = id;
+
+			/**
+			 * Converts from the C++ object to a ObjectiveC object
+			 *
+			 * @param env the ObjectiveC environment
+			 * @param object the C++ object
+			 *
+			 * @return the corresponding ObjectiveC type
+			 */
+			static ObjectiveCType toObjectiveC(Type object) {
+				if(object == nullptr) {
+					return nullptr;
+				}
+
+				auto c = NSClassFromString([NSString stringWithCString:OBJC_CLASS<T>.data()
+			encoding:[NSString defaultCStringEncoding]]);
+				return [[c alloc] initWithCppObject: new Type(object)];
+			}
+
+			/**
+			 * Converts from the ObjectiveC object to the C++ object
+			 *
+			 * @param env the ObjectiveC environment
+			 * @param wself the ObjectiveC object
+			 *
+			 * @return the corresponding C++ type
+			 */
+			static Type fromObjectiveC(ObjectiveCType wself) {
+				if(wself == nullptr) {
+					return nullptr;
+				}
+
+				return *reinterpret_cast<Type*>([wself performSelector: @selector(toCppObject)]);
+			}
+
 		};
 
 #define ALLOGEN_BRIDGED_CLASS(ClassName, ObjectiveCClass)                                                      		\

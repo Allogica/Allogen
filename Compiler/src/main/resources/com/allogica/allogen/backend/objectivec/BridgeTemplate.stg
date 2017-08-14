@@ -49,8 +49,8 @@ header(class) ::= <<
 ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>, <class.objcName>)
 
 @interface <class.objcName>()
--(id)initWithCppObject:(<class.fullyQualifiedName>*)cppObject;
--(<class.fullyQualifiedName>*)toCppObject;
+-(id)initWithCppObject:(std::shared_ptr\<<class.fullyQualifiedName>\>*)cppObject;
+-(std::shared_ptr\<<class.fullyQualifiedName>\>*)toCppObject;
 @end
 >>
 
@@ -63,19 +63,19 @@ implementation(class) ::= <<
 using namespace Allogen::ObjectiveC;
 
 @implementation <class.objcName> {
-    <class.fullyQualifiedName>* _cppObject;
+    std::shared_ptr\<<class.fullyQualifiedName>\>* _cppObject;
 }
 
 <class.constructors:constructor(class); separator="\n\n">
 <destructor(class.destructor, class)>
 <class.methods:method(class); separator="\n\n">
 
--(id)initWithCppObject:(<class.fullyQualifiedName>*)cppObject {
+-(id)initWithCppObject:(std::shared_ptr\<<class.fullyQualifiedName>\>*)cppObject {
     _cppObject = cppObject;
     return self;
 }
 
--(<class.fullyQualifiedName>*)toCppObject {
+-(std::shared_ptr\<<class.fullyQualifiedName>\>*)toCppObject {
     return _cppObject;
 }
 @end

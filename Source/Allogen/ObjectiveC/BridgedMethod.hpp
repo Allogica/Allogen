@@ -73,7 +73,7 @@ namespace Allogen {
 															   typename Converter<Args>::ObjectiveCType... args) {
 				return Converter<typename std::result_of<Executor(Class*, Args...)>::type>::toObjectiveC(
 						executor(
-								[objcSelf toCppObject],
+								Converter<Class*>::fromObjectiveC(objcSelf),
 								Converter<Args>::fromObjectiveC(
 										std::move(args)
 								)...
@@ -128,7 +128,7 @@ namespace Allogen {
 			static inline void call(ObjCT* objcSelf, Executor&& executor,
 									typename Converter<Args>::ObjectiveCType... args) {
 				executor(
-						[objcSelf toCppObject],
+						Converter<Class*>::fromObjectiveC(objcSelf),
 						Converter<Args>::fromObjectiveC(
 								std::move(args)
 						)...

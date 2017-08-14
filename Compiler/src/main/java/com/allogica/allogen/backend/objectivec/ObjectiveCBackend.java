@@ -70,6 +70,7 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
         return ObjectiveCBackend.class.getResource("BridgeTemplate.stg");
     }
 
+/*
     @Override
     public String getBridgeOutputHeaderFile(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
         return baseOutputName(compiler, compilerContext, clazz) + "+Private.h";
@@ -78,6 +79,17 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
     @Override
     public String getBridgeOutputImplementationFile(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
         return baseOutputName(compiler, compilerContext, clazz) + ".mm";
+    }
+*/
+
+    @Override
+    public String getBridgeOutputHeaderFile(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
+        return compilerContext.getBridgePath(clazz.getNamespaces(), clazz.getName()) + ".h";
+    }
+
+    @Override
+    public String getBridgeOutputImplementationFile(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
+        return compilerContext.getBridgePath(clazz.getNamespaces(), clazz.getName()) + ".mm";
     }
 
     @Override
