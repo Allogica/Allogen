@@ -52,16 +52,8 @@ public class SharedPtrType extends AbstractType {
     private Scope scope;
 
     public SharedPtrType(final TypeName typeName) {
-        IDLLexer lexer = new IDLLexer(CharStreams.fromString(typeName.getTemplateArguments().get(0).getName()));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        IDLParser parser = new IDLParser(tokens);
-        ParseTree tree = parser.typename();
-
         scope = typeName.getScope();
-
-        IDLParser.TypenameContext ctx = (IDLParser.TypenameContext) tree.getPayload();
-        IDLTypeName idlReturnType = new IDLTypeName(ctx.regulartypename());
-        containedType = handleTypeName(idlReturnType).setScope(scope);
+        containedType = typeName.getTemplateArguments().get(0).setScope(scope);
     }
 
     private TypeName handleTypeName(IDLTypeName typeName) {
