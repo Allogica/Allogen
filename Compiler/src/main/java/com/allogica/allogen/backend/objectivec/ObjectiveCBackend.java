@@ -84,7 +84,7 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
 
     @Override
     public String getBridgeOutputHeaderFile(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
-        return compilerContext.getBridgePath(clazz.getNamespaces(), clazz.getName()) + ".h";
+        return compilerContext.getBridgePath(clazz.getNamespaces(), clazz.getName()) + "+Private.h";
     }
 
     @Override

@@ -31,7 +31,7 @@
 #pragma once
 
 #include "Allogen/ObjectiveC/Converter.hpp"
-#include <Juice/Utility/Optional.hpp>
+#include <map>
 
 namespace Allogen {
 	namespace ObjectiveC {
@@ -41,17 +41,17 @@ namespace Allogen {
 		 *
 		 * @tparam IntegralType the integral type to be converted
 		 */
-		template<typename ContainedType>
-		struct Converter<std::experimental::optional<ContainedType>> {
+		template<typename KeyType, typename ValueType, typename Compare, typename Allocator>
+		struct Converter<std::map<KeyType, ValueType, Compare, Allocator>> {
 			/**
 			 * The C++ type this converter is operating on
 			 */
-			using Type = std::experimental::optional<ContainedType>;
+			using Type = std::map<KeyType, ValueType, Compare, Allocator>;
 
 			/**
 			 * The JNI type this converter supports
 			 */
-			using ObjectiveCType = typename Converter<ContainedType>::ObjectiveCType;
+			using ObjectiveCType = NSDictionary*;
 
 			/**
 			 * Converts a C++ integer into a ObjectiveC integer
@@ -62,10 +62,20 @@ namespace Allogen {
 			 * @return the ObjectiveC integer
 			 */
 			static ObjectiveCType toObjectiveC(Type object) {
-				if(object) {
-					return Converter<ContainedType>::toObjectiveC(object.value());
+                if(object.size() == 0) {
+                    return [NSDictionary dictionary];
+                }
+
+				std::vector<id> bridgedKeys;
+				std::vector<id> bridgedObjects;
+				for(auto entry : object) {
+					bridgedKeys.push_back(Converter<KeyType>::toObjectiveC(entry.first));
+					bridgedObjects.push_back(Converter<ValueType>::toObjectiveC(entry.second));
 				}
-				return {};
+
+				return [NSDictionary dictionaryWithObjects: &bridgedObjects[0]
+												   forKeys: &bridgedKeys[0]
+												     count: bridgedObjects.size()];
 			}
 
 			/**
@@ -76,11 +86,17 @@ namespace Allogen {
 			 *
 			 * @return the C++ integer
 			 */
-			static Type fromObjectiveC(ObjectiveCType object) {
-				if(object) {
-					return Converter<ContainedType>::fromObjectiveC(object.value());
+			static Type fromObjectiveC(ObjectiveCType dict) {
+				Type objects;
+
+				for (typename Converter<KeyType>::ObjectiveCType* key in dict) {
+					objects.insert(std::make_pair(
+							Converter<KeyType>::fromObjectiveC(key),
+							Converter<ValueType>::fromObjectiveC(dict[key])
+					));
 				}
-				return {};
+
+				return objects;
 			}
 		};
 

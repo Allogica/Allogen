@@ -31,58 +31,53 @@
 #pragma once
 
 #include "Allogen/ObjectiveC/Converter.hpp"
-#include <Juice/Utility/Optional.hpp>
+#include <vector>
 
-namespace Allogen {
-	namespace ObjectiveC {
-		
+namespace Allogen { namespace ObjectiveC {
+
+	/**
+	 * A converter specialization for C++ optional types
+	 *
+	 * @tparam IntegralType the integral type to be converted
+	 */
+	template<typename Allocator>
+	struct Converter<std::vector<uint8_t, Allocator>> {
 		/**
-		 * A converter specialization for C++ optional types
-		 *
-		 * @tparam IntegralType the integral type to be converted
+		 * The C++ type this converter is operating on
 		 */
-		template<typename ContainedType>
-		struct Converter<std::experimental::optional<ContainedType>> {
-			/**
-			 * The C++ type this converter is operating on
-			 */
-			using Type = std::experimental::optional<ContainedType>;
+		using Type = std::vector<uint8_t, Allocator>;
 
-			/**
-			 * The JNI type this converter supports
-			 */
-			using ObjectiveCType = typename Converter<ContainedType>::ObjectiveCType;
+		/**
+		 * The JNI type this converter supports
+		 */
+		using ObjectiveCType = NSData*;
 
-			/**
-			 * Converts a C++ integer into a ObjectiveC integer
-			 *
-			 * @param env the JNI environment
-			 * @param i the C++ integer
-			 *
-			 * @return the ObjectiveC integer
-			 */
-			static ObjectiveCType toObjectiveC(Type object) {
-				if(object) {
-					return Converter<ContainedType>::toObjectiveC(object.value());
-				}
-				return {};
-			}
+		/**
+		 * Converts a C++ integer into a ObjectiveC integer
+		 *
+		 * @param env the JNI environment
+		 * @param i the C++ integer
+		 *
+		 * @return the ObjectiveC integer
+		 */
+		static ObjectiveCType toObjectiveC(Type buffer) {
+			return [NSData dataWithBytes:buffer.data() length:buffer.size()];
+		}
 
-			/**
-			 * Converts a ObjectiveC integer into a C++ integer
-			 *
-			 * @param env the JNI environment
-			 * @param i the ObjectiveC integer
-			 *
-			 * @return the C++ integer
-			 */
-			static Type fromObjectiveC(ObjectiveCType object) {
-				if(object) {
-					return Converter<ContainedType>::fromObjectiveC(object.value());
-				}
-				return {};
-			}
-		};
+		/**
+		 * Converts a ObjectiveC integer into a C++ integer
+		 *
+		 * @param env the JNI environment
+		 * @param i the ObjectiveC integer
+		 *
+		 * @return the C++ integer
+		 */
+		static Type fromObjectiveC(ObjectiveCType buffer) {
+			return Type(
+					(uint8_t*) buffer.bytes,
+					(uint8_t*) buffer.bytes + buffer.length
+			);
+		}
+	};
 
-	}
-}
+}}

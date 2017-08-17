@@ -134,8 +134,9 @@ namespace Allogen {
 			 * @return the C++ integer
 			 */
 			static Type fromObjectiveC(ObjectiveCType func) {
-				return [func](Args... args) -> void {
-					func(
+                auto funcCopy = (ObjectiveCType) Block_copy(func);
+				return [funcCopy](Args... args) -> void {
+					funcCopy(
 							Converter<Args>::toObjectiveC(
 									std::forward<Args>(args)
 							)...

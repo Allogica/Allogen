@@ -31,7 +31,7 @@
 #pragma once
 
 #include "Allogen/ObjectiveC/Converter.hpp"
-#include <Juice/Utility/Optional.hpp>
+#include <vector>
 
 namespace Allogen {
 	namespace ObjectiveC {
@@ -41,17 +41,17 @@ namespace Allogen {
 		 *
 		 * @tparam IntegralType the integral type to be converted
 		 */
-		template<typename ContainedType>
-		struct Converter<std::experimental::optional<ContainedType>> {
+		template<typename ContainedType, typename Allocator>
+		struct Converter<std::vector<ContainedType, Allocator>> {
 			/**
 			 * The C++ type this converter is operating on
 			 */
-			using Type = std::experimental::optional<ContainedType>;
+			using Type = std::vector<ContainedType, Allocator>;
 
 			/**
 			 * The JNI type this converter supports
 			 */
-			using ObjectiveCType = typename Converter<ContainedType>::ObjectiveCType;
+			using ObjectiveCType = NSArray*;
 
 			/**
 			 * Converts a C++ integer into a ObjectiveC integer
@@ -62,10 +62,18 @@ namespace Allogen {
 			 * @return the ObjectiveC integer
 			 */
 			static ObjectiveCType toObjectiveC(Type object) {
-				if(object) {
-					return Converter<ContainedType>::toObjectiveC(object.value());
+                if(object.size() == 0) {
+                    return [NSArray array];
+                }
+
+				std::vector<id> bridgedObjects;
+				for(auto entry : object) {
+					bridgedObjects.push_back(
+							Converter<ContainedType>::toObjectiveC(entry)
+					);
 				}
-				return {};
+
+				return [NSArray arrayWithObjects:&bridgedObjects[0] count:bridgedObjects.size()];
 			}
 
 			/**
@@ -76,11 +84,16 @@ namespace Allogen {
 			 *
 			 * @return the C++ integer
 			 */
-			static Type fromObjectiveC(ObjectiveCType object) {
-				if(object) {
-					return Converter<ContainedType>::fromObjectiveC(object.value());
+			static Type fromObjectiveC(ObjectiveCType array) {
+				Type objects;
+				typename Converter<ContainedType>::ObjectiveCType* entry;
+				for (entry in array) {
+					objects.push_back(
+							Converter<ContainedType>::fromObjectiveC(entry)
+					);
 				}
-				return {};
+
+				return objects;
 			}
 		};
 

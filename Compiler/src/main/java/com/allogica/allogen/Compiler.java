@@ -69,7 +69,10 @@ public class Compiler<Input, Output> {
         context.registerTypeFactory(LambdaType::new, new TypeName("lambda"));
         context.registerTypeFactory(OptionalType::new, new TypeName("optional"));
         context.registerTypeFactory(SharedPtrType::new, new TypeName("shared_ptr"));
+        context.registerTypeFactory(VectorType::new, new TypeName("vector"));
+        context.registerTypeFactory(MapType::new, new TypeName("map"));
         context.registerType(new StringType(), new TypeName("string"));
+        context.registerType(new BufferType(), new TypeName("buffer"));
 
         this.backend.registerTypes(this, this.context);
     }

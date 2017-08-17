@@ -36,6 +36,10 @@
 #include "Allogen/ObjectiveC/Converter/IntegralTypes.hpp"
 #include "Allogen/ObjectiveC/Converter/Function.hpp"
 #include "Allogen/ObjectiveC/Converter/Optional.hpp"
+#include "Allogen/ObjectiveC/Converter/Vector.hpp"
+#include "Allogen/ObjectiveC/Converter/Map.hpp"
+#include "Allogen/ObjectiveC/Converter/Buffer.hpp"
+
 #include "Allogen/ObjectiveC/BridgedClass.hpp"
 #include "Allogen/ObjectiveC/BridgedConstructor.hpp"
 #include "Allogen/ObjectiveC/BridgedMethod.hpp"

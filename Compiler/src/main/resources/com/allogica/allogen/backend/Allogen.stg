@@ -93,6 +93,18 @@ sharedPtrTypeNative(type) ::= <% std::shared_ptr\<<nativeType(type.resolvedType.
 sharedPtrTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
 sharedPtrTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
 
+vectorTypeNative(type) ::= <% std::vector\<<nativeType(type.resolvedType.containedType)>> %>
+vectorTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+vectorTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
+mapTypeNative(type) ::= <% std::map\<<nativeType(type.resolvedType.keyType)>, <nativeType(type.resolvedType.valueType)>> %>
+mapTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+mapTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
+bufferTypeNative(type) ::= "std::vector\<uint8_t>"
+bufferTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+bufferTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
 documentation(object) ::= <%
 /**
 <\n>

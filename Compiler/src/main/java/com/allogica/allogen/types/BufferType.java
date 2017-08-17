@@ -28,61 +28,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+package com.allogica.allogen.types;
 
-#include "Allogen/ObjectiveC/Converter.hpp"
-#include <Juice/Utility/Optional.hpp>
+public class BufferType extends AbstractType {
 
-namespace Allogen {
-	namespace ObjectiveC {
-		
-		/**
-		 * A converter specialization for C++ optional types
-		 *
-		 * @tparam IntegralType the integral type to be converted
-		 */
-		template<typename ContainedType>
-		struct Converter<std::experimental::optional<ContainedType>> {
-			/**
-			 * The C++ type this converter is operating on
-			 */
-			using Type = std::experimental::optional<ContainedType>;
+    @Override
+    public String getTemplateName() {
+        return "bufferType";
+    }
 
-			/**
-			 * The JNI type this converter supports
-			 */
-			using ObjectiveCType = typename Converter<ContainedType>::ObjectiveCType;
-
-			/**
-			 * Converts a C++ integer into a ObjectiveC integer
-			 *
-			 * @param env the JNI environment
-			 * @param i the C++ integer
-			 *
-			 * @return the ObjectiveC integer
-			 */
-			static ObjectiveCType toObjectiveC(Type object) {
-				if(object) {
-					return Converter<ContainedType>::toObjectiveC(object.value());
-				}
-				return {};
-			}
-
-			/**
-			 * Converts a ObjectiveC integer into a C++ integer
-			 *
-			 * @param env the JNI environment
-			 * @param i the ObjectiveC integer
-			 *
-			 * @return the C++ integer
-			 */
-			static Type fromObjectiveC(ObjectiveCType object) {
-				if(object) {
-					return Converter<ContainedType>::fromObjectiveC(object.value());
-				}
-				return {};
-			}
-		};
-
-	}
 }

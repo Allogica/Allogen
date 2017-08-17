@@ -40,6 +40,9 @@ stringType(type) ::= "NSString*"
 lambdaType(type) ::= <% <if(type.resolvedType.returnType)><typename(type.resolvedType.returnType)><else>void<endif>(^)(<type.resolvedType.arguments:{arg|<typename(arg.type)>}; separator=", ">) %>
 optionalType(type) ::= "<typename(type.resolvedType.containedType)>"
 sharedPtrType(type) ::= "<typename(type.resolvedType.containedType)>"
+vectorType(type) ::= "NSArray\<<typename(type.resolvedType.containedType)>>*"
+mapType(type) ::= "NSDictionary\<<typename(type.resolvedType.keyType)>, <typename(type.resolvedType.valueType)>>*"
+bufferType(type) ::= "NSData*"
 
 bridgedConstructor(constructor, class) ::= <<
 if(self) {
