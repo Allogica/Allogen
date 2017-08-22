@@ -33,6 +33,7 @@ package com.allogica.allogen.passes;
 import com.allogica.allogen.Compiler;
 import com.allogica.allogen.CompilerContext;
 import com.allogica.allogen.model.Class;
+import com.allogica.allogen.model.Constructor;
 import com.allogica.allogen.model.Method;
 import com.allogica.allogen.model.MethodArgument;
 
@@ -46,6 +47,9 @@ public class TypeLinkingPass implements CompilerPass<Class, Class> {
         for (final Method method : clazz.getMethods()) {
             handleMethod(compiler, context, clazz, method);
         }
+        for(final Constructor constructor : clazz.getConstructors()) {
+            handleConstructor(compiler, context, clazz, constructor);
+        }
 
         return clazz;
     }
@@ -55,6 +59,12 @@ public class TypeLinkingPass implements CompilerPass<Class, Class> {
         clazz.getUsedTypes().addAll(method.getReturnType().getResolvedType().getDependantTypes());
 
         for (final MethodArgument argument : method.getArguments()) {
+            handleArgument(compiler, context, clazz, argument);
+        }
+    }
+
+    private void handleConstructor(Compiler<?, ?> compiler, CompilerContext context, Class clazz, Constructor constructor) {
+        for (final MethodArgument argument : constructor.getArguments()) {
             handleArgument(compiler, context, clazz, argument);
         }
     }

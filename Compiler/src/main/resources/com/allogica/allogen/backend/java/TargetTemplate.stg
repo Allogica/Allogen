@@ -36,6 +36,10 @@ class(class) ::= <<
 <if(class.javaPackage)>package <class.javaPackage>;
 <endif>
 
+import java.util.*;
+import java.nio.ByteBuffer;
+<class.usedTypes:{usedType|<if(usedType.userDefinedClass)>import <usedType.userDefinedClass.javaFullyQualifiedName>;<\n><endif>}>
+
 <documentation(class)>
 public class <class.name> {
     /**
@@ -107,7 +111,7 @@ arguments(method, class) ::= <%
 argument(argument, method, class) ::= "<typename(argument.type)> <argument.name>"
 
 javaLambda(method, argument) ::= <<
-interface <argument.javaLambdaInterfaceName> {
+public interface <argument.javaLambdaInterfaceName> {
     <typename(argument.type.resolvedType.returnType)> <argument.javaLambdaMethodName>(<argument.type.resolvedType.arguments:argument(method, method); separator=", ">);
 }
 >>
@@ -118,3 +122,8 @@ primitiveType(type) ::= "<javaTypeMapping.(type.name)>"
 userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.javaName>"
 stringType(type) ::= "String"
 lambdaType(type) ::= "<type.javaLambdaInterfaceName>"
+optionalType(type) ::= "<typename(type.resolvedType.containedType)>"
+sharedPtrType(type) ::= "<typename(type.resolvedType.containedType)>"
+vectorType(type) ::= "List\<<typename(type.resolvedType.containedType)>>"
+mapType(type) ::= "Map\<<typename(type.resolvedType.keyType)>, <typename(type.resolvedType.valueType)>>"
+bufferType(type) ::= "ByteBuffer"

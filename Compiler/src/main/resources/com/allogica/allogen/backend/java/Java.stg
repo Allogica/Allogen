@@ -63,13 +63,17 @@ javaSignatureTypes ::= [
     "float": "F",   "double": "D"
 ]
 
-javaSignature(type) ::= <%
-<if(javaSignatureTypes.(type.name))>
-    <javaSignatureTypes.(type.name)>
-<else>
-    <type.resolvedType.userDefinedClass.javaSignature>
-<endif>
-%> // FIXME!!!
+javaSignatureTemplateName_(type) ::= "<type.resolvedType.templateName>JavaSignature"
+javaSignature(type) ::= "<(javaSignatureTemplateName_(type))(type)>"
+
+primitiveTypeJavaSignature(type) ::= "<javaSignatureTypes.(type.name)>"
+userDefinedTypeJavaSignature(type) ::= "<type.resolvedType.userDefinedClass.javaSignature>"
+stringTypeJavaSignature(type) ::= "Ljava/lang/String;"
+optionalTypeJavaSignature(type) ::= "<javaSignature(type.resolvedType.containedType)>"
+sharedPtrTypeJavaSignature(type) ::= "<javaSignature(type.resolvedType.containedType)>"
+vectorTypeJavaSignature(type) ::= "Ljava/util/List;"
+mapTypeJavaSignature(type) ::= "Ljava/util/Map;"
+bufferTypeJavaSignature(type) ::= "Ljava/nio/ByteBuffer;"
 
 bridgedConstructor(constructor, class) ::= <<
 return BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(

@@ -36,10 +36,7 @@ import com.allogica.allogen.backend.AbstractCompilerBackend;
 import com.allogica.allogen.idl.model.IDLAnnotation;
 import com.allogica.allogen.model.Class;
 import com.allogica.allogen.model.*;
-import com.allogica.allogen.types.LambdaType;
-import com.allogica.allogen.types.PrimitiveType;
-import com.allogica.allogen.types.StringType;
-import com.allogica.allogen.types.UserDefinedType;
+import com.allogica.allogen.types.*;
 import com.allogica.allogen.util.StringHelper;
 
 import java.net.URL;
@@ -207,6 +204,12 @@ public class JavaBackend extends AbstractCompilerBackend {
                 overloadBuilder.append(javaSignatures.get(typeName));
             } else if (argument.getType().getResolvedType() instanceof StringType) {
                 overloadBuilder.append("Ljava_lang_String_2");
+            } else if(argument.getType().getResolvedType() instanceof BufferType) {
+                overloadBuilder.append("Ljava_nio_ByteBuffer_2");
+            } else if(argument.getType().getResolvedType() instanceof VectorType) {
+                overloadBuilder.append("Ljava_util_List_2");
+            } else if(argument.getType().getResolvedType() instanceof MapType) {
+                overloadBuilder.append("Ljava_util_Map_2");
             }
         }
 

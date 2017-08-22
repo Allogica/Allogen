@@ -30,49 +30,57 @@
 
 #pragma once
 
-#include <jni.h>
+#include "Allogen/JNI/Converter.hpp"
+#include <Juice/Utility/Optional.hpp>
 
 namespace Allogen {
 	namespace JNI {
 
 		/**
-		 * A template class that represents a bridged constructor.
+		 * A converter specialization for C++ integral types
 		 *
-		 * @tparam Class the class whose method is being wrapped
-		 * @tparam MethodSignature the method signature being wrapped
+		 * @tparam IntegralType the integral type to be converted
 		 */
-		template<typename MethodSignature>
-		struct BridgedConstructor;
-
-		/**
-		 * A BridgedConstructor specialization for class constructors.
-		 *
-		 * This class automatically sets the Java class "pointer" property
-		 * to the newly allocated object.
-		 *
-		 * @tparam R the return type
-		 * @tparam Args the contructor argument types
-		 */
-		template<typename R, typename... Args>
-		struct BridgedConstructor<R(Args...)> {
-		public:
+		template<typename ContainedType>
+		struct Converter<std::experimental::optional<ContainedType>> {
 			/**
-			 * Calls a wrapped C++ function from Java code
-			 *
-			 * @tparam Executor the executor type
+			 * The C++ type this converter is operating on
+			 */
+			using Type = std::experimental::optional<ContainedType>;
+
+			/**
+			 * The JNI type this converter supports
+			 */
+			using JavaType = typename Converter<ContainedType>::JavaType;
+
+			/**
+			 * Converts a C++ integer into a Java integer
 			 *
 			 * @param env the JNI environment
-			 * @param executor the code generated executor used to dispatch the method to the C++ object
-			 * @param args the JNI arguments of the method call
+			 * @param i the C++ integer
 			 *
-			 * @return the already java-converted object returned by the C++ method
+			 * @return the Java integer
 			 */
-			template<typename Executor>
-			static inline jlong call(JNIEnv* env, Executor&& executor,
-									 typename Converter<Args>::JavaType& ... args) {
-				return reinterpret_cast<jlong>(
-						new std::shared_ptr<R>(executor(Converter<Args>::fromJava(env, args)...))
-				);
+			static JavaType toJava(JNIEnv* env, Type object) {
+				if(object) {
+					return Converter<ContainedType>::toJava(env, object.value());
+				}
+				return {};
+			}
+
+			/**
+			 * Converts a Java integer into a C++ integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the Java integer
+			 *
+			 * @return the C++ integer
+			 */
+			static Type fromJava(JNIEnv* env, JavaType object) {
+				if(object) {
+					return Converter<ContainedType>::fromJava(env, object);
+				}
+				return {};
 			}
 		};
 

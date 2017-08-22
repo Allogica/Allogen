@@ -32,7 +32,7 @@
 
 #include "Allogen/JNI/Converter.hpp"
 
-#include <vector>
+#include <map>
 #include <jni.h>
 
 namespace Allogen {
@@ -44,22 +44,17 @@ namespace Allogen {
 		 * @tparam ContainedType the C++ object contained inside the vector
 		 * @tparam Allocator the vector allocator type
 		 */
-		template<typename ContainedType, typename Allocator>
-		struct Converter<std::vector<ContainedType, Allocator>> {
+		template<typename KeyType, typename ValueType, typename Compare, typename Allocator>
+		struct Converter<std::map<KeyType, ValueType, Compare, Allocator>> {
 			/**
 			 * The vector type
 			 */
-			using Type = std::vector<ContainedType, Allocator>;
+			using Type = std::map<KeyType, ValueType, Compare, Allocator>;
 
 			/**
 			 * The Java array type
 			 */
 			using JavaType = jobject;
-
-			/**
-			 * A alias to the vector type
-			 */
-			using Vector = Type;
 
 			/**
 			 * Converts a C++ vector into a Java array
@@ -69,16 +64,17 @@ namespace Allogen {
 			 *
 			 * @return the converted Java array
 			 */
-			static JavaType toJava(JNIEnv* env, Vector v) {
-				jclass java_util_ArrayList = env->FindClass("java/util/ArrayList");
-				jmethodID java_util_ArrayList_ = env->GetMethodID(java_util_ArrayList, "<init>", "(I)V");
-				jmethodID java_util_ArrayList_add = env->GetMethodID(java_util_ArrayList, "add",
-				                                                     "(Ljava/lang/Object;)Z");
+			static JavaType toJava(JNIEnv* env, Type v) {
+				jclass java_util_HashMap = env->FindClass("java/util/HashMap");
+				jmethodID java_util_HashMap_ = env->GetMethodID(java_util_HashMap, "<init>", "(I)V");
+				jmethodID java_util_HashMap_put = env->GetMethodID(java_util_HashMap, "put",
+				                                                     "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
-				jobject result = env->NewObject(java_util_ArrayList, java_util_ArrayList_, v.size());
-				for(ContainedType& object : v) {
-					env->CallBooleanMethod(result, java_util_ArrayList_add,
-					                       Converter<ContainedType>::toJava(env, object));
+				jobject result = env->NewObject(java_util_HashMap, java_util_HashMap_, v.size());
+				for(auto& entry : v) {
+					env->CallObjectMethod(result, java_util_HashMap_put,
+					                      Converter<KeyType>::toJava(env, entry.first),
+					                      Converter<ValueType>::toJava(env, entry.second));
 				}
 				return result;
 			}
@@ -91,22 +87,33 @@ namespace Allogen {
 			 *
 			 * @return the converted C++ vector
 			 */
-			static Type fromJava(JNIEnv* env, JavaType list) {
-				jclass java_util_List = env->FindClass("java/util/List");
-				jmethodID java_util_List_size = env->GetMethodID(java_util_List, "size", "()I");
-				jmethodID java_util_List_get = env->GetMethodID(java_util_List, "get",
-				                                                     "(I)Ljava/lang/Object;");
+			static Type fromJava(JNIEnv* env, JavaType map) {
+				jclass java_util_Map = env->FindClass("java/util/Map");
+				jmethodID java_util_Map_entrySey = env->GetMethodID(java_util_Map, "entrySet", "()Ljava/util/Set;");
 
-				jint len = env->CallIntMethod(list, java_util_List_size);
-				Type result;
-				result.reserve(len);
-				for (jint i=0; i<len; i++) {
-					jobject object = env->CallObjectMethod(list, java_util_List_get);
-					result.emplace_back(Converter<ContainedType>::fromJava(env, object));
-					env->DeleteLocalRef(object);
+				jobject entrySet = env->CallObjectMethod(map, java_util_Map_entrySey);
+
+				jclass entrySetClass = env->GetObjectClass(entrySet);
+				jmethodID java_util_Set_toArray = env->GetMethodID(entrySetClass, "toArray", "()[Ljava/lang/Object;");
+
+				jclass entryClass = env->FindClass("java/util/Map$Entry");
+				jmethodID entryGetKey = env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
+				jmethodID entryGetValue = env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
+
+				jobjectArray entries = (jobjectArray) env->CallObjectMethod(entrySet, java_util_Set_toArray);
+				jsize size = env->GetArrayLength(entries);
+
+				Type objects;
+				for(jsize i = 0; i<size; i++) {
+					jobject entry = env->GetObjectArrayElement(entries, i);
+
+					objects.insert(std::make_pair(
+							Converter<KeyType>::fromJava(env, env->CallObjectMethod(entry, entryGetKey)),
+							Converter<ValueType>::fromJava(env, env->CallObjectMethod(entry, entryGetValue))
+					));
 				}
 
-				return result;
+				return objects;
 			}
 		};
 

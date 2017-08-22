@@ -74,7 +74,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T object) {
-				return BridgeClass<T*>::toJava(env, new T(std::move(object)));
+				return BridgeClass<std::shared_ptr<T>>::toJava(env, std::make_shared<T>(std::move(object)));
 			}
 
 			/**
@@ -86,7 +86,7 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static T fromJava(JNIEnv* env, JavaType jthis) {
-				return *(BridgeClass<T*>::fromJava(env, jthis));
+				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis));
 			}
 		};
 
@@ -119,14 +119,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T* object) {
-				jclass c = env->FindClass(JAVA_CLASS_NAME<T>);
-				jobject jobject = env->AllocObject(c);
-
-				jfieldID field = env->GetFieldID(c, "pointer", "J");
-				jlong longPtr = env->GetLongField(jobject, field);
-				env->SetLongField(jobject, field, reinterpret_cast<jlong>(object));
-
-				return jobject;
+				return BridgeClass<std::shared_ptr<T>>::toJava(env, std::shared_ptr<T>(object, [](auto) { /* no-op */ }));
 			}
 
 			/**
@@ -138,10 +131,11 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static T* fromJava(JNIEnv* env, JavaType jthis) {
-				jclass view = env->GetObjectClass(jthis);
-				jfieldID field = env->GetFieldID(view, "pointer", "J");
-				jlong longPtr = env->GetLongField(jthis, field);
-				return reinterpret_cast<T*>(longPtr);
+				auto ptr = BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis);
+				if(ptr == nullptr) {
+					return nullptr;
+				}
+				return ptr.get();
 			}
 
 		};
@@ -175,7 +169,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T& object) {
-				return BridgeClass<T*>::toJava(env, new T(object));
+				return BridgeClass<T*>::toJava(env, std::make_shared<T>(object));
 			}
 
 			/**
@@ -187,7 +181,7 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static T& fromJava(JNIEnv* env, JavaType jthis) {
-				return *(BridgeClass<T*>::fromJava(env, jthis));
+				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis).get());
 			}
 		};
 
@@ -220,7 +214,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T& object) {
-				return BridgeClass<T*>::toJava(env, new T(object));
+				return BridgeClass<std::shared_ptr<T>>::toJava(env, std::make_shared<T>(object));
 			}
 
 			/**
@@ -232,7 +226,7 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static const T& fromJava(JNIEnv* env, JavaType jthis) {
-				return *(BridgeClass<T*>::fromJava(env, jthis));
+				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis).get());
 			}
 		};
 
@@ -265,7 +259,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, T&& object) {
-				return BridgeClass<T*>::toJava(env, new T(std::move(object)));
+				return BridgeClass<std::shared_ptr<T>>::toJava(env, std::make_shared<T>(std::move(object)));
 			}
 
 			/**
@@ -277,8 +271,64 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static const T& fromJava(JNIEnv* env, JavaType jthis) {
-				return *(BridgeClass<T*>::fromJava(env, jthis));
+				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis));
 			}
+		};
+
+		/**
+		 * A Conversion implementation for classes bridged between C++ and Java.
+		 *
+		 * This implementation deals with functions that return or use the object
+		 * by a pointer.
+		 *
+		 * @tparam T the bridged class type
+		 */
+		template<typename T>
+		struct BridgeClass<std::shared_ptr<T>> {
+			/**
+			 * The C++ type being converted
+			 */
+			using Type = std::shared_ptr<T>;
+
+			/**
+			 * The Java type this converter converts from/to
+			 */
+			using JavaType = jobject;
+
+			/**
+			 * Converts from the C++ object to a Java object
+			 *
+			 * @param env the JNI environment
+			 * @param object the C++ object
+			 *
+			 * @return the corresponding Java type
+			 */
+			static JavaType toJava(JNIEnv* env, Type object) {
+				jclass c = env->FindClass(JAVA_CLASS_NAME<T>);
+				jobject jobject = env->AllocObject(c);
+
+				jfieldID field = env->GetFieldID(c, "pointer", "J");
+				jlong longPtr = env->GetLongField(jobject, field);
+				env->SetLongField(jobject, field, (jlong) new Type(object));
+
+				return jobject;
+			}
+
+			/**
+			 * Converts from the Java object to the C++ object
+			 *
+			 * @param env the JNI environment
+			 * @param jthis the Java object
+			 *
+			 * @return the corresponding C++ type
+			 */
+			static Type fromJava(JNIEnv* env, JavaType jthis) {
+				jclass view = env->GetObjectClass(jthis);
+				jfieldID field = env->GetFieldID(view, "pointer", "J");
+				jlong longPtr = env->GetLongField(jthis, field);
+				return *reinterpret_cast<Type*>(longPtr);
+			}
+
 		};
 
 #define ALLOGEN_BRIDGED_CLASS(ClassName, JavaClassName)                                                      		\

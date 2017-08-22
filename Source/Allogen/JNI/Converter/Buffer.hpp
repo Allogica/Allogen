@@ -30,49 +30,56 @@
 
 #pragma once
 
+#include "Allogen/JNI/Converter.hpp"
+
+#include <vector>
 #include <jni.h>
 
 namespace Allogen {
 	namespace JNI {
 
 		/**
-		 * A template class that represents a bridged constructor.
+		 * A converter specialization that allows convertion between std::vector and Java arrays.
 		 *
-		 * @tparam Class the class whose method is being wrapped
-		 * @tparam MethodSignature the method signature being wrapped
+		 * @tparam ContainedType the C++ object contained inside the vector
+		 * @tparam Allocator the vector allocator type
 		 */
-		template<typename MethodSignature>
-		struct BridgedConstructor;
-
-		/**
-		 * A BridgedConstructor specialization for class constructors.
-		 *
-		 * This class automatically sets the Java class "pointer" property
-		 * to the newly allocated object.
-		 *
-		 * @tparam R the return type
-		 * @tparam Args the contructor argument types
-		 */
-		template<typename R, typename... Args>
-		struct BridgedConstructor<R(Args...)> {
-		public:
+		template<typename Allocator>
+		struct Converter<std::vector<uint8_t, Allocator>> {
 			/**
-			 * Calls a wrapped C++ function from Java code
-			 *
-			 * @tparam Executor the executor type
+			 * The vector type
+			 */
+			using Type = std::vector<uint8_t, Allocator>;
+
+			/**
+			 * The Java array type
+			 */
+			using JavaType = jobject;
+
+			/**
+			 * Converts a C++ vector into a Java array
 			 *
 			 * @param env the JNI environment
-			 * @param executor the code generated executor used to dispatch the method to the C++ object
-			 * @param args the JNI arguments of the method call
+			 * @param v the C++ vector
 			 *
-			 * @return the already java-converted object returned by the C++ method
+			 * @return the converted Java array
 			 */
-			template<typename Executor>
-			static inline jlong call(JNIEnv* env, Executor&& executor,
-									 typename Converter<Args>::JavaType& ... args) {
-				return reinterpret_cast<jlong>(
-						new std::shared_ptr<R>(executor(Converter<Args>::fromJava(env, args)...))
-				);
+			static JavaType toJava(JNIEnv* env, Type v) {
+				return env->NewDirectByteBuffer(v.data(), v.size());
+			}
+
+			/**
+			 * Converts a Java array into a C++ vector
+			 *
+			 * @param env the JNI environment
+			 * @param i the Java array
+			 *
+			 * @return the converted C++ vector
+			 */
+			static Type fromJava(JNIEnv* env, JavaType buffer) {
+				uint8_t* data = (uint8_t*) env->GetDirectBufferAddress(buffer);
+				size_t length = (size_t) env->GetDirectBufferCapacity(buffer);
+				return std::vector<uint8_t>(data, data+length);
 			}
 		};
 
