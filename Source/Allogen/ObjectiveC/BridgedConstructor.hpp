@@ -70,7 +70,9 @@ namespace Allogen {
 			template<typename ObjCT, typename Executor>
 			static inline void call(ObjCT* wself, Executor&& executor,
 									 typename Converter<Args>::ObjectiveCType... args) {
-				[wself initWithCppObject: new std::shared_ptr<R>(executor(Converter<Args>::fromObjectiveC(args)...))];
+				@autoreleasepool {
+						[wself initWithCppObject: new std::shared_ptr<R>(executor(Converter<Args>::fromObjectiveC(args)...))];
+				}
 			}
 		};
 

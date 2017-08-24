@@ -71,14 +71,16 @@ namespace Allogen {
 			template<typename ObjCT, typename Executor>
 			static inline typename Converter<R>::ObjectiveCType call(ObjCT* objcSelf, Executor&& executor,
 															   typename Converter<Args>::ObjectiveCType... args) {
-				return Converter<typename std::result_of<Executor(Class*, Args...)>::type>::toObjectiveC(
-						executor(
-								Converter<Class*>::fromObjectiveC(objcSelf),
-								Converter<Args>::fromObjectiveC(
-										std::move(args)
-								)...
-						)
-				);
+				@autoreleasepool {
+					return Converter<typename std::result_of<Executor(Class*, Args...)>::type>::toObjectiveC(
+							executor(
+									Converter<Class*>::fromObjectiveC(objcSelf),
+									Converter<Args>::fromObjectiveC(
+											std::move(args)
+									)...
+							)
+					);
+				}
 			}
 
 			/**
@@ -95,13 +97,15 @@ namespace Allogen {
 			template<typename Executor>
 			static inline typename Converter<R>::ObjectiveCType call(Executor&& executor,
 															   typename Converter<Args>::ObjectiveCType... args) {
-				return Converter<typename std::result_of<Executor(Args...)>::type>::toObjectiveC(
-						executor(
-								Converter<Args>::fromObjectiveC(
-										std::move(args)
-								)...
-						)
-				);
+				@autoreleasepool {
+					return Converter<typename std::result_of<Executor(Args...)>::type>::toObjectiveC(
+							executor(
+									Converter<Args>::fromObjectiveC(
+											std::move(args)
+									)...
+							)
+					);
+				}
 			}
 		};
 
@@ -126,14 +130,16 @@ namespace Allogen {
 			 */
 			template<typename ObjCT, typename Executor>
 			static inline void call(ObjCT* objcSelf, Executor&& executor,
-									typename Converter<Args>::ObjectiveCType... args) {
-				executor(
-						Converter<Class*>::fromObjectiveC(objcSelf),
-						Converter<Args>::fromObjectiveC(
-								std::move(args)
-						)...
+			                        typename Converter<Args>::ObjectiveCType... args) {
+				@autoreleasepool {
+						executor(
+								Converter<Class*>::fromObjectiveC(objcSelf),
+								Converter<Args>::fromObjectiveC(
+										std::move(args)
+								)...
 
-				);
+						);
+				}
 			}
 
 			/**
@@ -147,13 +153,15 @@ namespace Allogen {
 			 */
 			template<typename Executor>
 			static inline void call(Executor&& executor,
-									typename Converter<Args>::ObjectiveCType... args) {
-				executor(
-						Converter<Args>::fromObjectiveC(
-								std::move(args)
-						)...
+			                        typename Converter<Args>::ObjectiveCType... args) {
+				@autoreleasepool {
+					executor(
+							Converter<Args>::fromObjectiveC(
+									std::move(args)
+							)...
 
-				);
+					);
+				}
 			}
 		};
 	}
