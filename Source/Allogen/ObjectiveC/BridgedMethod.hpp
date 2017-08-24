@@ -80,7 +80,7 @@ namespace Allogen {
 									)...
 							)
 					);
-				}
+                }
 			}
 
 			/**

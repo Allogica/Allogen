@@ -63,11 +63,13 @@ namespace Allogen {
 			 */
 			static ObjectiveCType toObjectiveC(Type func) {
 				return ^R(Args... args) {
-					return Converter<R>::toObjectiveC(func(
+                    @autoreleasepool {
+                    return Converter<R>::toObjectiveC(func(
 							Converter<Args>::toObjectiveC(
 									std::move<Args>(args)
 							)...
 					));
+                    }
 				};
 			}
 
@@ -81,11 +83,13 @@ namespace Allogen {
 			 */
 			static Type fromObjectiveC(ObjectiveCType func) {
 				return [func](Args... args) -> R {
+                    @autoreleasepool {
 					return Converter<R>::fromObjectiveC(func(
 							Converter<Args>::toObjectiveC(
 									std::forward<Args>(args)
 							)...
 					));
+                    }
 				};
 			}
 		};
@@ -117,11 +121,13 @@ namespace Allogen {
 			 */
 			static ObjectiveCType toObjectiveC(Type func) {
 				return ^void(Args... args) {
+                    @autoreleasepool {
 					func(
 							Converter<Args>::toObjectiveC(
 									std::move<Args>(args)
 							)...
 					);
+                    }
 				};
 			}
 
@@ -136,11 +142,13 @@ namespace Allogen {
 			static Type fromObjectiveC(ObjectiveCType func) {
                 //auto funcCopy = (ObjectiveCType) Block_copy(func);
 				return [func](Args... args) -> void {
+                    @autoreleasepool {
 					func(
 							Converter<Args>::toObjectiveC(
 									std::forward<Args>(args)
 							)...
 					);
+                    }
 				};
 			}
 		};
