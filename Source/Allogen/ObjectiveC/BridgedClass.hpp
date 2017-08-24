@@ -305,7 +305,10 @@ namespace Allogen {
 
 				auto c = NSClassFromString([NSString stringWithCString:OBJC_CLASS<T>.data()
 			encoding:[NSString defaultCStringEncoding]]);
-				return [[c alloc] initWithCppObject: new Type(object)];
+                id objcObject = [c alloc];
+                
+                return ((id (*)(id, SEL, Type*))[objcObject methodForSelector:@selector(initWithCppObject:)])(objcObject, @selector(initWithCppObject:), new Type(object));
+                // return [[c alloc] performSelector:@selector(initWithCppObject:) withObject:new Type(object)];
 			}
 
 			/**
@@ -321,7 +324,7 @@ namespace Allogen {
 					return nullptr;
 				}
 
-				return *reinterpret_cast<Type*>([wself performSelector: @selector(toCppObject)]);
+				return *((__bridge Type*)[wself performSelector: @selector(toCppObject)]);
 			}
 
 		};
