@@ -89,7 +89,7 @@ constructor(constructor, class) ::= <<
 
 destructor(destructor, class) ::= <<
 -(void)dealloc {
-    <bridgedDestructor(destructor, class)>
+    delete _cppObject;
 }
 >>
 
