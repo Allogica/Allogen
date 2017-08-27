@@ -53,10 +53,13 @@ if(JNI_FOUND)
     )
 endif()
 
-add_library(Allogen.ObjectiveC INTERFACE)
-target_include_directories(Allogen.ObjectiveC
-        INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Source
-)
+# Objective-C bridges are only available on Apple platforms. For now at least.
+if(APPLE)
+    add_library(Allogen.ObjectiveC INTERFACE)
+    target_include_directories(Allogen.ObjectiveC
+            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Source
+    )
+endif()
 
 add_library(Allogen.CSharp INTERFACE)
 target_include_directories(Allogen.CSharp
