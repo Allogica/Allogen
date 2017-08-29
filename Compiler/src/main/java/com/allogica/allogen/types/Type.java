@@ -42,4 +42,6 @@ public interface Type {
 
     List<Type> getDependantTypes();
 
+    int compare(Type other);
+
 }

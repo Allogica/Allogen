@@ -43,6 +43,8 @@ sharedPtrType(type) ::= "<typename(type.resolvedType.containedType)>"
 vectorType(type) ::= "NSArray\<<typename(type.resolvedType.containedType)>>*"
 mapType(type) ::= "NSDictionary\<<typename(type.resolvedType.keyType)>, <typename(type.resolvedType.valueType)>>*"
 bufferType(type) ::= "NSData*"
+durationType(type) ::= "NSDate*"
+dateType(type) ::= "NSDate*"
 
 bridgedConstructor(constructor, class) ::= <<
 if(self) {

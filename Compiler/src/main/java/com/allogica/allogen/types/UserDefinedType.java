@@ -48,4 +48,11 @@ public class UserDefinedType extends AbstractType {
     public String getTemplateName() {
         return "userDefinedType";
     }
+
+    public int compare(Type other) {
+        if(other instanceof UserDefinedType) {
+            return clazz.getFullyQualifiedName().compareTo(((UserDefinedType) other).clazz.getFullyQualifiedName());
+        }
+        return super.compare(other);
+    }
 }

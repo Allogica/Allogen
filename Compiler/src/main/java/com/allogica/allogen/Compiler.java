@@ -65,6 +65,8 @@ public class Compiler<Input, Output> {
         context.registerType(new PrimitiveType(), new TypeName("int32"));
         context.registerType(new PrimitiveType(), new TypeName("uint64"));
         context.registerType(new PrimitiveType(), new TypeName("int64"));
+        context.registerType(new PrimitiveType(), new TypeName("float"));
+        context.registerType(new PrimitiveType(), new TypeName("double"));
 
         context.registerTypeFactory(LambdaType::new, new TypeName("lambda"));
         context.registerTypeFactory(OptionalType::new, new TypeName("optional"));
@@ -73,6 +75,7 @@ public class Compiler<Input, Output> {
         context.registerTypeFactory(MapType::new, new TypeName("map"));
         context.registerType(new StringType(), new TypeName("string"));
         context.registerType(new BufferType(), new TypeName("buffer"));
+        context.registerType(new DateType(), new TypeName("date"));
 
         this.backend.registerTypes(this, this.context);
     }

@@ -105,6 +105,14 @@ bufferTypeNative(type) ::= "std::vector\<uint8_t>"
 bufferTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
 bufferTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
 
+durationTypeNative(type) ::= "std::chrono::seconds"
+durationTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+durationTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
+dateTypeNative(type) ::= "std::chrono::system_clock::time_point"
+dateTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
+dateTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+
 documentation(object) ::= <%
 /**
 <\n>

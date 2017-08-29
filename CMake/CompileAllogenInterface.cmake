@@ -35,12 +35,12 @@ include(CMakeParseArguments)
 
 find_package(Java 1.8)
 if(NOT Java_FOUND)
-    message(WARNING "Java not found. Allogen compiler will be unavailable.")
+    message("Java not found. Allogen compiler will be unavailable.")
 endif()
 
 find_package(Maven)
 if(NOT Maven_FOUND)
-    message(WARNING "Maven not found. Allogen compiler will be unavailable.")
+    message("Maven not found. Allogen compiler will be unavailable.")
 endif()
 
 if (NOT ALLOGEN_COMPILER)

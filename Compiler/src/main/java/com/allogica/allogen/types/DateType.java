@@ -30,27 +30,11 @@
 
 package com.allogica.allogen.types;
 
-import com.allogica.allogen.Compiler;
-import com.allogica.allogen.CompilerContext;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-public abstract class AbstractType implements Type {
+public class DateType extends AbstractType {
 
     @Override
-    public void link(Compiler<?, ?> compiler, CompilerContext compilerContext) {
-
-    }
-
-    @Override
-    public List<Type> getDependantTypes() {
-        return Collections.emptyList();
-    }
-
-    public int compare(Type other) {
-        return hashCode() - other.hashCode();
+    public String getTemplateName() {
+        return "dateType";
     }
 
 }

@@ -47,7 +47,7 @@ public class Class extends ModelObject {
     private Map<String, Property> properties = new HashMap<>();
 
     private IDLClass idlClass;
-    private transient Set<Type> usedTypes = new HashSet<>();
+    private transient Set<Type> usedTypes = new TreeSet<>(Type::compare);
 
     public Class(String name, List<Method> methods) {
         this.name = name;

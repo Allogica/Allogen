@@ -39,6 +39,7 @@
 #include "Allogen/ObjectiveC/Converter/Vector.hpp"
 #include "Allogen/ObjectiveC/Converter/Map.hpp"
 #include "Allogen/ObjectiveC/Converter/Buffer.hpp"
+#include "Allogen/ObjectiveC/Converter/DateTime.hpp"
 
 #include "Allogen/ObjectiveC/BridgedClass.hpp"
 #include "Allogen/ObjectiveC/BridgedConstructor.hpp"
