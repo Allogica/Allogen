@@ -31,7 +31,7 @@
 #pragma once
 
 #include "Allogen/ObjectiveC/Converter.hpp"
-#include <Juice/Utility/Optional.hpp>
+#include <experimental/optional>
 
 namespace Allogen {
 	namespace ObjectiveC {
@@ -63,7 +63,7 @@ namespace Allogen {
 			 */
 			static ObjectiveCType toObjectiveC(Type object) {
 				if(object) {
-					return Converter<ContainedType>::toObjectiveC(object.value());
+					return Converter<ContainedType>::toObjectiveC(*object);
 				}
 				return {};
 			}
@@ -78,7 +78,7 @@ namespace Allogen {
 			 */
 			static Type fromObjectiveC(ObjectiveCType object) {
 				if(object) {
-					return Converter<ContainedType>::fromObjectiveC(object.value());
+					return Converter<ContainedType>::fromObjectiveC(object);
 				}
 				return {};
 			}

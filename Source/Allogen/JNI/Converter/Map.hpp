@@ -107,11 +107,19 @@ namespace Allogen {
 				for(jsize i = 0; i<size; i++) {
 					jobject entry = env->GetObjectArrayElement(entries, i);
 
+					auto key = env->CallObjectMethod(entry, entryGetKey);
+					auto value = env->CallObjectMethod(entry, entryGetValue);
+
 					objects.insert(std::make_pair(
-							Converter<KeyType>::fromJava(env, env->CallObjectMethod(entry, entryGetKey)),
-							Converter<ValueType>::fromJava(env, env->CallObjectMethod(entry, entryGetValue))
+							Converter<KeyType>::fromJava(env, key),
+							Converter<ValueType>::fromJava(env, value)
 					));
+
+					env->DeleteLocalRef(key);
+					env->DeleteLocalRef(value);
 				}
+
+				env->DeleteLocalRef(entries);
 
 				return objects;
 			}

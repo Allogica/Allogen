@@ -31,27 +31,77 @@
 #pragma once
 
 #include "Allogen/JNI/Converter.hpp"
-#include <Juice/Utility/Optional.hpp>
+#include <chrono>
 
 namespace Allogen {
 	namespace JNI {
-
+		
 		/**
-		 * A converter specialization for C++ integral types
+		 * A converter specialization for C++ duration types
 		 *
 		 * @tparam IntegralType the integral type to be converted
 		 */
-		template<typename ContainedType>
-		struct Converter<std::experimental::optional<ContainedType>> {
+		template<typename Representation, typename Period>
+		struct Converter<std::chrono::duration<Representation, Period>> {
 			/**
 			 * The C++ type this converter is operating on
 			 */
-			using Type = std::experimental::optional<ContainedType>;
+			using Type = std::chrono::duration<Representation, Period>;
 
 			/**
 			 * The JNI type this converter supports
 			 */
-			using JavaType = typename Converter<ContainedType>::JavaType;
+			using JavaType = jobject;
+
+			/**
+			 * Converts a C++ data into a Java data
+			 *
+			 * @param env the JNI environment
+			 * @param i the C++ integer
+			 *
+			 * @return the Java integer
+			 */
+			static JavaType toJava(JNIEnv* env, Type object) {
+				jclass java_util_Date = env->FindClass("java/util/Date");
+				jmethodID java_util_Date_ = env->GetMethodID(java_util_Date, "<init>", "(L)V");
+
+				auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(object);
+				return env->NewObject(java_util_Date, java_util_Date_, millis.count());
+			}
+
+			/**
+			 * Converts a Java data into a C++ data
+			 *
+			 * @param env the JNI environment
+			 * @param i the Java integer
+			 *
+			 * @return the C++ integer
+			 */
+			static Type fromJava(JNIEnv* env, JavaType date) {
+				jclass java_util_Date = env->FindClass("java/util/Date");
+				jmethodID java_util_Date_getTime = env->GetMethodID(java_util_Date, "getTime", "()L");
+
+				auto millis = std::chrono::milliseconds(env->CallLongMethod(date, java_util_Date_getTime));
+				return std::chrono::duration_cast<Type>(millis);
+			}
+		};
+
+		/**
+		 * A converter specialization for C++ time_point types
+		 *
+		 * @tparam IntegralType the integral type to be converted
+		 */
+		template<typename Clock, typename Duration>
+		struct Converter<std::chrono::time_point<Clock, Duration>> {
+			/**
+			 * The C++ type this converter is operating on
+			 */
+			using Type = std::chrono::time_point<Clock, Duration>;
+
+			/**
+			 * The JNI type this converter supports
+			 */
+			using JavaType = jobject;
 
 			/**
 			 * Converts a C++ integer into a Java integer
@@ -62,10 +112,7 @@ namespace Allogen {
 			 * @return the Java integer
 			 */
 			static JavaType toJava(JNIEnv* env, Type object) {
-				if(object) {
-					return Converter<ContainedType>::toJava(env, *object);
-				}
-				return {};
+				return Converter<Duration>::toJava(env, object.time_since_epoch());
 			}
 
 			/**
@@ -76,11 +123,8 @@ namespace Allogen {
 			 *
 			 * @return the C++ integer
 			 */
-			static Type fromJava(JNIEnv* env, JavaType object) {
-				if(object) {
-					return Converter<ContainedType>::fromJava(env, object);
-				}
-				return {};
+			static Type fromJava(JNIEnv* env, JavaType date) {
+				return Converter<Duration>::fromJava(env, date);
 			}
 		};
 

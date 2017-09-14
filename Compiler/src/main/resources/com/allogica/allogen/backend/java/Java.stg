@@ -74,6 +74,7 @@ sharedPtrTypeJavaSignature(type) ::= "<javaSignature(type.resolvedType.contained
 vectorTypeJavaSignature(type) ::= "Ljava/util/List;"
 mapTypeJavaSignature(type) ::= "Ljava/util/Map;"
 bufferTypeJavaSignature(type) ::= "Ljava/nio/ByteBuffer;"
+dateTypeJavaSignature(type) ::= "Ljava/util/Date;"
 
 bridgedConstructor(constructor, class) ::= <<
 return BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(

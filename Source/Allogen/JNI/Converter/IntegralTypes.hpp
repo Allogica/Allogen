@@ -48,7 +48,8 @@ namespace Allogen {
 		 * @tparam IntegralType the integral type to be converted
 		 */
 		template<typename IntegralType>
-		struct Converter<IntegralType, typename std::enable_if<std::is_integral<IntegralType>::value>::type> {
+		struct Converter<IntegralType, typename std::enable_if<std::is_integral<IntegralType>::value ||
+				std::is_floating_point<IntegralType>::value>::type> {
 			/**
 			 * The C++ type this converter is operating on
 			 */
@@ -122,6 +123,15 @@ namespace Allogen {
 		template<>
 		struct IntegralConverterTrait<bool> {
 			using T = jboolean;
+		};
+
+		template<>
+		struct IntegralConverterTrait<float> {
+			using T = jfloat;
+		};
+		template<>
+		struct IntegralConverterTrait<double> {
+			using T = jdouble;
 		};
 
 	}

@@ -42,6 +42,7 @@
 #include "Allogen/JNI/Converter/Buffer.hpp"
 #include "Allogen/JNI/Converter/Map.hpp"
 #include "Allogen/JNI/Converter/Optional.hpp"
+#include "Allogen/JNI/Converter/DateTime.hpp"
 #include "Allogen/JNI/BridgedClass.hpp"
 #include "Allogen/JNI/BridgedConstructor.hpp"
 #include "Allogen/JNI/BridgedMethod.hpp"
