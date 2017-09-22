@@ -231,7 +231,7 @@ namespace Allogen {
 					bool attached = false;
 					int err = lambda.object.vm->GetEnv((void**) &env, JNI_VERSION_1_6);
 					if(err == JNI_EDETACHED) {
-						err = lambda.object.vm->AttachCurrentThreadAsDaemon(&env, nullptr);
+						err = lambda.object.vm->AttachCurrentThreadAsDaemon(ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND &env, nullptr);
 						attached = true;
 					}
 
@@ -315,7 +315,7 @@ namespace Allogen {
 					bool attached = false;
 					int err = lambda.object.vm->GetEnv((void**) &env, JNI_VERSION_1_6);
 					if(err == JNI_EDETACHED) {
-						err = lambda.object.vm->AttachCurrentThreadAsDaemon(&env, nullptr);
+						err = lambda.object.vm->AttachCurrentThreadAsDaemon(ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND &env, nullptr);
 						attached = true;
 					}
 
