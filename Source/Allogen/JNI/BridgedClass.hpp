@@ -275,6 +275,36 @@ namespace Allogen {
 			}
 		};
 
+		inline jclass getClass(JNIEnv* env, std::string className) {
+			static jobject gClassLoader;
+			static jmethodID gFindClassMethod;
+			static bool loaded = false;
+			if(!loaded) {
+				loaded = true;
+
+				//replace with one of your classes in the line below
+				auto randomClass = env->FindClass(className.data());
+				jclass classClass = env->GetObjectClass(randomClass);
+
+				auto classLoaderClass = env->FindClass("java/lang/ClassLoader");
+				auto getClassLoaderMethod = env->GetMethodID(classClass, "getClassLoader",
+															 "()Ljava/lang/ClassLoader;");
+				gClassLoader = env->NewGlobalRef(
+						env->CallObjectMethod(randomClass, getClassLoaderMethod));
+				gFindClassMethod = env->GetMethodID(classLoaderClass, "findClass",
+													"(Ljava/lang/String;)Ljava/lang/Class;");
+			}
+
+			// fixup the class name
+			for(char& c : className) {
+				if(c == '/') {
+					c = '.';
+				}
+			}
+
+			return static_cast<jclass>(env->CallObjectMethod(gClassLoader, gFindClassMethod, env->NewStringUTF(className.data())));
+		}
+
 		/**
 		 * A Conversion implementation for classes bridged between C++ and Java.
 		 *
@@ -304,7 +334,7 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, Type object) {
-				jclass c = env->FindClass(JAVA_CLASS_NAME<T>);
+				jclass c = getClass(env, JAVA_CLASS_NAME<T>);
 				jobject jobject = env->AllocObject(c);
 
 				jfieldID field = env->GetFieldID(c, "pointer", "J");
