@@ -78,40 +78,40 @@ userDefinedTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argu
 
 stringTypeNative(type) ::= "std::string"
 stringTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-stringTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+stringTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 lambdaTypeNative(type) ::= <% std::function\<<if(type.resolvedType.returnType)><nativeType(type.resolvedType.returnType)><else>void<endif>(<type.resolvedType.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)> %>
 lambdaTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-lambdaTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+lambdaTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 optionalTypeNative(type) ::= <% std::experimental::optional\<<nativeType(type.resolvedType.containedType)>> %>
 //optionalTypeNative(type) ::= <% <nativeType(type.resolvedType.containedType)>* %>
 optionalTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-optionalTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+optionalTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 sharedPtrTypeNative(type) ::= <% std::shared_ptr\<<nativeType(type.resolvedType.containedType)>> %>
 sharedPtrTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-sharedPtrTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+sharedPtrTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 vectorTypeNative(type) ::= <% std::vector\<<nativeType(type.resolvedType.containedType)>> %>
 vectorTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-vectorTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+vectorTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 mapTypeNative(type) ::= <% std::map\<<nativeType(type.resolvedType.keyType)>, <nativeType(type.resolvedType.valueType)>> %>
 mapTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-mapTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+mapTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 bufferTypeNative(type) ::= "std::vector\<uint8_t>"
 bufferTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-bufferTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+bufferTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 durationTypeNative(type) ::= "std::chrono::seconds"
 durationTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-durationTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+durationTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 dateTypeNative(type) ::= "std::chrono::system_clock::time_point"
 dateTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
-dateTypeForwardArgument(argument) ::= "<primitiveTypeForwardArgument(argument)>"
+dateTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
 documentation(object) ::= <%
 /**

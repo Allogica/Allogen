@@ -88,11 +88,14 @@ Java_<method.jniSignature>(JNIEnv* _env_<if(!method.static)>, jobject _jthis_<en
 }
 >>
 
+primitiveTypeForwardArgument(argument) ::= "<typename(argument.type)>(<primitiveTypeArgumentName(argument)>)"
+userDefinedTypeForwardArgument(argument) ::= "LocalRef\<<typename(argument.type)>>(_env_, <primitiveTypeForwardArgument(argument)>, false)"
+
 primitiveType(type) ::= "<jniTypeMapping.(type.name)>"
 userDefinedType(type) ::= "jobject"
 stringType(type) ::= "jstring"
 lambdaType(type) ::= "jobject"
-lambdaTypeForwardArgument(argument) ::= <% Lambda::make(_env_, <lambdaTypeArgumentName(argument)>, "<argument.javaLambdaMethodName>", "(<argument.type.resolvedType.arguments:{argument|<javaSignature(argument.type)>}>)<argument.type.resolvedType.returnType:javaSignature()>") %>
+lambdaTypeForwardArgument(argument) ::= <% Lambda::make(_env_, {_env_, <lambdaTypeArgumentName(argument)>, false}, "<argument.javaLambdaMethodName>", "(<argument.type.resolvedType.arguments:{argument|<javaSignature(argument.type)>}>)<argument.type.resolvedType.returnType:javaSignature()>") %>
 
 optionalType(type) ::= "<typename(type.resolvedType.containedType)>"
 sharedPtrType(type) ::= "<typename(type.resolvedType.containedType)>"

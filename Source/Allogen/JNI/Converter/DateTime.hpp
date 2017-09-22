@@ -51,7 +51,7 @@ namespace Allogen {
 			/**
 			 * The JNI type this converter supports
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts a C++ data into a Java data
@@ -66,7 +66,7 @@ namespace Allogen {
 				jmethodID java_util_Date_ = env->GetMethodID(java_util_Date, "<init>", "(L)V");
 
 				auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(object);
-				return env->NewObject(java_util_Date, java_util_Date_, millis.count());
+				return {env, env->NewObject(java_util_Date, java_util_Date_, millis.count())};
 			}
 
 			/**
@@ -101,7 +101,7 @@ namespace Allogen {
 			/**
 			 * The JNI type this converter supports
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts a C++ integer into a Java integer

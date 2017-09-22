@@ -54,7 +54,7 @@ namespace Allogen {
 			/**
 			 * The Java array type
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * A alias to the vector type
@@ -75,10 +75,10 @@ namespace Allogen {
 				jmethodID java_util_ArrayList_add = env->GetMethodID(java_util_ArrayList, "add",
 				                                                     "(Ljava/lang/Object;)Z");
 
-				jobject result = env->NewObject(java_util_ArrayList, java_util_ArrayList_, v.size());
+				LocalRef<jobject> result = {env, env->NewObject(java_util_ArrayList, java_util_ArrayList_, v.size())};
 				for(ContainedType& object : v) {
 					env->CallBooleanMethod(result, java_util_ArrayList_add,
-					                       Converter<ContainedType>::toJava(env, object));
+										   unwrapReference(Converter<ContainedType>::toJava(env, object)));
 				}
 				return result;
 			}
@@ -101,9 +101,8 @@ namespace Allogen {
 				Type result;
 				result.reserve(len);
 				for (jint i=0; i<len; i++) {
-					jobject object = env->CallObjectMethod(list, java_util_List_get);
+					LocalRef<jobject> object = {env, env->CallObjectMethod(list, java_util_List_get)};
 					result.emplace_back(Converter<ContainedType>::fromJava(env, object));
-					env->DeleteLocalRef(object);
 				}
 
 				return result;

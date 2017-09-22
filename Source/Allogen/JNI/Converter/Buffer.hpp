@@ -54,7 +54,7 @@ namespace Allogen {
 			/**
 			 * The Java array type
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts a C++ vector into a Java array
@@ -65,7 +65,7 @@ namespace Allogen {
 			 * @return the converted Java array
 			 */
 			static JavaType toJava(JNIEnv* env, Type v) {
-				return env->NewDirectByteBuffer(v.data(), v.size());
+				return {env, env->NewDirectByteBuffer(v.data(), v.size())};
 			}
 
 			/**

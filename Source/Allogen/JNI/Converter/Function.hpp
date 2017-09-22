@@ -41,14 +41,9 @@ namespace Allogen {
 		 */
 		struct Lambda {
 			/**
-			 * The Java VM handle
-			 */
-			JavaVM* vm;
-
-			/**
 			 * The lambda target object instance (as a global reference)
 			 */
-			jobject object;
+			GlobalRef<jobject> object;
 
 			/**
 			 * The lambda class type
@@ -63,8 +58,7 @@ namespace Allogen {
 			/**
 			 * Creates a new empty lambda
 			 */
-			Lambda() : vm(nullptr),
-					   object(nullptr),
+			Lambda() : object(nullptr),
 					   clazz(nullptr),
 					   method(nullptr) {};
 
@@ -75,8 +69,7 @@ namespace Allogen {
 			 * @param clazz the lambda class type
 			 * @param method the lambda method
 			 */
-			Lambda(JavaVM* vm, jobject object, jclass clazz, jmethodID method) :
-					vm(vm),
+			Lambda(const LocalRef<jobject>& object, jclass clazz, jmethodID method) :
 					object(object),
 					clazz(clazz),
 					method(method) {};
@@ -87,15 +80,9 @@ namespace Allogen {
 			 * @param other the lambda object to copy
 			 */
 			Lambda(const Lambda& other) :
-					vm(other.vm),
 					object(other.object),
 					clazz(other.clazz),
-					method(other.method) {
-				JNIEnv* env;
-				vm->AttachCurrentThreadAsDaemon((void**) &env, nullptr);
-				object = env->NewGlobalRef(other.object);
-				vm->DetachCurrentThread();
-			}
+					method(other.method) {}
 
 			/**
 			 * Moves a lambda object
@@ -103,32 +90,19 @@ namespace Allogen {
 			 * @param other the instance to move from
 			 */
 			Lambda(Lambda&& other) :
-					vm(other.vm),
-					object(other.object),
-					clazz(other.clazz),
-					method(other.method) {
-				other.vm = nullptr;
-				other.object = nullptr;
-				other.clazz = nullptr;
-				other.method = nullptr;
-			}
+					object(std::move(other.object)),
+					clazz(std::move(other.clazz)),
+					method(std::move(other.method)) {}
 
 			/**
 			 * Destroys a lambda object
 			 */
-			~Lambda() {
-				if(object != nullptr) {
-					JNIEnv* env;
-					vm->AttachCurrentThreadAsDaemon((void**) &env, nullptr);
-					env->DeleteGlobalRef(object);
-					vm->DetachCurrentThread();
-				}
-			}
+			~Lambda() {}
 
 			/**
 			 * @return the lambda object
 			 */
-			operator jobject() const { return object; }
+			operator jobject() const { return object.object; }
 
 			/**
 			 * @return the lambda class
@@ -147,10 +121,10 @@ namespace Allogen {
 			 *
 			 * @return the newly created lambda object
 			 */
-			static Lambda make(JNIEnv* env, jobject object, const std::string& methodName,
+			static Lambda make(JNIEnv* env, LocalRef<jobject> object, const std::string& methodName,
 							   const std::string& signature) {
-				if(object == nullptr) {
-					return Lambda(nullptr, nullptr, nullptr, nullptr);
+				if(!object) {
+					return Lambda(nullptr, nullptr, nullptr);
 				}
 
 				jclass clazz = env->GetObjectClass(object);
@@ -163,7 +137,7 @@ namespace Allogen {
 				JavaVM* vm;
 				env->GetJavaVM(&vm);
 
-				return Lambda(vm, env->NewGlobalRef(object), clazz, method);
+				return Lambda(object, clazz, method);
 			}
 
 			static jint throwNoSuchMethodError(
@@ -181,24 +155,27 @@ namespace Allogen {
 		template<>
 		struct FunctionTrait<void> {
 			template<typename... Args>
-			static void javaCall(JNIEnv* env, const Lambda& lambda, Args&& ... args) {
-				env->CallVoidMethod(lambda, lambda, args...);
+			static void javaCall(JNIEnv* env, const Lambda& lambda, Args... args) {
+				LocalRef<jobject> localObject = lambda.object;
+				env->CallVoidMethod(localObject, lambda.method, UnwrapReference<Args>::unwrap(args)...);
 			}
 		};
 
 		template<>
 		struct FunctionTrait<uint8_t> {
 			template<typename... Args>
-			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args&& ... args) {
-				return env->CallByteMethod(lambda, lambda, args...);
+			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args... args) {
+				LocalRef<jobject> localObject = lambda.object;
+				return env->CallByteMethod(localObject, lambda.method, UnwrapReference<Args>::unwrap(args)...);
 			}
 		};
 
 		template<>
 		struct FunctionTrait<uint32_t> {
 			template<typename... Args>
-			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args&& ... args) {
-				return env->CallIntMethod(lambda, lambda, args...);
+			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args... args) {
+				LocalRef<jobject> localObject = lambda.object;
+				return env->CallIntMethod(localObject, lambda.method, UnwrapReference<Args>::unwrap(args)...);
 			}
 		};
 
@@ -236,7 +213,7 @@ namespace Allogen {
 			static JavaType toJava(JNIEnv* env, Type i) {
 				JavaVM* vm;
 				env->GetJavaVM(&vm);
-				return i;
+//				return i;
 			}
 
 			/**
@@ -250,7 +227,13 @@ namespace Allogen {
 			static Type fromJava(JNIEnv* env, Lambda lambda) {
 				return [lambda = std::move(lambda)](Args... args) mutable -> R {
 					JNIEnv* env;
-					lambda.vm->AttachCurrentThread((void**) &env, nullptr);
+
+					bool attached = false;
+					int err = lambda.object.vm->GetEnv((void**) &env, JNI_VERSION_1_6);
+					if(err == JNI_EDETACHED) {
+						err = lambda.object.vm->AttachCurrentThreadAsDaemon(&env, nullptr);
+						attached = true;
+					}
 
 //					if(lambda.object == nullptr) {
 //						throw std::runtime_error("Invalid Java object handle");
@@ -259,12 +242,21 @@ namespace Allogen {
 //						throw std::runtime_error("Invalid Java method handle");
 //					}
 
-					return Converter<R>::fromJava(
+					// fixup the lambda env
+//					lambda.object.env = env;
+
+					auto ret = Converter<R>::fromJava(
 							env, Traits::javaCall(
 									env, lambda,
 									Converter<Args>::toJava(env, args)...
 							)
 					);
+
+					if(attached) {
+						lambda.object.vm->DetachCurrentThread();
+					}
+
+					return ret;
 
 					// TODO detach thread
 				};
@@ -319,7 +311,13 @@ namespace Allogen {
 			static Type fromJava(JNIEnv* env, Lambda lambda) {
 				return [lambda = std::move(lambda)](Args... args) mutable {
 					JNIEnv* env;
-					lambda.vm->AttachCurrentThread((void**) &env, nullptr);
+
+					bool attached = false;
+					int err = lambda.object.vm->GetEnv((void**) &env, JNI_VERSION_1_6);
+					if(err == JNI_EDETACHED) {
+						err = lambda.object.vm->AttachCurrentThreadAsDaemon(&env, nullptr);
+						attached = true;
+					}
 
 //					if(lambda.object == nullptr) {
 //						throw std::runtime_error("Invalid Java object handle");
@@ -333,7 +331,9 @@ namespace Allogen {
 							Converter<Args>::toJava(env, args)...
 					);
 
-					// TODO detach thread
+					if(attached) {
+						lambda.object.vm->DetachCurrentThread();
+					}
 				};
 			}
 		};

@@ -54,7 +54,7 @@ namespace Allogen {
 			/**
 			 * The Java array type
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts a C++ vector into a Java array
@@ -68,13 +68,15 @@ namespace Allogen {
 				jclass java_util_HashMap = env->FindClass("java/util/HashMap");
 				jmethodID java_util_HashMap_ = env->GetMethodID(java_util_HashMap, "<init>", "(I)V");
 				jmethodID java_util_HashMap_put = env->GetMethodID(java_util_HashMap, "put",
-				                                                     "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+																   "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
-				jobject result = env->NewObject(java_util_HashMap, java_util_HashMap_, v.size());
+				LocalRef<jobject> result = {env, env->NewObject(java_util_HashMap, java_util_HashMap_, v.size())};
 				for(auto& entry : v) {
-					env->CallObjectMethod(result, java_util_HashMap_put,
-					                      Converter<KeyType>::toJava(env, entry.first),
-					                      Converter<ValueType>::toJava(env, entry.second));
+					LocalRef<jobject> ret = {env, env->CallObjectMethod(
+							result, java_util_HashMap_put,
+							unwrapReference(Converter<KeyType>::toJava(env, entry.first)),
+							unwrapReference(Converter<ValueType>::toJava(env, entry.second))
+					)};
 				}
 				return result;
 			}
@@ -91,7 +93,7 @@ namespace Allogen {
 				jclass java_util_Map = env->FindClass("java/util/Map");
 				jmethodID java_util_Map_entrySey = env->GetMethodID(java_util_Map, "entrySet", "()Ljava/util/Set;");
 
-				jobject entrySet = env->CallObjectMethod(map, java_util_Map_entrySey);
+				LocalRef<jobject> entrySet = {env, env->CallObjectMethod(map, java_util_Map_entrySey)};
 
 				jclass entrySetClass = env->GetObjectClass(entrySet);
 				jmethodID java_util_Set_toArray = env->GetMethodID(entrySetClass, "toArray", "()[Ljava/lang/Object;");
@@ -100,26 +102,22 @@ namespace Allogen {
 				jmethodID entryGetKey = env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
 				jmethodID entryGetValue = env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
 
-				jobjectArray entries = (jobjectArray) env->CallObjectMethod(entrySet, java_util_Set_toArray);
+				LocalRef<jobjectArray> entries = {env, (jobjectArray) env->CallObjectMethod(entrySet,
+																							java_util_Set_toArray)};
 				jsize size = env->GetArrayLength(entries);
 
 				Type objects;
-				for(jsize i = 0; i<size; i++) {
-					jobject entry = env->GetObjectArrayElement(entries, i);
+				for(jsize i = 0; i < size; i++) {
+					LocalRef<jobject> entry = {env, env->GetObjectArrayElement(entries, i)};
 
-					auto key = env->CallObjectMethod(entry, entryGetKey);
-					auto value = env->CallObjectMethod(entry, entryGetValue);
+					LocalRef<jobject> key = {env, env->CallObjectMethod(entry, entryGetKey)};
+					LocalRef<jobject> value = {env, env->CallObjectMethod(entry, entryGetValue)};
 
 					objects.insert(std::make_pair(
 							Converter<KeyType>::fromJava(env, key),
 							Converter<ValueType>::fromJava(env, value)
 					));
-
-					env->DeleteLocalRef(key);
-					env->DeleteLocalRef(value);
 				}
-
-				env->DeleteLocalRef(entries);
 
 				return objects;
 			}

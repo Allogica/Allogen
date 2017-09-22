@@ -69,7 +69,7 @@ namespace Allogen {
 			 */
 			template<typename Executor>
 			static inline jlong call(JNIEnv* env, Executor&& executor,
-									 typename Converter<Args>::JavaType& ... args) {
+									 typename Converter<Args>::JavaType&&... args) {
 				return reinterpret_cast<jlong>(
 						new std::shared_ptr<R>(executor(Converter<Args>::fromJava(env, args)...))
 				);

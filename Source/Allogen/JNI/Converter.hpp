@@ -33,6 +33,8 @@
 #include <jni.h>
 #include <string>
 
+#include <Allogen/JNI/References.hpp>
+
 namespace Allogen {
 	namespace JNI {
 
@@ -91,7 +93,7 @@ namespace Allogen {
 			/**
 			 * The Java string type
 			 */
-			using JavaType = jstring;
+			using JavaType = LocalRef<jstring>;
 
 			/**
 			 * Creates a Java string from a C++ string
@@ -102,8 +104,8 @@ namespace Allogen {
 			 * @return the newly created Java string or NULL if
 			 * no memory could be allocated
 			 */
-			static jstring toJava(JNIEnv* env, const std::string& string) {
-				return env->NewStringUTF(string.c_str());
+			static LocalRef<jstring> toJava(JNIEnv* env, const std::string& string) {
+				return {env, env->NewStringUTF(string.c_str()), false};
 			}
 
 			/**
@@ -114,12 +116,12 @@ namespace Allogen {
 			 *
 			 * @return the C++ string created from the Java string contents
 			 */
-			static std::string fromJava(JNIEnv* env, jstring string) {
-				const char* inCStr = env->GetStringUTFChars(string, nullptr);
+			static std::string fromJava(JNIEnv* env, LocalRef<jstring> string) {
+				const char* inCStr = env->GetStringUTFChars(string.object, nullptr);
 				if(NULL == inCStr) return NULL;
 
 				std::string str = inCStr; // TODO maybe we should check for exceptions here
-				env->ReleaseStringUTFChars(string, inCStr);  // release resources
+				env->ReleaseStringUTFChars(string.object, inCStr);  // release resources
 
 				return str;
 			}
