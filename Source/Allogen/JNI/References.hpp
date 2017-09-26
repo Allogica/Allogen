@@ -247,7 +247,7 @@ namespace Allogen {
 				bool attached = false;
 				int err = vm->GetEnv((void**) &env, JNI_VERSION_1_6);
 				if(err == JNI_EDETACHED) {
-					err = vm->AttachCurrentThreadAsDaemon(&env, nullptr);
+					err = vm->AttachCurrentThreadAsDaemon(ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND &env, nullptr);
 					attached = true;
 				}
 
@@ -267,7 +267,7 @@ namespace Allogen {
 				bool attached = false;
 				int err = vm->GetEnv((void**) &env, JNI_VERSION_1_6);
 				if(err == JNI_EDETACHED) {
-					err = vm->AttachCurrentThreadAsDaemon(&env, nullptr);
+					err = vm->AttachCurrentThreadAsDaemon(ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND &env, nullptr);
 					attached = true;
 				}
 
@@ -285,7 +285,7 @@ namespace Allogen {
 				bool attached = false;
 				int err = vm->GetEnv((void**) &env, JNI_VERSION_1_6);
 				if(err == JNI_EDETACHED) {
-					err = vm->AttachCurrentThreadAsDaemon(&env, nullptr);
+					err = vm->AttachCurrentThreadAsDaemon(ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND &env, nullptr);
 					attached = true;
 				}
 
@@ -323,7 +323,7 @@ namespace Allogen {
 				bool attached = false;
 				int err = vm->GetEnv((void**) &env, JNI_VERSION_1_6);
 				if(err == JNI_EDETACHED) {
-					err = vm->AttachCurrentThreadAsDaemon(&env, nullptr);
+					err = vm->AttachCurrentThreadAsDaemon(ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND &env, nullptr);
 					attached = true;
 				}
 

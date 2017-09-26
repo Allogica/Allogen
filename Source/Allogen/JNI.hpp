@@ -35,6 +35,12 @@
  */
 #include <jni.h>
 
+#if defined(__ANDROID__)
+# define ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND
+#else
+# define ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND (void**)
+#endif
+
 #include "Allogen/JNI/Converter.hpp"
 #include "Allogen/JNI/Converter/IntegralTypes.hpp"
 #include "Allogen/JNI/Converter/Function.hpp"
