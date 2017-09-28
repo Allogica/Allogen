@@ -33,6 +33,7 @@ package com.allogica.allogen.model;
 import com.allogica.allogen.Scope;
 import com.allogica.allogen.idl.model.IDLClass;
 import com.allogica.allogen.types.Type;
+import com.allogica.allogen.types.UserDefinedType;
 
 import java.util.*;
 
@@ -40,9 +41,15 @@ public class Class extends ModelObject {
     private String name;
     private String[] namespaces;
 
+    private TypeName parent;
+
     private List<Constructor> constructors = new ArrayList<>();
     private Destructor destructor;
     private List<Method> methods = new ArrayList<>();
+    private List<InheritedMethod> inheritedMethods = new ArrayList<>();
+
+    private boolean isAbstract = false;
+    private boolean isStatic = false;
 
     private Map<String, Property> properties = new HashMap<>();
 
@@ -70,6 +77,22 @@ public class Class extends ModelObject {
 
     public String[] getNamespaces() {
         return namespaces;
+    }
+
+    public TypeName getParent() {
+        return parent;
+    }
+
+    public Class getParentClass() {
+        if(parent.getResolvedType() == null) {
+            return null;
+        }
+        return ((UserDefinedType) parent.getResolvedType()).getUserDefinedClass();
+    }
+
+    public Class setParent(TypeName parent) {
+        this.parent = parent;
+        return this;
     }
 
     public Scope getScope() {
@@ -104,6 +127,33 @@ public class Class extends ModelObject {
 
     public void setMethods(List<Method> methods) {
         this.methods = methods;
+    }
+
+    public List<InheritedMethod> getInheritedMethods() {
+        return inheritedMethods;
+    }
+
+    public Class setInheritedMethods(List<InheritedMethod> inheritedMethods) {
+        this.inheritedMethods = inheritedMethods;
+        return this;
+    }
+
+    public boolean isStatic() {
+        return isStatic;
+    }
+
+    public Class setStatic(boolean aStatic) {
+        isStatic = aStatic;
+        return this;
+    }
+
+    public boolean isAbstract() {
+        return isAbstract;
+    }
+
+    public Class setAbstract(boolean anAbstract) {
+        isAbstract = anAbstract;
+        return this;
     }
 
     public Map<String, Property> getProperties() {
@@ -155,4 +205,14 @@ public class Class extends ModelObject {
         }
         return false;
     }
+
+    public boolean hasNonStaticMethod() {
+        for(final Method method : methods) {
+            if(!method.isStatic()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

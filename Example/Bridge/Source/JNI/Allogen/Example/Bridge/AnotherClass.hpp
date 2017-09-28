@@ -11,9 +11,8 @@
 #include <Allogen/JNI.hpp>
 
 #include "Allogen/Example/AnotherClass.hpp"
-#include "Allogen/Example/Bridge/AnotherClass.hpp"
 
-#include "AnotherClass.hpp"
+#include "Allogen/Example/Bridge/AnotherClass.hpp"
 
 
 ALLOGEN_BRIDGED_CLASS(Allogen::Example::AnotherClass, "allogen/example/AnotherClass")

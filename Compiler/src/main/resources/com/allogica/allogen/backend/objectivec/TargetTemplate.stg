@@ -35,16 +35,21 @@ class(class) ::= <<
 
 #import \<Foundation/Foundation.h>
 
+<if(class.parent)>
+#import "<class.parentClass.targetOutputFile>"
+<endif>
+
 <class.usedTypes:{usedType|
-<if(usedType.userDefinedClass)>#import "<usedType.userDefinedClass.targetOutputFile>"<\n><endif>}>
+<if(usedType.userDefinedClass)>@class <usedType.userDefinedClass.objcName>;<\n><endif>}>
 
 <documentation(class)>
-@interface <class.objcName> : NSObject
+@interface <class.objcName> : <if(class.parent)><class.parentClass.objcName><else>NSObject<endif>
 
 <if(class.properties.values)><class.properties.values:property(); separator="\n"><endif>
 <if(class.constructors)><class.constructors:constructor(class); separator="\n\n"><\ ><endif>
 <if(class.destructor)><class.destructor:destructor(class); separator="\n\n"><\n><endif>
 <if(class.methods)><class.methods:method(class); separator="\n\n"><endif>
+<if(class.inheritedMethods)><class.inheritedMethods:method(class); separator="\n\n"><endif>
 
 @end
 >>
@@ -64,4 +69,4 @@ method(method, class, native=true) ::= <<
 <methodSignature(method)>;
 >>
 
-property(property) ::= "@property (<if(!property.setter)>readonly, <endif>nonatomic, assign, getter=<property.getter.objcName><if(property.setter)>, setter=<property.setter.objcName>:<endif>) <typename(property.getter.returnType)> <property.name>;"
+property(property) ::= "@property (<if(!property.setter)>readonly, <endif>nonatomic, assign, getter=<property.getter.objcName><if(property.setter)>, setter=<property.setter.objcName>:<endif><if(property.getter.returnType.objcHasNullability)>, <nullabilityBase(property.getter.returnType)><endif>) <typename(property.getter.returnType)> <property.name>;"

@@ -79,7 +79,11 @@ classname:
 classdefinition:
     DocumentationBlock?
     annotation*
-	Class classname '{' classbody '}' ';'?
+	(Static|Abstract)? Class classname classextends? '{' classbody '}' ';'?
+;
+
+classextends:
+    Extends typename
 ;
 
 classbody:
@@ -206,6 +210,8 @@ booleanliteral:
 /* Identifiers */
 Namespace: 'namespace';
 Class: 'class';
+Extends: 'extends';
+Abstract: 'abstract';
 
 Constructor: 'constructor';
 Destructor: 'destructor';

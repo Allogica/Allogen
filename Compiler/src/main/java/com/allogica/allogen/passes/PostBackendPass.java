@@ -32,10 +32,8 @@ package com.allogica.allogen.passes;
 
 import com.allogica.allogen.Compiler;
 import com.allogica.allogen.CompilerContext;
+import com.allogica.allogen.model.*;
 import com.allogica.allogen.model.Class;
-import com.allogica.allogen.model.Constructor;
-import com.allogica.allogen.model.Method;
-import com.allogica.allogen.model.MethodArgument;
 
 public class PostBackendPass implements CompilerPass<Class, Class> {
 
@@ -61,6 +59,13 @@ public class PostBackendPass implements CompilerPass<Class, Class> {
                 compiler.getBackend().postHandle(compiler, context, clazz, method, argument);
             }
         }
+        for (final InheritedMethod method : clazz.getInheritedMethods()) {
+            compiler.getBackend().postHandle(compiler, context, clazz, method);
+            for (final MethodArgument argument : method.getArguments()) {
+                compiler.getBackend().postHandle(compiler, context, clazz, method, argument);
+            }
+        }
+
         return clazz;
     }
 

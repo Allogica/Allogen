@@ -31,6 +31,7 @@
 package com.allogica.allogen.idl.model;
 
 import com.allogica.allogen.idl.grammar.IDLParser;
+import org.omg.CORBA.IDLType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,11 @@ public class IDLClass extends IDLWrappedObject {
     private String name;
     private List<IDLMember> members = new ArrayList<>();
     private List<IDLInclude> includes = new ArrayList<>();
+
+    private IDLTypeName parentClass;
+
+    private boolean isAbstract = false;
+    private boolean isStatic = false;
 
     public IDLClass(String name, List<IDLMember> members, List<IDLInclude> includes) {
         super(null);
@@ -74,6 +80,16 @@ public class IDLClass extends IDLWrappedObject {
 
         for (final IDLParser.IncludedefinitionContext include : ctx.classbody().includedefinition()) {
             this.includes.add(new IDLInclude(include));
+        }
+
+        if(ctx.Static() != null) {
+            this.isStatic = true;
+        }
+        if(ctx.classextends() != null) {
+            this.parentClass = new IDLTypeName(ctx.classextends().typename());
+        }
+        if(ctx.Abstract() != null) {
+            this.isAbstract = true;
         }
     }
 
@@ -111,5 +127,32 @@ public class IDLClass extends IDLWrappedObject {
 
     public void setIncludes(List<IDLInclude> includes) {
         this.includes = includes;
+    }
+
+    public boolean isStatic() {
+        return isStatic;
+    }
+
+    public IDLClass setStatic(boolean aStatic) {
+        isStatic = aStatic;
+        return this;
+    }
+
+    public boolean isAbstract() {
+        return isAbstract;
+    }
+
+    public IDLClass setAbstract(boolean anAbstract) {
+        isAbstract = anAbstract;
+        return this;
+    }
+
+    public IDLTypeName getParentClass() {
+        return parentClass;
+    }
+
+    public IDLClass setParentClassName(IDLTypeName parentClass) {
+        this.parentClass = parentClass;
+        return this;
     }
 }

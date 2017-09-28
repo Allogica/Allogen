@@ -40,6 +40,7 @@ import com.allogica.allogen.idl.model.IDLClass;
 import com.allogica.allogen.model.Class;
 import com.allogica.allogen.modules.Module;
 import com.allogica.allogen.passes.*;
+import com.allogica.allogen.util.FileConverter;
 import com.beust.jcommander.JCommander;
 
 import java.io.*;
@@ -98,6 +99,7 @@ public class AllogenMain {
                 new TypeLinkingPass(),
 
                 new PropertiesPass(),
+                new InheritancePass(),
 
                 new PreBackendPass(),
                 new BackendPass(),

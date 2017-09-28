@@ -50,7 +50,13 @@ public class ObjectModelCreationPass implements CompilerPass<IDLClass, Class> {
                 clazz,
                 clazz.getName(),
                 new ArrayList<>()
-        );
+        )
+                .setStatic(clazz.isStatic())
+                .setAbstract(clazz.isAbstract());
+
+        if (clazz.getParentClass() != null) {
+            o.setParent(handleTypeName(context, clazz, clazz.getParentClass()));
+        }
 
         for (final IDLMember member : clazz.getMembers()) {
             if (member instanceof IDLConstructor) {
@@ -62,8 +68,8 @@ public class ObjectModelCreationPass implements CompilerPass<IDLClass, Class> {
             }
         }
 
-        // create a implicit destructor
-        if (o.getDestructor() == null) {
+        // create a implicit destructor if the class is non-static method
+        if (o.getDestructor() == null && !o.isStatic()) {
             o.setDestructor(new Destructor(null));
         }
 

@@ -127,6 +127,31 @@ namespace Allogen {
 			}
 		};
 
+		/**
+		 * A converter specialization for string types
+		 */
+		template<>
+		struct Converter<const char*> {
+			/**
+			 * The Java string type
+			 */
+			using JavaType = LocalRef<jstring>;
+
+			/**
+			 * Creates a Java string from a C++ string
+			 *
+			 * @param env the JNI environment
+			 * @param string the C++ string
+			 *
+			 * @return the newly created Java string or NULL if
+			 * no memory could be allocated
+			 */
+			static LocalRef<jstring> toJava(JNIEnv* env, const char* string) {
+				return {env, env->NewStringUTF(string), false};
+			}
+
+		};
+
 	}
 }
 

@@ -82,10 +82,16 @@ function(add_allogen_interface target_name)
         set(module_args --module ${IFT_MODULE_NAME})
     endif()
 
+    set(idls)
+    foreach(idl ${IFT_IDL})
+        string(REPLACE " " "\\ " idl_repl ${idl})
+        list(APPEND idls '${idl_repl}')
+    endforeach()
+
     add_custom_target(${target_name} SOURCES ${IFT_IDL}
             DEPENDS ${IFT_IDL}
             COMMAND ${Maven_EXECUTABLE} compile exec:java -f ${ALLOGEN_COMPILER}
-            -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${module_args} ${import_args} ${IFT_IDL}\"
+            -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${module_args} ${import_args} ${idls}\"
             COMMENT "Compiling Allogen interface files..."
     )
 

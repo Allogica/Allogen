@@ -8,10 +8,15 @@
 
 package allogen.example;
 
+import java.util.*;
+import java.nio.ByteBuffer;
+import allogen.example.AnotherClass;
+
+
 /**
  * Calls the C++ AnotherClass() native method
  */
-class AnotherClass {
+public class AnotherClass {
     /**
 	 * A numeric value that represents the pointer used to access the wrapped object.
 	 *

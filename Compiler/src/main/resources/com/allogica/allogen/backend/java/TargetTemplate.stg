@@ -41,18 +41,21 @@ import java.nio.ByteBuffer;
 <class.usedTypes:{usedType|<if(usedType.userDefinedClass)>import <usedType.userDefinedClass.javaFullyQualifiedName>;<\n><endif>}>
 
 <documentation(class)>
-public class <class.name> {
+public class <class.name><if(class.parent)> extends <class.parentClass.name><endif> {
+<if(!class.parent)>
     /**
 	 * A numeric value that represents the pointer used to access the wrapped object.
 	 *
 	 * This value should not be changed by the user and is automatically initialized by the _init
 	 * or when used as a return value from another method.
 	 */
-    private long pointer;
+    protected long pointer;
+<endif>
 
     <if(class.constructors)><class.constructors:constructor(class); separator="\n\n"><\ ><endif>
     <if(class.destructor)><class.destructor:destructor(class); separator="\n\n"><\n><endif>
     <if(class.methods)><class.methods:method(class); separator="\n\n"><endif>
+    <if(class.inheritedMethods)><class.inheritedMethods:method(class, true, true); separator="\n\n"><endif>
 }
 >>
 
@@ -82,7 +85,7 @@ public <class.javaName>(<arguments(constructor, class)>) {
 <endif>
  * @return a pointer to the C++ native object
  */
-public native long _init(<arguments(constructor, class)>);
+private native long _init(<arguments(constructor, class)>);
 >>
 
 destructor(destructor, class) ::= <<
@@ -98,9 +101,10 @@ destructor(destructor, class) ::= <<
 protected native void finalize() throws Throwable;
 >>
 
-method(method, class, native=true) ::= <<
-<method.arguments:{argument|<if(argument.javaHasLambdaInterface)><javaLambda(method, argument)><endif>}>
+method(method, class, native=true, inherited=false) ::= <<
+<if(!inherited)><method.arguments:{argument|<if(argument.javaHasLambdaInterface)><javaLambda(method, argument)><endif>}><endif>
 <documentation(method)>
+<if(inherited)>@Override<endif>
 public<if(native)> native<endif><if(method.static)> static<endif> <typename(method.returnType)> <method.javaName>(<arguments(method, class)>);
 >>
 

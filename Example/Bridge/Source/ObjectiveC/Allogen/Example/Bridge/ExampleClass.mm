@@ -6,16 +6,16 @@
  * interface declaration file and regenerate the bridge code.
  */
 
+#import "Allogen/AExampleClass.h"
 #import "Allogen/Example/Bridge/ExampleClass+Private.h"
-#import "Allogen/Example/AExampleClass.h"
 
 using namespace Allogen::ObjectiveC;
 
 @implementation AExampleClass {
-    Allogen::Example::ExampleClass* _cppObject;
+    std::shared_ptr<Allogen::Example::ExampleClass>* _cppObject;
 }
 
--(id)init {
+-(nonnull id)init {
     if(self) {
         BridgedConstructor<Allogen::Example::ExampleClass()>::call(
             self,
@@ -27,7 +27,7 @@ using namespace Allogen::ObjectiveC;
     return self;
 }
 
--(id)initWithInitialValue:(uint32_t)initialValue {
+-(nonnull id)initWithInitialValue:(uint32_t)initialValue {
     if(self) {
         BridgedConstructor<Allogen::Example::ExampleClass(uint32_t)>::call(
             self,
@@ -49,13 +49,7 @@ using namespace Allogen::ObjectiveC;
     return self;
 }
 -(void)dealloc {
-    BridgedMethod<Allogen::Example::ExampleClass, void()>::call(
-        self,
-        [](Allogen::Example::ExampleClass* wself) {
-            delete wself;
-        }
-    );
-    [super dealloc];
+    delete _cppObject;
 }
 -(void)setInteger:(uint32_t)aInteger {
     return BridgedMethod<Allogen::Example::ExampleClass, void(uint32_t)>::call(
@@ -186,12 +180,12 @@ using namespace Allogen::ObjectiveC;
     );
 }
 
--(id)initWithCppObject:(Allogen::Example::ExampleClass*)cppObject {
+-(id)initWithCppObject:(std::shared_ptr<Allogen::Example::ExampleClass>*)cppObject {
     _cppObject = cppObject;
     return self;
 }
 
--(Allogen::Example::ExampleClass*)toCppObject {
+-(std::shared_ptr<Allogen::Example::ExampleClass>*)toCppObject {
     return _cppObject;
 }
 @end

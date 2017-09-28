@@ -41,7 +41,9 @@ header(class) ::= <<
 #include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><else>\><endif>}>
 <class.usedTypes:{usedType|<if(usedType.userDefinedClass)>#include "<usedType.userDefinedClass.bridgeHeaderOutputFile>"<\n><endif>}>
 
+<if(!class.static)>
 ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>, "<class.javaClassPath>")
+<endif>
 >>
 
 implementation(class) ::= <<
@@ -54,8 +56,9 @@ using namespace Allogen::JNI;
 <class.namespaces:namespace_begin(); separator=" ">
 
     <class.constructors:constructor(class); separator="\n\n">
-    <destructor(class.destructor, class)>
+    <if(class.destructor)><destructor(class.destructor, class)><endif>
     <class.methods:method(class); separator="\n\n">
+    <class.inheritedMethods:method(class); separator="\n\n">
 
 <class.namespaces:namespace_end()>
 >>

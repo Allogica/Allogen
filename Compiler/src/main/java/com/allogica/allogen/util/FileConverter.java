@@ -33,10 +33,11 @@ package com.allogica.allogen.util;
 import com.beust.jcommander.IStringConverter;
 
 import java.io.File;
+import java.util.regex.Pattern;
 
 public class FileConverter implements IStringConverter<File> {
     @Override
     public File convert(String value) {
-        return new File(value);
+        return new File(value.replaceAll(Pattern.quote("\\ "), " "));
     }
 }

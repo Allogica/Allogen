@@ -160,6 +160,18 @@ public class IDLBaseListener implements IDLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterClassextends(IDLParser.ClassextendsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassextends(IDLParser.ClassextendsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterClassbody(IDLParser.ClassbodyContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -6,7 +6,7 @@
  * interface declaration file and regenerate the bridge code.
  */
 
-#include "ExampleClass.hpp"
+#include "Allogen/Example/Bridge/ExampleClass.hpp"
 
 using namespace Allogen::JNI;
 
@@ -39,7 +39,7 @@ namespace Allogen { namespace Example {
                 auto example = new Allogen::Example::ExampleClass();
                 example->setInteger(initialValue);
                 return example;
-            }, initialValue
+            }, jint(initialValue)
         );
     }
     JNIEXPORT void JNICALL
@@ -59,7 +59,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, uint32_t aInteger) {
                 return wself->setInteger(aInteger);
-            }, aInteger
+            }, jint(aInteger)
         );
     }
 
@@ -93,7 +93,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, std::function<void()>  callback) {
                 return wself->doAsync(callback);
-            }, Lambda::make(_env_, callback, "onCallback", "()V") 
+            }, Lambda::make(_env_, {_env_, callback, false}, "onCallback", "()V") 
         );
     }
 
@@ -105,7 +105,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, std::function<uint32_t(uint16_t, uint16_t)>  callback) {
                 return wself->anotherCallback(callback);
-            }, Lambda::make(_env_, callback, "onCallback", "(SS)I") 
+            }, Lambda::make(_env_, {_env_, callback, false}, "onCallback", "(SS)I") 
         );
     }
 
@@ -117,7 +117,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, std::function<uint32_t(uint16_t, uint16_t)>  callback, uint16_t a, uint16_t b) {
                 return callback(a, b);
-            }, Lambda::make(_env_, callback, "onCallback", "(SS)I") , a, b
+            }, Lambda::make(_env_, {_env_, callback, false}, "onCallback", "(SS)I") , jshort(a), jshort(b)
         );
     }
 
@@ -133,7 +133,7 @@ namespace Allogen { namespace Example {
                 } else {
                 return uint32_t(a);
                 }
-            }, a
+            }, jshort(a)
         );
     }
 
@@ -145,7 +145,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, std::string name) {
                 return wself->sayHello(name);
-            }, name
+            }, LocalRef<jstring>(_env_, jstring(name), false)
         );
     }
 
@@ -157,7 +157,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, std::string name) {
                 return wself->createAnother(name);
-            }, name
+            }, LocalRef<jstring>(_env_, jstring(name), false)
         );
     }
 
@@ -169,7 +169,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, std::string name, std::function<void(Allogen::Example::AnotherClass)>  callback) {
                 return wself->createAnotherAsync(name, callback);
-            }, name, Lambda::make(_env_, callback, "createAnother", "(Lallogen/example/AnotherClass;)V") 
+            }, LocalRef<jstring>(_env_, jstring(name), false), Lambda::make(_env_, {_env_, callback, false}, "createAnother", "(Lallogen/example/AnotherClass;)V") 
         );
     }
 
@@ -181,7 +181,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, Allogen::Example::AnotherClass another) {
                 return wself->printAnother(another);
-            }, another
+            }, LocalRef<jobject>(_env_, jobject(another), false)
         );
     }
 
@@ -193,7 +193,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](ExampleClass *wself, Allogen::Example::AnotherClass another, std::function<void()>  callback) {
                 return wself->printAnotherAsync(another, callback);
-            }, another, Lambda::make(_env_, callback, "printAnother", "()V") 
+            }, LocalRef<jobject>(_env_, jobject(another), false), Lambda::make(_env_, {_env_, callback, false}, "printAnother", "()V") 
         );
     }
 

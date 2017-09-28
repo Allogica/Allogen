@@ -10,8 +10,10 @@
 
 #include <Allogen/ObjectiveC.hpp>
 
+#import "Allogen/AAnotherClass.h"
+
 #import "Allogen/Example/Bridge/AnotherClass+Private.h"
-#import "Allogen/Example/AAnotherClass.h"
+#import "Allogen/AAnotherClass.h"
 
 
 #include "Allogen/Example/AnotherClass.hpp"
@@ -20,6 +22,6 @@
 ALLOGEN_BRIDGED_CLASS(Allogen::Example::AnotherClass, AAnotherClass)
 
 @interface AAnotherClass()
--(id)initWithCppObject:(Allogen::Example::AnotherClass*)cppObject;
--(Allogen::Example::AnotherClass*)toCppObject;
+-(id)initWithCppObject:(std::shared_ptr<Allogen::Example::AnotherClass>*)cppObject;
+-(std::shared_ptr<Allogen::Example::AnotherClass>*)toCppObject;
 @end

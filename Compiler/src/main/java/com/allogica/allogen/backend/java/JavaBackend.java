@@ -97,6 +97,11 @@ public class JavaBackend extends AbstractCompilerBackend {
     }
 
     @Override
+    public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method) {
+        method.setAttribute("jniSignature", createJNIMethodMangling(clazz, method.getMethod()));
+    }
+
+    @Override
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Method method, MethodArgument argument) {
         if (argument.getType().getResolvedType() instanceof LambdaType) {
             createCallbackInterface(method, argument, (LambdaType) argument.getType().getResolvedType());
