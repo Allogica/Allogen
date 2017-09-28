@@ -36,6 +36,10 @@ import com.allogica.allogen.backend.AbstractCompilerBackend;
 import com.allogica.allogen.idl.model.IDLAnnotation;
 import com.allogica.allogen.model.*;
 import com.allogica.allogen.model.Class;
+import com.allogica.allogen.types.LambdaType;
+import com.allogica.allogen.types.OptionalType;
+import com.allogica.allogen.types.PrimitiveType;
+import com.allogica.allogen.types.UserDefinedType;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -98,11 +102,17 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
 
         clazz.setAttribute("objPrefix", prefix);
         clazz.setAttribute("objcName", prefix + clazz.getName());
+
+        clazz.getUsedTypes().remove(new UserDefinedType(clazz));
+        if(clazz.getParent() != null) {
+            clazz.getUsedTypes().remove(new UserDefinedType(clazz.getParentClass()));
+        }
     }
 
     @Override
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Method method) {
         method.setAttribute("objcName", method.getName());
+        nullabilityHooking(method.getReturnType());
     }
 
     @Override
@@ -119,6 +129,7 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
         if (method.getArguments().get(0) == argument) { /* first argument signature name must be capitalized */
             argument.setAttribute("objSignatureName", "");
         }
+        nullabilityHooking(argument.getType());
     }
 
     @Override
@@ -127,6 +138,35 @@ public class ObjectiveCBackend extends AbstractCompilerBackend {
         if (constructor.getArguments().get(0) == argument) { /* first argument signature name must be capitalized */
             argument.setAttribute("objSignatureName", Character.toUpperCase(argument.getName().charAt(0)) +
                     argument.getName().substring(1));
+        }
+        nullabilityHooking(argument.getType());
+    }
+
+    private void nullabilityHooking(TypeName typeName) {
+        if(typeName.getResolvedType() instanceof PrimitiveType) {
+            return;
+        }
+
+        typeName.setAttribute("objcHasNullability", true);
+        if (typeName.getResolvedType() instanceof OptionalType) {
+            final OptionalType optionalType = (OptionalType) typeName.getResolvedType();
+            // this is an edge case... if a optional contains a primitive type, ignore it.
+            if(optionalType.getContainedType().getResolvedType() instanceof PrimitiveType) {
+                typeName.setAttribute("objcHasNullability", false);
+                return;
+            }
+
+            typeName.setAttribute("objcNullable", true);
+        } else {
+            typeName.setAttribute("objcNullable", false);
+        }
+
+        // lambdas are special...
+        if (typeName.getResolvedType() instanceof LambdaType) {
+            typeName.setAttribute("objcHasNullability", false);
+            LambdaType lambda = (LambdaType) typeName.getResolvedType();
+            nullabilityHooking(lambda.getReturnType());
+            lambda.getArguments().forEach(a -> nullabilityHooking(a.getType()));
         }
     }
 

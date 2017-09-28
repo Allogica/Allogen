@@ -1,4 +1,8 @@
-#import <Allogen/Example/AExampleClass.h>
+#import <Allogen/AExampleClass.h>
+#import <Allogen/AExampleClass.h>
+#import <Allogen/ABaseClass.h>
+#import <Allogen/ASubClass1.h>
+#import <Allogen/ASubClass2.h>
 
 int main(int argc, const char** argv) {
     AExampleClass* exampleClass = [[AExampleClass alloc] init];
@@ -11,7 +15,6 @@ int main(int argc, const char** argv) {
 
 
     AExampleClass* n = [[AExampleClass alloc] initWithInitialValue: 200];
-/*
     {
         AExampleClass* shared1 = [AExampleClass shared];
         [shared1 setInteger: 123];
@@ -24,7 +27,6 @@ int main(int argc, const char** argv) {
     }
 
     NSLog(@"%i", [AExampleClass getStaticInt]);
-*/
 
     [n sayHello: @"Allogen Bridge"];
 
@@ -70,4 +72,17 @@ int main(int argc, const char** argv) {
         }];
     }];
 
+    ABaseClass* b = [[ASubClass1 alloc] init];
+    NSLog(@"Name: %@", [b getName]);
+    [b fromNonvirtualBase];
+
+    ASubClass1* sb1 = b;
+    [sb1 fromNonvirtualBase];
+
+    b = [[ASubClass2 alloc] init];
+    NSLog(@"Name: %@", [b getName]);
+    [b fromNonvirtualBase];
+
+    ASubClass1* sb2 = b;
+    [sb2 fromNonvirtualBase];
 }

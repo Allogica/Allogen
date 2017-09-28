@@ -8,10 +8,17 @@
 
 package allogen.example;
 
+import java.util.*;
+import java.nio.ByteBuffer;
+import allogen.example.AnotherClass;
+import allogen.example.ExampleClass;
+import allogen.example.ExampleClass;
+
+
 /**
  * Calls the C++ ExampleClass() native method
  */
-class ExampleClass {
+public class ExampleClass {
     /**
 	 * A numeric value that represents the pointer used to access the wrapped object.
 	 *
@@ -83,7 +90,7 @@ class ExampleClass {
      */
     public native ExampleClass copy();
 
-    interface AsyncTaskCallback {
+    public interface AsyncTaskCallback {
         void onCallback();
     }
     /**
@@ -93,7 +100,7 @@ class ExampleClass {
      */
     public native void doAsync(AsyncTaskCallback callback);
 
-    interface AsyncTaskCallback2 {
+    public interface AsyncTaskCallback2 {
         int onCallback(short a, short b);
     }
     /**
@@ -103,7 +110,7 @@ class ExampleClass {
      */
     public native int anotherCallback(AsyncTaskCallback2 callback);
 
-    interface AsyncTaskCallback3 {
+    public interface AsyncTaskCallback3 {
         int onCallback(short a, short b);
     }
     /**
@@ -139,7 +146,7 @@ class ExampleClass {
      */
     public native AnotherClass createAnother(String name);
 
-    interface CreateAnotherAsyncCallback {
+    public interface CreateAnotherAsyncCallback {
         void createAnother(AnotherClass another);
     }
     /**
@@ -158,7 +165,7 @@ class ExampleClass {
      */
     public native void printAnother(AnotherClass another);
 
-    interface PrintAnotherAsyncCallback {
+    public interface PrintAnotherAsyncCallback {
         void printAnother();
     }
     /**

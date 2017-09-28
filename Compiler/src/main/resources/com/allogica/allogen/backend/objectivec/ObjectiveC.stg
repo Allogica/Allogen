@@ -30,14 +30,19 @@
 
 import "../Allogen.stg"
 
-methodSignature(method) ::= "<if(method.static)>+<else>-<endif>(<if(method.returnType)><typename(method.returnType)><else>nonnull id<endif>)<method.objcName><arguments(method, class)>"
+nullabilityBase(type)  ::= "<if(type.objcNullable)>nullable<else>nonnull<endif>"
+nullabilityBase2(type) ::= "<if(type.objcNullable)>_Nullable<else>_Nonnull<endif>"
+
+nullability(type) ::= "<if(type.objcHasNullability)><nullabilityBase(type)> <endif>"
+
+methodSignature(method) ::= "<if(method.static)>+<else>-<endif>(<if(method.returnType)><nullability(method.returnType)><typename(method.returnType)><else>nonnull id<endif>)<method.objcName><arguments(method, class)>"
 arguments(method, class) ::= <%<method.arguments:argument(method, class); separator=" ">%>
-argument(argument, method, class) ::= "<argument.objSignatureName>:(<typename(argument.type)>)<argumentName(argument)>"
+argument(argument, method, class) ::= "<argument.objSignatureName>:(<nullability(argument.type)><typename(argument.type)>)<argumentName(argument)>"
 
 primitiveType(type) ::= "<cppTypeMapping.(type.name)>"
 userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.objcName>*"
 stringType(type) ::= "NSString*"
-lambdaType(type) ::= <% <if(type.resolvedType.returnType)><typename(type.resolvedType.returnType)><else>void<endif>(^)(<type.resolvedType.arguments:{arg|<typename(arg.type)>}; separator=", ">) %>
+lambdaType(type) ::= <% <if(type.resolvedType.returnType)><typename(type.resolvedType.returnType)><else>void<endif>(^ <if(type.objcNullable)>_Nullable<else>_Nonnull<endif>)(<type.resolvedType.arguments:{arg|<typename(arg.type)><if(arg.type.objcHasNullability)> <nullabilityBase2(arg.type)><endif><if(arg.name)> <arg.name><endif>}; separator=", ">)%>
 optionalType(type) ::= "<typename(type.resolvedType.containedType)>"
 sharedPtrType(type) ::= "<typename(type.resolvedType.containedType)>"
 vectorType(type) ::= "NSArray\<<typename(type.resolvedType.containedType)>>*"
@@ -90,7 +95,7 @@ return BridgedMethod\<<class.fullyQualifiedName>, <nativeType(method.returnType)
 >>
 
 bridgedStaticMethod(method, class) ::= <<
-return BridgedMethod\<<class.fullyQualifiedName>, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+return BridgedMethod\<void, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
     [](<method.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) {
     <if(method.body)>
         <method.body>

@@ -119,6 +119,31 @@ namespace Allogen {
 			}
 		};
 
+		/**
+		 * A converter specialization for string types
+		 */
+		template<>
+		struct Converter<const char*> {
+			/**
+			 * The ObjectiveC string type
+			 */
+			using ObjectiveCType = NSString*;
+
+			/**
+			 * Creates a ObjectiveC string from a C++ string
+			 *
+			 * @param env the ObjectiveC environment
+			 * @param string the C string
+			 *
+			 * @return the newly created ObjectiveC string or NULL if
+			 * no memory could be allocated
+			 */
+			static NSString* toObjectiveC(const char* string) {
+				return [NSString stringWithCString:string encoding:[NSString defaultCStringEncoding]];
+			}
+
+		};
+
 	}
 }
 

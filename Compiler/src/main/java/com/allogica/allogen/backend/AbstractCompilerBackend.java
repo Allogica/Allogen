@@ -128,4 +128,33 @@ public abstract class AbstractCompilerBackend implements CompilerBackend {
 
     }
 
+    @Override
+    public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method) {
+
+    }
+
+    @Override
+    public void handle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method) {
+
+    }
+
+    @Override
+    public void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method) {
+
+    }
+
+    @Override
+    public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method, MethodArgument argument) {
+
+    }
+
+    @Override
+    public void handle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method, MethodArgument argument) {
+
+    }
+
+    @Override
+    public void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method, MethodArgument argument) {
+
+    }
 }

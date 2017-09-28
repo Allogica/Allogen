@@ -46,11 +46,15 @@ header(class) ::= <<
 <class.idlClass.includes:{include|
 #include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><endif>}>
 
+<if(!class.static)>
 ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>, <class.objcName>)
+<endif>
 
 @interface <class.objcName>()
+<if(!class.static)>
 -(id)initWithCppObject:(std::shared_ptr\<<class.fullyQualifiedName>\>*)cppObject;
 -(std::shared_ptr\<<class.fullyQualifiedName>\>*)toCppObject;
+<endif>
 @end
 >>
 
@@ -63,13 +67,17 @@ implementation(class) ::= <<
 using namespace Allogen::ObjectiveC;
 
 @implementation <class.objcName> {
+<if(!class.static)>
     std::shared_ptr\<<class.fullyQualifiedName>\>* _cppObject;
+<endif>
 }
 
 <class.constructors:constructor(class); separator="\n\n">
-<destructor(class.destructor, class)>
+<if(class.destructor)><destructor(class.destructor, class)><endif>
 <class.methods:method(class); separator="\n\n">
+<class.inheritedMethods:method(class); separator="\n\n">
 
+<if(!class.static)>
 -(id)initWithCppObject:(std::shared_ptr\<<class.fullyQualifiedName>\>*)cppObject {
     _cppObject = cppObject;
     return self;
@@ -78,6 +86,7 @@ using namespace Allogen::ObjectiveC;
 -(std::shared_ptr\<<class.fullyQualifiedName>\>*)toCppObject {
     return _cppObject;
 }
+<endif>
 @end
 >>
 

@@ -43,6 +43,18 @@ public class TypeResolutionPass implements CompilerPass<Class, Class> {
     public Class pass(Compiler compiler, CompilerContext context, Class clazz) {
         final Scope scope = clazz.getScope();
 
+        if(clazz.getIdlClass().getParentClass() != null) {
+            final TypeName parentClass = clazz.getParent();
+            final Type resolvedType = context.resolve(parentClass, scope);
+
+            if (resolvedType == null) {
+                throw new RuntimeException(String.format("Type '%s' not found in scope '%s'",
+                        parentClass, scope));
+            }
+            parentClass.setResolvedType(resolvedType);
+            clazz.addUsedType(resolvedType);
+        }
+
         for (final Method method : clazz.getMethods()) {
             final TypeName returnType = method.getReturnType();
             final Type resolvedType = context.resolve(returnType, scope);

@@ -31,7 +31,7 @@
 #pragma once
 
 #include "Allogen/JNI/Converter.hpp"
-#include <Juice/Utility/Optional.hpp>
+#include <experimental/optional>
 
 namespace Allogen {
 	namespace JNI {

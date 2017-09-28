@@ -74,4 +74,12 @@ public interface CompilerBackend {
     void handle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Method method, MethodArgument argument);
     void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Method method, MethodArgument argument);
 
+    void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method);
+    void handle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method);
+    void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method);
+
+    void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method, MethodArgument argument);
+    void handle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method, MethodArgument argument);
+    void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method, MethodArgument argument);
+
 }

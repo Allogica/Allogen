@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import "Allogen/Example/AAnotherClass.h"
-#import "Allogen/Example/AExampleClass.h"
+#import "Allogen/AAnotherClass.h"
+#import "Allogen/AExampleClass.h"
 
 
 /**
@@ -17,18 +17,18 @@
  */
 @interface AExampleClass : NSObject
 
-@property (nonatomic, assign, getter=getInteger) uint32_t aInteger;
+@property (nonatomic, assign, getter=getInteger, setter=setInteger:) uint32_t aInteger;
 /**
  * Calls the C++ () native method
  */
--(id)init;
+-(nonnull id)init;
 
 /**
  * Calls the C++ (uint32_t) native method
  *
  * @param initialValue the initialValue parameter
  */
--(id)initWithInitialValue:(uint32_t)initialValue; 
+-(nonnull id)initWithInitialValue:(uint32_t)initialValue; 
 /**
  * Calls the C++ () native method
  */

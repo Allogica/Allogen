@@ -74,4 +74,5 @@ public class MethodArgument extends ModelObject {
         this.idlMethodArgument = idlMethodArgument;
         return this;
     }
+
 }

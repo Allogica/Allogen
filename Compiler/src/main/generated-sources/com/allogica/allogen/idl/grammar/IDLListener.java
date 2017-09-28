@@ -128,6 +128,16 @@ public interface IDLListener extends ParseTreeListener {
 	 */
 	void exitClassdefinition(IDLParser.ClassdefinitionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link IDLParser#classextends}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassextends(IDLParser.ClassextendsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link IDLParser#classextends}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassextends(IDLParser.ClassextendsContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link IDLParser#classbody}.
 	 * @param ctx the parse tree
 	 */

@@ -6,7 +6,7 @@
  * interface declaration file and regenerate the bridge code.
  */
 
-#include "AnotherClass.hpp"
+#include "Allogen/Example/Bridge/AnotherClass.hpp"
 
 using namespace Allogen::JNI;
 
@@ -19,7 +19,7 @@ namespace Allogen { namespace Example {
         return BridgedConstructor<Allogen::Example::AnotherClass(Allogen::Example::AnotherClass, std::string)>::call(
             _env_, [](Allogen::Example::AnotherClass parent, std::string sub) {
                 return nullptr;
-            }, parent, sub
+            }, LocalRef<jobject>(_env_, jobject(parent), false), LocalRef<jstring>(_env_, jstring(sub), false)
         );
     }
 
@@ -30,7 +30,7 @@ namespace Allogen { namespace Example {
         return BridgedConstructor<Allogen::Example::AnotherClass(std::string)>::call(
             _env_, [](std::string str) {
                 return nullptr;
-            }, str
+            }, LocalRef<jstring>(_env_, jstring(str), false)
         );
     }
     JNIEXPORT void JNICALL
@@ -61,7 +61,7 @@ namespace Allogen { namespace Example {
             _env_, _jthis_,
             [](AnotherClass *wself, std::string newName) {
                 return wself->setName(newName);
-            }, newName
+            }, LocalRef<jstring>(_env_, jstring(newName), false)
         );
     }
 

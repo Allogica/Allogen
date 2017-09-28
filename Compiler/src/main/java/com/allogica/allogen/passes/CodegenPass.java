@@ -39,17 +39,17 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
 
 public class CodegenPass implements CompilerPass<Class, Class> {
 
     @Override
     public Class pass(Compiler compiler, CompilerContext context, Class clazz) throws IOException {
-        /* Generate the target language objects */
+        /*
+         * Generate the target language objects
+         */
         final URL targetTemplateURL = compiler.getBackend().getTargetTemplateURL();
         final STGroup targetTemplate = new STGroupFile(targetTemplateURL, "UTF-8", '<', '>');
         targetTemplate.registerModelAdaptor(ModelObject.class, new CompilerObjectModelAdaptor());
@@ -59,15 +59,13 @@ public class CodegenPass implements CompilerPass<Class, Class> {
 
         final String targetOutputFilename = clazz.getAttribute("targetOutputFile");
         final File targetOutputFile = new File(context.getTargetDir(), targetOutputFilename);
+
         createParentIfNotExists(targetOutputFile);
+        writeFileIfChanged(targetOutputFile, targetClassTemplate.render());
 
-        final FileOutputStream targetOutputStream = new FileOutputStream(targetOutputFile);
-        final OutputStreamWriter targetWriter = new OutputStreamWriter(targetOutputStream);
-
-        targetWriter.write(targetClassTemplate.render());
-        targetWriter.close();
-
-        /* Generate Bridged C++ header objects */
+        /*
+         * Generate Bridged C++ header objects
+         */
         final URL bridgeTemplateURL = compiler.getBackend().getBridgeTemplateURL();
         final STGroup bridgeTemplate = new STGroupFile(bridgeTemplateURL, "UTF-8", '<', '>');
         bridgeTemplate.registerModelAdaptor(ModelObject.class, new CompilerObjectModelAdaptor());
@@ -77,27 +75,21 @@ public class CodegenPass implements CompilerPass<Class, Class> {
 
         final String bridgeHeaderOutputFilename = clazz.getAttribute("bridgeHeaderOutputFile");
         final File bridgeHeaderOutputFile = new File(context.getBridgeDir(), bridgeHeaderOutputFilename);
+
         createParentIfNotExists(bridgeHeaderOutputFile);
+        writeFileIfChanged(bridgeHeaderOutputFile, bridgeHeaderClassTemplate.render());
 
-        final FileOutputStream bridgeHeaderOutputStream = new FileOutputStream(bridgeHeaderOutputFile);
-        final OutputStreamWriter bridgeHeaderWriter = new OutputStreamWriter(bridgeHeaderOutputStream);
-
-        bridgeHeaderWriter.write(bridgeHeaderClassTemplate.render());
-        bridgeHeaderWriter.close();
-
-        /* Generate Bridged C++ implementation objects */
+        /*
+         * Generate Bridged C++ implementation objects
+         */
         final ST bridgeImplementationClassTemplate = bridgeTemplate.getInstanceOf("implementation");
         bridgeImplementationClassTemplate.add("class", clazz);
 
         final String bridgeImplementationOutputFilename = clazz.getAttribute("bridgeImplementationOutputFile");
         final File bridgeImplementationOutputFile = new File(context.getBridgeDir(), bridgeImplementationOutputFilename);
+
         createParentIfNotExists(bridgeImplementationOutputFile);
-
-        final FileOutputStream bridgeImplementationOutputStream = new FileOutputStream(bridgeImplementationOutputFile);
-        final OutputStreamWriter bridgeImplementationWriter = new OutputStreamWriter(bridgeImplementationOutputStream);
-
-        bridgeImplementationWriter.write(bridgeImplementationClassTemplate.render());
-        bridgeImplementationWriter.close();
+        writeFileIfChanged(bridgeImplementationOutputFile, bridgeImplementationClassTemplate.render());
 
         return clazz;
     }
@@ -107,6 +99,25 @@ public class CodegenPass implements CompilerPass<Class, Class> {
         if (!parent.exists()) {
             parent.mkdirs();
         }
+    }
+
+    static private void writeFileIfChanged(File file, String content) throws IOException {
+        if (file.exists()) {
+            final String originalContent = new String(Files.readAllBytes(file.toPath()));
+            if (content.equals(originalContent)) {
+                return;
+            }
+        }
+
+        final FileOutputStream outputStream = new FileOutputStream(file);
+        final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+        outputStreamWriter.write(content);
+
+        outputStreamWriter.flush();
+        outputStreamWriter.close();
+
+        outputStream.flush();
+        outputStream.close();
     }
 
 }

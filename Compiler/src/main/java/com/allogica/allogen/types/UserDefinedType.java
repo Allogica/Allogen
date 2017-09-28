@@ -53,6 +53,6 @@ public class UserDefinedType extends AbstractType {
         if(other instanceof UserDefinedType) {
             return clazz.getFullyQualifiedName().compareTo(((UserDefinedType) other).clazz.getFullyQualifiedName());
         }
-        return super.compare(other);
+        return -1;
     }
 }

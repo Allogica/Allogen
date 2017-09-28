@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "Allogen/Example/AAnotherClass.h"
+#import "Allogen/AAnotherClass.h"
 
 
 /**
@@ -22,14 +22,14 @@
  * @param parent the parent parameter
  * @param sub the sub parameter
  */
--(id)initWithParent:(AAnotherClass*)parent sub:(NSString*)sub;
+-(nonnull id)initWithParent:(AAnotherClass*)parent sub:(NSString*)sub;
 
 /**
  * Calls the C++ (std::string) native method
  *
  * @param str the str parameter
  */
--(id)initWithStr:(NSString*)str; 
+-(nonnull id)initWithStr:(NSString*)str; 
 /**
  * Calls the C++ () native method
  */
