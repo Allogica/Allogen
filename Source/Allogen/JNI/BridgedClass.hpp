@@ -276,6 +276,7 @@ namespace Allogen {
 		};
 
 		inline jclass getClass(JNIEnv* env, std::string className) {
+#if defined(__ANDROID__)
 			static jobject gClassLoader;
 			static jmethodID gFindClassMethod;
 			static bool loaded = false;
@@ -303,6 +304,9 @@ namespace Allogen {
 			}
 
 			return static_cast<jclass>(env->CallObjectMethod(gClassLoader, gFindClassMethod, env->NewStringUTF(className.data())));
+#else
+			return env->FindClass(className.data());
+#endif
 		}
 
 		/**
