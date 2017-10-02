@@ -89,7 +89,7 @@ namespace Allogen {
 			static Type fromObjectiveC(ObjectiveCType dict) {
 				Type objects;
 
-				for (typename Converter<KeyType>::ObjectiveCType* key in dict) {
+				for (typename Converter<KeyType>::ObjectiveCType key in dict) {
 					objects.insert(std::make_pair(
 							Converter<KeyType>::fromObjectiveC(key),
 							Converter<ValueType>::fromObjectiveC(dict[key])

@@ -44,6 +44,9 @@ namespace Allogen {
 		template<typename T>
 		class LocalRef {
 		public:
+			using RefType = T;
+
+		public:
 			/**
 			 * The JNI object
 			 */
@@ -87,6 +90,9 @@ namespace Allogen {
 
 		template<typename T>
 		class GlobalRef {
+		public:
+			using RefType = T;
+
 		public:
 			/**
 			 * The JNI reference

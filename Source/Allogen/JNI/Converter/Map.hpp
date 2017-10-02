@@ -110,8 +110,14 @@ namespace Allogen {
 				for(jsize i = 0; i < size; i++) {
 					LocalRef<jobject> entry = {env, env->GetObjectArrayElement(entries, i)};
 
-					LocalRef<jobject> key = {env, env->CallObjectMethod(entry, entryGetKey)};
-					LocalRef<jobject> value = {env, env->CallObjectMethod(entry, entryGetValue)};
+					typename Converter<KeyType>::JavaType key = {
+							env, reinterpret_cast<typename Converter<KeyType>::JavaType::RefType>(env->CallObjectMethod(
+									entry, entryGetKey))
+					};
+					typename Converter<ValueType>::JavaType value = {
+							env, reinterpret_cast<typename Converter<ValueType>::JavaType::RefType>(env->CallObjectMethod(
+									entry, entryGetValue))
+					};
 
 					objects.insert(std::make_pair(
 							Converter<KeyType>::fromJava(env, key),
