@@ -30,26 +30,39 @@
 
 #pragma once
 
-/*
- * Include the JNI header first, then include all other support headers
- */
 #include <jni.h>
 
-#if defined(__ANDROID__)
-# define ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND
-#else
-# define ALLOGEN_JNI_ANDROID_ATTACH_CURRENT_THREAD_WORKAROUND (void**)
-#endif
+namespace Allogen {
+	namespace JNI {
 
-#include "Allogen/JNI/Converter.hpp"
-#include "Allogen/JNI/Converter/IntegralTypes.hpp"
-#include "Allogen/JNI/Converter/Function.hpp"
-#include "Allogen/JNI/Converter/Vector.hpp"
-#include "Allogen/JNI/Converter/Buffer.hpp"
-#include "Allogen/JNI/Converter/Map.hpp"
-#include "Allogen/JNI/Converter/Optional.hpp"
-#include "Allogen/JNI/Converter/DateTime.hpp"
-#include "Allogen/JNI/BridgedClass.hpp"
-#include "Allogen/JNI/BridgedConstructor.hpp"
-#include "Allogen/JNI/BridgedDestructor.hpp"
-#include "Allogen/JNI/BridgedMethod.hpp"
+		/**
+		 * This class represents a standard destructor wrapper.
+		 *
+		 * @tparam Class 	the wrapped class whose destructor is being called
+		 */
+		template<typename Class>
+		struct BridgedDestructor {
+		public:
+			/**
+			 * Calls a wrapped C++ destructor from Java code
+			 *
+			 * @tparam Executor the executor type
+			 *
+			 * @param env 		the JNI environment
+			 * @param jthis 	the "this" Java object calling the wrapped destructor
+			 * @param executor 	the code generated executor used to dispatch the destructor to
+			 * 					the C++ object
+			 */
+			template<typename Executor>
+			static inline void call(JNIEnv* env, jobject jthis, Executor&& executor) {
+				jclass view = env->GetObjectClass(jthis);
+				jfieldID field = env->GetFieldID(view, "pointer", "J");
+				jlong longPtr = env->GetLongField(jthis, field);
+
+				auto ptr = reinterpret_cast<std::shared_ptr<Class>*>(longPtr);
+				executor(ptr);
+			}
+		};
+
+	}
+}

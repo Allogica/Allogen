@@ -89,9 +89,9 @@ return BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{ar
 >>
 
 bridgedDestructor(destructor, class) ::= <<
-BridgedMethod\<<class.name>, void()>::call(
+BridgedDestructor\<<class.name>\>::call(
     _env_, _jthis_,
-    [](<class.name> *wself) {
+    [](std::shared_ptr\<<class.name>\> *wself) {
     <if(destructor.body)>
         <destructor.body>
     <else>

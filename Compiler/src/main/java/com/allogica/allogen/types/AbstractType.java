@@ -50,7 +50,7 @@ public abstract class AbstractType implements Type {
     }
 
     public int compare(Type other) {
-        return hashCode() - other.hashCode();
+        return 1;
     }
 
 }

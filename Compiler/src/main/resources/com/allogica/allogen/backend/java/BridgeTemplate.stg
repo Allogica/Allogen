@@ -76,6 +76,7 @@ Java_<constructor.jniSignature>(JNIEnv* _env_, jobject _jthis_<if(constructor.ar
 >>
 
 destructor(destructor, class) ::= <<
+extern "C"
 JNIEXPORT void JNICALL
 Java_<destructor.jniSignature>(JNIEnv* _env_, jobject _jthis_) {
     <bridgedDestructor(destructor, class)>
