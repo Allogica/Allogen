@@ -76,6 +76,18 @@ mapTypeJavaSignature(type) ::= "Ljava/util/Map;"
 bufferTypeJavaSignature(type) ::= "Ljava/nio/ByteBuffer;"
 dateTypeJavaSignature(type) ::= "Ljava/util/Date;"
 
+javaRetainTemplateName_(type) ::= "<type.resolvedType.templateName>Retain"
+javaRetain(type) ::= "<(javaRetainTemplateName_(type))(type)>"
+primitiveTypeRetain(type) ::= ""
+userDefinedTypeRetain(type) ::= ""
+stringTypeRetain(type) ::= ""
+optionalTypeRetain(type) ::= ""
+sharedPtrTypeRetain(type) ::= ""
+vectorTypeRetain(type) ::= ""
+mapTypeRetain(type) ::= ""
+bufferTypeRetain(type) ::= ".retain()"
+dateTypeRetain(type) ::= ""
+
 bridgedConstructor(constructor, class) ::= <<
 return BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
     _env_, [](<constructor.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) {
@@ -111,7 +123,7 @@ return BridgedMethod\<<class.name>, <nativeType(method.returnType)>(<method.argu
         return wself-><method.name>(<method.arguments:{argument|<argument.name>}; separator=", ">);
     <endif>
     }<if(method.arguments)>, <method.arguments:forwardArgument(); separator=", "><endif>
-);
+)<javaRetain(method.returnType)>;
 >>
 
 bridgedStaticMethod(method, class) ::= <<
@@ -124,5 +136,5 @@ return BridgedMethod\<void, <nativeType(method.returnType)>(<method.arguments:{a
         return <class.fullyQualifiedName>::<method.name>(<method.arguments:{argument|<argument.name>}; separator=", ">);
     <endif>
     }<if(method.arguments)>, <method.arguments:forwardArgument(); separator=", "><endif>
-);
+)<javaRetain(method.returnType)>;
 >>

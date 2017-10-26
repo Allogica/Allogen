@@ -86,6 +86,9 @@ namespace Allogen {
 
 			operator T() const;
 
+		public:
+			T retain() const;
+
 		};
 
 		template<typename T>
@@ -214,6 +217,11 @@ namespace Allogen {
 		template<typename T>
 		LocalRef<T>::operator T() const {
 			return object;
+		}
+
+		template<typename T>
+		T LocalRef<T>::retain() const {
+			return env->NewLocalRef(object);
 		}
 
 		// -------------------------------------------------------------------------------------------------------------
