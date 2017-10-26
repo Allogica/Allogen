@@ -195,7 +195,9 @@ public class JavaBackend extends AbstractCompilerBackend {
         overloadBuilder.append(methodName)
                 .append("__");
 
+        int argumentCount = 0;
         for (final MethodArgument argument : method.getArguments()) {
+            argumentCount++;
             if (argument.getType().getResolvedType() instanceof UserDefinedType) {
                 final String javaName = ((UserDefinedType) argument.getType().getResolvedType()).getUserDefinedClass()
                         .getAttribute("javaFullyQualifiedName");
@@ -208,6 +210,9 @@ public class JavaBackend extends AbstractCompilerBackend {
                 }
                 overloadBuilder.append(javaSignatures.get(typeName));
             } else if (argument.getType().getResolvedType() instanceof StringType) {
+                if(argumentCount >= 2) {
+                    overloadBuilder.append(argumentCount);
+                }
                 overloadBuilder.append("Ljava_lang_String_2");
             } else if(argument.getType().getResolvedType() instanceof BufferType) {
                 overloadBuilder.append("Ljava_nio_ByteBuffer_2");
