@@ -65,7 +65,7 @@ namespace Allogen {
 				if(object) {
 					return Converter<ContainedType>::toCSharp(object.value());
 				}
-				return nullptr;
+				return {};
 			}
 
 			/**
@@ -80,7 +80,7 @@ namespace Allogen {
 				if(object) {
 					return Converter<ContainedType>::fromCSharp(object.value());
 				}
-				return nullptr;
+				return {};
 			}
 		};
 

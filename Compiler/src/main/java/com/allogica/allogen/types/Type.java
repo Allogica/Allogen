@@ -30,12 +30,14 @@
 
 package com.allogica.allogen.types;
 
+import java.io.Serializable;
+
 import com.allogica.allogen.Compiler;
 import com.allogica.allogen.CompilerContext;
 
 import java.util.List;
 
-public interface Type {
+public interface Type extends Serializable {
 
     void link(Compiler<?, ?> compiler, CompilerContext compilerContext);
     String getTemplateName();

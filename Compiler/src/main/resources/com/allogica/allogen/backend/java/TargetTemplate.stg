@@ -38,10 +38,9 @@ class(class) ::= <<
 
 import java.util.*;
 import java.nio.ByteBuffer;
-<class.usedTypes:{usedType|<if(usedType.userDefinedClass)>import <usedType.userDefinedClass.javaFullyQualifiedName>;<\n><endif>}>
 
 <documentation(class)>
-public class <class.name><if(class.parent)> extends <class.parentClass.name><endif> {
+public class <class.name><if(class.parent)> extends <class.parentClass.javaFullyQualifiedName><endif> {
 <if(!class.parent)>
     /**
 	 * A numeric value that represents the pointer used to access the wrapped object.
@@ -53,6 +52,10 @@ public class <class.name><if(class.parent)> extends <class.parentClass.name><end
 <endif>
 
     <if(class.constructors)><class.constructors:constructor(class); separator="\n\n"><\ ><endif>
+    protected <class.javaName>(<class.javaName> dummy) {
+        // DO NOT USE THIS CONSTRUCTOR! THIS IS FOR INTERNAL USE ONLY!!!
+        <if(class.parentClass)>super((<class.parentClass.javaFullyQualifiedName>) null);<endif>
+    }
     <if(class.destructor)><class.destructor:destructor(class); separator="\n\n"><\n><endif>
     <if(class.methods)><class.methods:method(class); separator="\n\n"><endif>
     <if(class.inheritedMethods)><class.inheritedMethods:method(class, true, true); separator="\n\n"><endif>
@@ -72,6 +75,7 @@ interface <interface.name> {
 constructor(constructor, class) ::= <<
 <documentation(constructor)>
 public <class.javaName>(<arguments(constructor, class)>) {
+    <if(class.parentClass)>super((<class.parentClass.javaFullyQualifiedName>) null);<endif>
     pointer = this._init(<constructor.arguments:{argument|<argument.name>}; separator=", ">);
 }
 
@@ -123,7 +127,7 @@ public interface <argument.javaLambdaInterfaceName> {
 typename(type) ::= "<type:(type.resolvedType.templateName)()>"
 
 primitiveType(type) ::= "<javaTypeMapping.(type.name)>"
-userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.javaName>"
+userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.javaFullyQualifiedName>"
 stringType(type) ::= "String"
 lambdaType(type) ::= "<type.javaLambdaInterfaceName>"
 optionalType(type) ::= "<typename(type.resolvedType.containedType)>"

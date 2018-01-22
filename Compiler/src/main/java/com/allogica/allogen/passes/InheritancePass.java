@@ -46,11 +46,19 @@ public class InheritancePass implements CompilerPass<Class, Class> {
         }
 
         for (final InheritedMethod method : clazz.getInheritedMethods()) {
-            clazz.addUsedType(method.getReturnType().getResolvedType());
-            clazz.getUsedTypes().addAll(method.getReturnType().getResolvedType().getDependantTypes());
+            if(method.getReturnType().getResolvedType() != null) {
+                clazz.addUsedType(method.getReturnType().getResolvedType());
+            }
+            if(method.getReturnType() != null && method.getReturnType().getResolvedType() != null) {
+                clazz.getUsedTypes().addAll(method.getReturnType().getResolvedType().getDependantTypes());
+            }
             for (final MethodArgument argument : method.getArguments()) {
-                clazz.addUsedType(argument.getType().getResolvedType());
-                clazz.getUsedTypes().addAll(argument.getType().getResolvedType().getDependantTypes());
+                if(argument.getType().getResolvedType() != null) {
+                    clazz.addUsedType(argument.getType().getResolvedType());
+                }
+                if(argument.getType().getResolvedType() != null) {
+                    clazz.getUsedTypes().addAll(argument.getType().getResolvedType().getDependantTypes());
+                }
             }
         }
 

@@ -84,7 +84,7 @@ public class CompilerContext {
 
         NamespaceContext addNamespace(String name) {
             if (types.containsKey(name) || namespaces.containsKey(name)) {
-                throw new RuntimeException("Name is already used.");
+                throw new RuntimeException("Name " + name + " is already used.");
             }
             NamespaceContext ns = new NamespaceContext(name);
             namespaces.put(name, ns);
@@ -93,14 +93,14 @@ public class CompilerContext {
 
         void addType(String name, Type type) {
             if (types.containsKey(name) || namespaces.containsKey(name)) {
-                throw new RuntimeException("Name is already used.");
+                throw new RuntimeException("Name "+name+" is already used.");
             }
             types.put(name, new TypeContext(type));
         }
 
         void addTypeFactory(String name, TypeFactory typeFactory) {
             if (types.containsKey(name) || namespaces.containsKey(name)) {
-                throw new RuntimeException("Name is already used.");
+                throw new RuntimeException("Name "+name+" is already used.");
             }
             types.put(name, new TypeContext(typeFactory));
         }

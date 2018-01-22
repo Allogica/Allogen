@@ -46,7 +46,7 @@ public class TypeName extends ModelObject {
     private List<TypeName> templateArguments = new ArrayList<>();
 
     private IDLTypeName idlTypeName;
-    private transient Type resolvedType;
+    private Type resolvedType;
 
     public TypeName(String name) {
         this(name, new String[]{});

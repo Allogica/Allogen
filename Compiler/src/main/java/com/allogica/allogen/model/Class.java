@@ -182,11 +182,6 @@ public class Class extends ModelObject {
         return usedTypes;
     }
 
-    public Class setUsedTypes(Set<Type> usedTypes) {
-        this.usedTypes = usedTypes;
-        return this;
-    }
-
     public Class addUsedType(Type usedType) {
         this.usedTypes.add(usedType);
         return this;
