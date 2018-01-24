@@ -102,8 +102,7 @@ namespace Allogen {
 			 * no memory could be allocated
 			 */
 			static NSString* toObjectiveC(const std::string& string) {
-				return [NSString stringWithCString:string.c_str()
-						encoding:[NSString defaultCStringEncoding]];
+				return [[NSString alloc] initWithUTF8String:string.c_str()];
 			}
 
 			/**
