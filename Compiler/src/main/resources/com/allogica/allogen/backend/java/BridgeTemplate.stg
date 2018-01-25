@@ -86,7 +86,7 @@ Java_<destructor.jniSignature>(JNIEnv* _env_, jobject _jthis_) {
 method(method, class) ::= <<
 extern "C"
 JNIEXPORT <typename(method.returnType)> JNICALL
-Java_<method.jniSignature>(JNIEnv* _env_<if(!method.static)>, jobject _jthis_<endif><if(method.arguments)>,
+Java_<method.jniSignature>(JNIEnv* _env_<if(!method.static)>, jobject _jthis_<else>, jclass<endif><if(method.arguments)>,
         <method.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", "><endif>) {
     <if(!method.static)><bridgedMethod(method, class)><else><bridgedStaticMethod(method, class)><endif>
 }
