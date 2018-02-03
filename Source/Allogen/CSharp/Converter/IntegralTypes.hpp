@@ -77,5 +77,74 @@ namespace Allogen {
 			}
 		};
 
+		/**
+		 * A converter specialization for float types
+		 */
+		template<>
+		struct Converter<float> {
+			/**
+			 * The C++ type this converter is operating on
+			 */
+			using Type = float;
+
+			/**
+			 * The CSharp type this converter supports
+			 */
+			using CSharpType = float;
+
+			/**
+			 * Converts a C++ float into a CSharp float
+			 *
+			 * @param i the C++ integer
+			 *
+			 * @return the CSharp integer
+			 */
+			static CSharpType toCSharp(Type i) { return i; }
+
+			/**
+			 * Converts a CSharp float into a C++ float
+			 *
+			 * @param i the CSharp float
+			 *
+			 * @return the C++ float
+			 */
+			static Type fromCSharp(CSharpType i) { return i; }
+		};
+
+		/**
+		 * A converter specialization for double types
+		 */
+		template<>
+		struct Converter<double> {
+			/**
+			 * The C++ type this converter is operating on
+			 */
+			using Type = double;
+
+			/**
+			 * The CSharp type this converter supports
+			 */
+			using CSharpType = double;
+
+			/**
+			 * Converts a C++ double into a CSharp double
+			 *
+			 * @param i the C++ double
+			 *
+			 * @return the CSharp double
+			 */
+			static CSharpType toCSharp(Type i) { return i; }
+
+			/**
+			 * Converts a CSharp integer into a C++ double
+			 *
+			 * @param i the CSharp double
+			 *
+			 * @return the C++ double
+			 */
+			static Type fromCSharp(CSharpType i) { return i; }
+		};
+
+
 	}
 }

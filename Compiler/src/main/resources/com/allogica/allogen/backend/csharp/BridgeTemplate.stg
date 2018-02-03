@@ -41,7 +41,9 @@ header(class) ::= <<
 #include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><else>\><endif>}>
 <class.usedTypes:{usedType|<if(usedType.userDefinedClass)>#include "<usedType.userDefinedClass.bridgeHeaderOutputFile>"<\n><endif>}>
 
-// ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>)
+<if(!class.static)>
+ALLOGEN_BRIDGED_CLASS(<class.fullyQualifiedName>)
+<endif>
 >>
 
 implementation(class) ::= <<
@@ -56,6 +58,7 @@ using namespace Allogen::CSharp;
     <class.constructors:constructor(class); separator="\n\n">
     <destructor(class.destructor, class)>
     <class.methods:method(class); separator="\n\n">
+    <class.inheritedMethods:method(class); separator="\n\n">
 
 <class.namespaces:namespace_end()>
 >>
@@ -64,28 +67,111 @@ namespace_begin(ns) ::= "namespace <ns> {"
 namespace_end(ns) ::= "}"
 
 constructor(constructor, class) ::= <<
-extern "C" <class.fullyQualifiedName>*
+<if(!constructor.csSkip)>
+extern "C" std::shared_ptr\<<class.fullyQualifiedName>\>*
 <constructor.csEntryPoint>(<constructor.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", ">) {
     <bridgedConstructor(constructor, class)>
 }
+<endif>
 >>
 
 destructor(destructor, class) ::= <<
+<if(!class.static)>
 extern "C" void
-<destructor.csEntryPoint>(<class.fullyQualifiedName>* csthis) {
+<destructor.csEntryPoint>(std::shared_ptr\<<class.fullyQualifiedName>\>* csthis) {
     <bridgedDestructor(destructor, class)>
 }
+<endif>
 >>
 
 method(method, class) ::= <<
-extern "C" <typename(method.returnType)>
-<method.csEntryPoint>(<if(!method.static)><class.fullyQualifiedName>* csthis<endif><if(method.arguments)>, <method.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", "><endif>) {
+<if(!method.csSkip)>
+extern "C" <if(method.returnType.csTranslatedReturnType)>void<else><typename(method.returnType)><endif>
+<method.csEntryPoint>(<if(!method.static)>std::shared_ptr\<<class.fullyQualifiedName>\>* csthis<if(method.arguments || method.returnType.csTranslatedReturnType)>, <endif><endif>
+<if(method.returnType.csTranslatedReturnType)><translatedReturnArgs(method.returnType)><if(method.arguments)>, <endif><endif>
+<if(method.arguments)>
+<method.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", "><endif>) {
     <if(!method.static)><bridgedMethod(method, class)><else><bridgedStaticMethod(method, class)><endif>
 }
+<endif>
+>>
+
+
+bridgedConstructor(constructor, class) ::= <<
+return BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+    [](<constructor.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) {
+    <if(constructor.body)>
+        <constructor.body>
+    <else>
+        return new <class.name>(<constructor.arguments:{argument|<argument.name>}; separator=", ">);
+    <endif>
+    }<if(constructor.arguments)>, <constructor.arguments:forwardArgument(); separator=", "><endif>
+);
+>>
+
+bridgedDestructor(destructor, class) ::= <<
+BridgedMethod\<<class.fullyQualifiedName>, void()>::call(
+    csthis,
+    [](<class.fullyQualifiedName> *wself) {
+    <if(destructor.body)>
+        <destructor.body>
+    <else>
+        delete wself;
+    <endif>
+    }
+);
+>>
+
+bridgedMethod(method, class) ::= <<
+<if(!method.csSkip)>
+<if(method.returnType.csTranslatedReturnType)>auto ret =<else>return<endif> BridgedMethod\<<class.fullyQualifiedName>, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+    csthis,
+    [](<class.fullyQualifiedName> *wself<if(method.arguments)>, <method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", "><endif>) {
+    <if(method.body)>
+        <method.body>
+    <else>
+        return wself-><method.name>(<method.arguments:{argument|<argument.name>}; separator=", ">);
+    <endif>
+    }<if(method.arguments)>, <method.arguments:forwardArgument(); separator=", "><endif>
+);
+<if(method.returnType.csTranslatedReturnType)>
+<translatedReturnUnwrap(method.returnType)>
+<endif>
+<endif>
+>>
+
+bridgedStaticMethod(method, class) ::= <<
+return BridgedMethod\<void, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
+    [](<method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", ">) {
+    <if(method.body)>
+        <method.body>
+    <else>
+        return <class.fullyQualifiedName>::<method.name>(<method.arguments:{argument|<argument.name>}; separator=", ">);
+    <endif>
+    }<if(method.arguments)>, <method.arguments:forwardArgument(); separator=", "><endif>
+);
 >>
 
 primitiveType(type) ::= "<nativeType(type)>"
-userDefinedType(type) ::= "<nativeType(type)>*"
+userDefinedType(type) ::= "std::shared_ptr\<<nativeType(type)>>*"
 stringType(type) ::= "const char*"
 lambdaType(type) ::= "void*"
-// lambdaTypeForwardArgument(argument) ::= <% Lambda::make(_env_, <lambdaTypeArgumentName(argument)>, "<argument.javaLambdaMethodName>", "(<argument.type.resolvedType.arguments:{argument|<javaSignature(argument.type)>}>)<argument.type.resolvedType.returnType:javaSignature()>") %>
+optionalType(type) ::= "<typename(type.resolvedType.containedType)>"
+sharedPtrType(type) ::= "<typename(type.resolvedType.containedType)>"
+vectorType(type) ::= "void*"
+mapType(type) ::= "void*"
+bufferType(type) ::= "unsigned char*"
+dateType(type) ::= "long"
+
+translatedReturnArgsTemplateName_(type) ::= "<type.resolvedType.templateName>TranslatedReturnArgs"
+translatedReturnArgs(type) ::= "<(translatedReturnArgsTemplateName_(type))(type)>"
+bufferTypeTranslatedReturnArgs(type) ::= <%
+    const unsigned char** csretValue, uint64_t* csretSize
+%>
+
+translatedReturnUnwrapTemplateName_(type) ::= "<type.resolvedType.templateName>TranslatedReturnUnwrap"
+translatedReturnUnwrap(type) ::= "<(translatedReturnUnwrapTemplateName_(type))(type)>"
+bufferTypeTranslatedReturnUnwrap(type) ::= <%
+    *csretValue = ret.first;
+    *csretSize = ret.second;
+%>

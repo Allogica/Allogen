@@ -197,8 +197,8 @@ namespace Allogen {
 			 * no memory could be allocated
 			 */
 			static char* toCSharp(const std::string& string) {
-				auto cstr = new char[string.size()];
-				memcpy(cstr, string.data(), string.size());
+				auto cstr = new char[string.size() + 1];
+				memcpy(cstr, string.c_str(), string.size() + 1);
 				return cstr;
 			}
 

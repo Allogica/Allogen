@@ -30,6 +30,8 @@
 
 #pragma once
 
+#include "Allogen/CSharp/Converter.hpp"
+
 namespace Allogen {
 	namespace CSharp {
 
@@ -65,9 +67,11 @@ namespace Allogen {
 			 * @return the already CSharp-converted object returned by the C++ method
 			 */
 			template<typename Executor>
-			static inline R* call(Executor&& executor,
-									 typename Converter<Args>::CSharpType... args) {
-				return executor(Converter<Args>::fromCSharp(args)...);
+			static inline std::shared_ptr<R>* call(Executor&& executor,
+												   typename Converter<Args>::CSharpType... args) {
+				return new std::shared_ptr<R>(
+						executor(Converter<Args>::fromCSharp(args)...)
+				);
 			}
 		};
 

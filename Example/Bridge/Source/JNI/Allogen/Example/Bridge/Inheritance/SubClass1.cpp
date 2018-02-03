@@ -12,11 +12,21 @@ using namespace Allogen::JNI;
 
 namespace Allogen { namespace Example { namespace Inheritance {
 
+    extern "C"
+    JNIEXPORT jlong JNICALL
+    Java_allogen_example_inheritance_SubClass1__1init(JNIEnv* _env_, jobject _jthis_) {
+        return BridgedConstructor<Allogen::Example::Inheritance::SubClass1()>::call(
+            _env_, []() {
+                return new SubClass1();
+            }
+        );
+    }
+    extern "C"
     JNIEXPORT void JNICALL
     Java_allogen_example_inheritance_SubClass1_finalize(JNIEnv* _env_, jobject _jthis_) {
-        BridgedMethod<SubClass1, void()>::call(
+        BridgedDestructor<SubClass1>::call(
             _env_, _jthis_,
-            [](SubClass1 *wself) {
+            [](std::shared_ptr<SubClass1> *wself) {
                 delete wself;
             }
         );
@@ -33,7 +43,7 @@ namespace Allogen { namespace Example { namespace Inheritance {
     }
     extern "C"
     JNIEXPORT jstring JNICALL
-    Java_allogen_example_inheritance_BaseClass_getName(JNIEnv* _env_, jobject _jthis_) {
+    Java_allogen_example_inheritance_SubClass1_getName(JNIEnv* _env_, jobject _jthis_) {
         return BridgedMethod<SubClass1, std::string()>::call(
             _env_, _jthis_,
             [](SubClass1 *wself) {
@@ -44,7 +54,7 @@ namespace Allogen { namespace Example { namespace Inheritance {
 
     extern "C"
     JNIEXPORT void JNICALL
-    Java_allogen_example_inheritance_BaseClass_fromNonvirtualBase(JNIEnv* _env_, jobject _jthis_) {
+    Java_allogen_example_inheritance_SubClass1_fromNonvirtualBase(JNIEnv* _env_, jobject _jthis_) {
         return BridgedMethod<SubClass1, void()>::call(
             _env_, _jthis_,
             [](SubClass1 *wself) {

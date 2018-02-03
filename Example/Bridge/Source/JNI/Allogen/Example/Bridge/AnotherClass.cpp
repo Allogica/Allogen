@@ -14,7 +14,7 @@ namespace Allogen { namespace Example {
 
     extern "C"
     JNIEXPORT jlong JNICALL
-    Java_allogen_example_AnotherClass__1init__Lallogen_example_AnotherClass_Ljava_lang_String_2(JNIEnv* _env_, jobject _jthis_,
+    Java_allogen_example_AnotherClass__1init__Lallogen_example_AnotherClass_2Ljava_lang_String_2(JNIEnv* _env_, jobject _jthis_,
             jobject parent, jstring sub) {
         return BridgedConstructor<Allogen::Example::AnotherClass(Allogen::Example::AnotherClass, std::string)>::call(
             _env_, [](Allogen::Example::AnotherClass parent, std::string sub) {
@@ -33,11 +33,12 @@ namespace Allogen { namespace Example {
             }, LocalRef<jstring>(_env_, jstring(str), false)
         );
     }
+    extern "C"
     JNIEXPORT void JNICALL
     Java_allogen_example_AnotherClass_finalize(JNIEnv* _env_, jobject _jthis_) {
-        BridgedMethod<AnotherClass, void()>::call(
+        BridgedDestructor<AnotherClass>::call(
             _env_, _jthis_,
-            [](AnotherClass *wself) {
+            [](std::shared_ptr<AnotherClass> *wself) {
                 delete wself;
             }
         );

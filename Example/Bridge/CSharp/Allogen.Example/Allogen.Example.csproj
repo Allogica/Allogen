@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Allogen\Example\AnotherClass.cs">
+      <Link>AnotherClass.cs</Link>
+    </Compile>
+    <Compile Include="..\Allogen\Example\DataTypes.cs">
+      <Link>DataTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\Allogen\Example\DummyClass.cs">
+      <Link>DummyClass.cs</Link>
+    </Compile>
+    <Compile Include="..\Allogen\Example\ExampleClass.cs">
+      <Link>ExampleClass.cs</Link>
+    </Compile>
+    <Compile Include="..\Allogen\Example\Inheritance\BaseClass.cs">
+      <Link>BaseClass.cs</Link>
+    </Compile>
+    <Compile Include="..\Allogen\Example\Inheritance\SubClass1.cs">
+      <Link>SubClass1.cs</Link>
+    </Compile>
+    <Compile Include="..\Allogen\Example\Inheritance\SubClass2.cs">
+      <Link>SubClass2.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="libAllogen.Example.Bridge.CSharp">
+      <HintPath>..\..\..\..\cmake-build-debug\Example\Bridge\libAllogen.Example.Bridge.CSharp.dylib</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\..\..\cmake-build-debug\Example\Bridge\libAllogen.Example.Bridge.CSharp.dylib">
+      <Link>libAllogen.Example.Bridge.CSharp.dylib</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

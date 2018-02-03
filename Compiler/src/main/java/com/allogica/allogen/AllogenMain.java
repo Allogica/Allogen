@@ -77,7 +77,7 @@ public class AllogenMain {
 
             case "cs":
             case "csharp":
-                backend = new CSharpBackend();
+                backend = new CSharpBackend(args.pInvokeDll);
                 break;
 
             default:

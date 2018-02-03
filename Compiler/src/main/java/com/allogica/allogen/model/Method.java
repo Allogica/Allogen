@@ -82,6 +82,10 @@ public class Method extends ModelObject {
         this.arguments = arguments;
     }
 
+    public void addArgumentAfter(MethodArgument argument, MethodArgument newArgument) {
+        arguments.add(arguments.indexOf(argument) + 1, newArgument);
+    }
+
     public String getBody() {
         return body;
     }

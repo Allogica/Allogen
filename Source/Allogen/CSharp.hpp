@@ -30,10 +30,14 @@
 
 #pragma once
 
-#include "Allogen/CSharp/Converter.hpp"
-#include "Allogen/CSharp/Converter/IntegralTypes.hpp"
-//#include "Allogen/CSharp/Converter/Function.hpp"
-//#include "Allogen/CSharp/Converter/Optional.hpp"
-//#include "Allogen/CSharp/BridgedClass.hpp"
+#include "Allogen/CSharp/BridgedClass.hpp"
 #include "Allogen/CSharp/BridgedConstructor.hpp"
 #include "Allogen/CSharp/BridgedMethod.hpp"
+
+#include "Allogen/CSharp/Converter.hpp"
+#include "Allogen/CSharp/Converter/IntegralTypes.hpp"
+#include "Allogen/CSharp/Converter/Function.hpp"
+#include "Allogen/CSharp/Converter/Optional.hpp"
+#include "Allogen/CSharp/Converter/DateTime.hpp"
+#include "Allogen/CSharp/Converter/Vector.hpp"
+#include "Allogen/CSharp/Converter/Map.hpp"

@@ -57,7 +57,7 @@ endif ()
 
 function(add_allogen_interface target_name)
     set(options)
-    set(oneValueArgs LANGUAGE TARGET_DIR BRIDGE_DIR BRIDGE_NAMESPACE MODULE_NAME)
+    set(oneValueArgs LANGUAGE TARGET_DIR BRIDGE_DIR BRIDGE_NAMESPACE MODULE_NAME PINVOKE_DLL)
     set(multiValueArgs IDL IMPORT)
     cmake_parse_arguments(IFT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
@@ -87,11 +87,16 @@ function(add_allogen_interface target_name)
         string(REPLACE " " "\\ " idl_repl ${idl})
         list(APPEND idls '${idl_repl}')
     endforeach()
-
+    
+    set(args "")
+    if(IFT_PINVOKE_DLL)
+        list(APPEND args --pinvokedll ${IFT_PINVOKE_DLL})
+    endif()
+    
     add_custom_target(${target_name} SOURCES ${IFT_IDL}
             DEPENDS ${IFT_IDL}
             COMMAND ${Maven_EXECUTABLE} compile exec:java -f ${ALLOGEN_COMPILER}
-            -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${module_args} ${import_args} ${idls}\"
+            -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${module_args} ${args} ${import_args} ${idls}\"
             COMMENT "Compiling Allogen interface files..."
     )
 

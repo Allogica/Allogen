@@ -40,47 +40,88 @@ using System.Runtime.InteropServices;
 
 namespace <class.csNamespace> {
     <documentation(class)>
-    public class <class.name> {
+    public class <class.csName><if(class.parent)> : <class.parentClass.csFullyQualifiedName><endif> {
+        <if(!class.parent)>
         /**
          * A numeric value that represents the pointer used to access the wrapped object.
          *
          * This value should not be changed by the user and is automatically initialized by the _init
          * or when used as a return value from another method.
          */
-        internal IntPtr Pointer;
+        protected IntPtr Pointer;
+        <endif>
 
         <if(class.properties.values)><class.properties.values:property(); separator="\n"><\n><endif>
-        public <class.csName>(IntPtr pointer) {
+        public <class.csName>(IntPtr pointer)<if(class.parent)> : base(pointer)<endif> {
             Pointer = pointer;
         }
 
         <if(class.constructors)><class.constructors:constructor(class); separator="\n\n"><\ ><endif>
         <if(class.destructor)><class.destructor:destructor(class); separator="\n\n"><\n><endif>
         <if(class.methods)><class.methods:method(class); separator="\n\n"><endif>
+        <class.inheritedMethods:method(class); separator="\n\n">
+
+        private struct AllogenPInvoke {
+            <if(class.constructors)><class.constructors:pinvokeConstructor(class); separator="\n\n"><\ ><endif>
+            <if(class.destructor)><class.destructor:pinvokeDestructor(class); separator="\n\n"><\n><endif>
+            <if(class.methods)><class.methods:pinvokeMethod(class); separator="\n\n"><endif>
+            <class.inheritedMethods:pinvokeMethod(class); separator="\n\n">
+        }
+
+        public<if(class.parent)> new<endif> class Marshaller : ICustomMarshaler
+        {
+            public void CleanUpManagedData(object managedObj)
+            {
+
+            }
+
+            public void CleanUpNativeData(IntPtr nativeData)
+            {
+
+            }
+
+            public int GetNativeDataSize()
+            {
+                return IntPtr.Size;
+            }
+
+            public IntPtr MarshalManagedToNative(object managedObj)
+            {
+                return ((<class.name>) managedObj)?.Pointer ?? IntPtr.Zero;
+            }
+
+            public object MarshalNativeToManaged(IntPtr nativeData)
+            {
+                return nativeData.ToInt64() == 0 ? null : new <class.name>(nativeData);
+            }
+
+            private static readonly Marshaller Shared = new Marshaller();
+
+            public static ICustomMarshaler GetInstance(string cookie)
+            {
+                return Shared;
+            }
+        }
     }
 }
 >>
 
 constructor(constructor, class) ::= <<
+<if(!constructor.csSkip)>
 <documentation(constructor)>
-public <class.csName>(<arguments(constructor, class)>) {
-    Pointer = _Constructor(<constructor.arguments:{argument|<wrapUnmanaged(argument.type, argument.name)>}; separator=", ">);
+public <class.csName>(<arguments(constructor, class)>)<if(class.parent)> : base(IntPtr.Zero)<endif> {
+    Pointer = AllogenPInvoke.Constructor(<constructor.arguments:{argument|<wrapUnmanaged(argument.type, argument.name)>}; separator=", ">);
 }
-
-/**
- * This method performs the object creation. This method should only be called
- * from the object constructor.
- *
-<if(constructor.arguments)>
-<constructor.arguments:{argument|  * @param <argument.name> <if(argument.documentation)><argument.documentation><else>the <argument.name> parameter<endif>}; separator="\n">
- *
 <endif>
- * @return a pointer to the C++ native object
- */
+>>
+
+pinvokeConstructor(constructor, class) ::= <<
+<if(!constructor.csSkip)>
 [DllImport("<class.csLibraryName>",
     EntryPoint = "<constructor.csEntryPoint>",
-    CallingConvention = CallingConvention.Cdecl)]
-private static extern IntPtr _Constructor(<constructor.arguments:{arg|<unmanagedTypename(arg.type)> <arg.name>}; separator=", ">);
+    CallingConvention = CallingConvention.StdCall)]
+public static extern IntPtr Constructor(<constructor.arguments:{arg|<marshalAs(arg.type, false)> <unmanagedTypename(arg.type)> <arg.name>}; separator=", ">);
+<endif>
 >>
 
 destructor(destructor, class) ::= <<
@@ -93,79 +134,178 @@ destructor(destructor, class) ::= <<
  * resources that are system wide.
  */
 ~<class.csName>() {
-    _Destructor(Pointer);
+    AllogenPInvoke.Destructor(Pointer);
 }
+>>
 
+pinvokeDestructor(destructor, class) ::= <<
 [DllImport("<class.csLibraryName>",
     EntryPoint = "<destructor.csEntryPoint>",
-    CallingConvention = CallingConvention.Cdecl)]
-private static extern void _Destructor(IntPtr pointer);
+    CallingConvention = CallingConvention.StdCall)]
+public static extern void Destructor(IntPtr pointer);
 >>
 
 method(method, class) ::= <<
+<if(!method.csSkip)>
 <method.arguments:{argument|<if(argument.csHasDelegate)><delegate(method, argument)><endif>}>
 <documentation(method)>
-public<if(method.static)> static<endif><if(method.csOverride)> override<endif> <typename(method.returnType)> <method.csName>(<arguments(method, class)>) {
-<if(method.returnType.csIsVoid)>
-    _<method.csName>(<if(!method.static)>Pointer<endif><if(method.arguments)><if(!method.static)>, <endif><method.arguments:{arg|<wrapUnmanaged(arg.type, arg.name)>}; separator=", "><endif>);
-<else>
-    return <unwrapUnmanaged(method.returnType, nonvoidForward(method))>;
-<endif>
+<if(method.csPrivate)>protected<else>public<endif><if(method.static)> static<endif><if(method.csVirtual && !method.static)> virtual<endif><if(method.csOverride)> override<endif> <typename(method.returnType)> <method.csName>(<arguments(method, class)>) {
+    <method.arguments:{arg|<wrapPreamble(arg)>}; separator="\n">
+    <if(method.returnType.csIsVoid)>
+    AllogenPInvoke.<method.csName>(<if(!method.static)>Pointer<endif><if(method.arguments)><if(!method.static)>, <endif><method.arguments:{arg|<wrapUnmanaged(arg.type, arg.name)>}; separator=", "><endif>);
+    <else>
+    <unwrapUnmanaged(method.returnType, nonvoidForward(method))>
+    <endif>
 }
+<endif>
+>>
 
+pinvokeMethod(method, class) ::= <<
+<if(!method.csSkip)>
 [DllImport("<class.csLibraryName>",
     EntryPoint = "<method.csEntryPoint>",
-    CallingConvention = CallingConvention.Cdecl)]
-private static extern <unmanagedTypename(method.returnType)> _<method.csName>(<if(!method.static)>IntPtr pointer<endif><if(method.arguments)><if(!method.static)>, <endif><method.arguments:{arg|<unmanagedTypename(arg.type)>  <arg.name>}; separator=", "><endif>);
+    CallingConvention = CallingConvention.StdCall,
+    CharSet=CharSet.Ansi)]
+<if(method.returnType)><marshalAs(method.returnType, true)><endif>
+public static extern <unmanagedTypename(method.returnType)> <method.csName>(
+    <if(!method.static)>IntPtr pointer<if(method.arguments || method.returnType.csTranslatedReturnType)>, <endif><endif>
+    <if(method.returnType.csTranslatedReturnType)>
+    <translatedReturnArgs(method.returnType)>
+    <if(method.arguments)>, <endif>
+    <endif>
+    <if(method.arguments)>
+    <method.arguments:{arg|<marshalAs(arg.type, false)> <if(arg.csOut)>out <endif><unmanagedTypename(arg.type)> <arg.name>}; separator=",\n">
+    <endif>
+);
+<endif>
 >>
 
 property(property) ::= <%
+<if(!property.getter.csSkip)>
 <if(!property.setter)>
-public <typename(property.getter.returnType)> <property.csName> => <property.getter.csName>();
+<if(property.csPrivate)>protected<else>public<endif> <typename(property.getter.returnType)> <property.csName> => <property.getter.csName>();
 <else>
-public <typename(property.getter.returnType)> <property.name> {
-    get { return <property.getter.csName>(); }
-    set { return <property.setter.csName>(value); }
+<if(property.csPrivate)>protected<else>public<endif> <typename(property.getter.returnType)> <property.csName> {<\n>
+    get => <property.getter.csName>();<\n>
+    set => <property.setter.csName>(value);<\n>
 }
+<endif>
 <endif>
 %>
 
 nonvoidForward(method) ::= <%
-_<method.csName>(<if(!method.static)>Pointer<endif><if(method.arguments)><if(!method.static)>, <endif><method.arguments:{arg|<wrapUnmanaged(arg.type, arg.name)>}; separator=", "><endif>)
+AllogenPInvoke.<method.csName>(<if(!method.static)>Pointer<if(method.arguments || method.returnType.csTranslatedReturnType)>, <endif><endif>
+<if(method.returnType.csTranslatedReturnType)><translatedReturnUnwrap(method.returnType)><if(method.arguments)>, <endif><endif>
+<if(method.arguments)><method.arguments:{arg|<wrapUnmanaged(arg.type, arg.name)>}; separator=", "><endif>)
 %>
 
+notEmptyFilter(arg) ::= "<if(arg)><arg><endif>"
 arguments(method, class) ::= <%
     <method.arguments:argument(method, class); separator=", ">
 %>
 
-argument(argument, method, class) ::= "<typename(argument.type)> <argument.name>"
+argument(argument, method, class) ::= "<marshalAs(argument.type, false)> <typename(argument.type)> <argument.name>"
 
 delegate(method, argument) ::= <<
+<if(!argument.csDelegateReuse && !method.csOverride)>
+[UnmanagedFunctionPointer(CallingConvention.StdCall,
+    CharSet=CharSet.Ansi)]
+<if(argument.type.resolvedType.returnType)><marshalAs(argument.type.resolvedType.returnType, true)><endif>
 public delegate <typename(argument.type.resolvedType.returnType)> <argument.csDelegateName>(<argument.type.resolvedType.arguments:argument(method, method); separator=", ">);
+<endif>
 >>
 
 primitiveType(type) ::= "<csTypeMapping.(type.name)>"
 userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.csName>"
 stringType(type) ::= "string"
 lambdaType(type) ::= "<type.csDelegateName>"
+optionalType(type) ::= "<typename(type.resolvedType.containedType)>"
+sharedPtrType(type) ::= "<typename(type.resolvedType.containedType)>"
+vectorType(type) ::= "System.Collections.Generic.List\<<typename(type.resolvedType.containedType)>>"
+mapType(type) ::= "System.Collections.Generic.Dictionary\<<typename(type.resolvedType.keyType)>, <typename(type.resolvedType.valueType)>>"
+bufferType(type) ::= "System.IO.MemoryStream"
+dateType(type) ::= "System.DateTime"
+
+marshalAsTemplateName_(type) ::= "<type.resolvedType.templateName>MarshalAs"
+marshalAs(type, return) ::= "<if(marshalAsTemplateName_(type))><(marshalAsTemplateName_(type))(type, return)><endif>"
+userDefinedTypeMarshalAs(type, return) ::= "[<if(return)>return: <endif>MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(<type.resolvedType.userDefinedClass.csName>.Marshaller))]"
+stringTypeMarshalAs(type, return) ::= ""
+lambdaTypeMarshalAs(type, return) ::= ""
+optionalTypeMarshalAs(type, return) ::= "<marshalAs(type.resolvedType.containedType, return)>"
+sharedPtrTypeMarshalAs(type, return) ::= "<marshalAs(type.resolvedType.containedType, return)>"
+vectorTypeMarshalAs(type, return) ::= ""
+mapTypeMarshalAs(type, return) ::= ""
+bufferTypeMarshalAs(type, return) ::= ""
+dateTypeMarshalAs(type, return) ::= ""
 
 unmanagedTypenameTemplateName_(type) ::= "<type.resolvedType.templateName>UnmanangedTypename"
 unmanagedTypename(type) ::= "<(unmanagedTypenameTemplateName_(type))(type)>"
 primitiveTypeUnmanangedTypename(type) ::= "<csTypeMapping.(type.name)>"
 stringTypeUnmanangedTypename(type) ::= "string"
-userDefinedTypeUnmanangedTypename(type) ::= "IntPtr"
+userDefinedTypeUnmanangedTypename(type) ::= "<type.resolvedType.userDefinedClass.csName>"
 lambdaTypeUnmanangedTypename(type) ::= "<type.csDelegateName>"
+optionalTypeUnmanangedTypename(type) ::= "<unmanagedTypename(type.resolvedType.containedType)>"
+sharedPtrTypeUnmanangedTypename(type) ::= "<unmanagedTypename(type.resolvedType.containedType)>"
+vectorTypeUnmanangedTypename(type) ::= "string[]"
+mapTypeUnmanangedTypename(type) ::= "IntPtr"
+bufferTypeUnmanangedTypename(type) ::= "void"
+dateTypeUnmanangedTypename(type) ::= "long"
+
+wrapPreambleTemplateName_(type) ::= "<type.resolvedType.templateName>WrapPreamble"
+wrapPreamble(arg) ::= "<(wrapPreambleTemplateName_(arg.type))(arg.type, arg)>"
+primitiveTypeWrapPreamble(type, arg) ::= ""
+stringTypeWrapPreamble(type, arg) ::= ""
+userDefinedTypeWrapPreamble(type, arg) ::= ""
+lambdaTypeWrapPreamble(type, arg) ::= ""
+optionalTypeWrapPreamble(type, arg) ::= ""
+sharedPtrTypeWrapPreamble(type, arg) ::= ""
+vectorTypeWrapPreamble(type, arg) ::= <%
+    long <arg.name>Size = <arg.name>.Count;
+%>
+mapTypeWrapPreamble(type, arg) ::= ""
+bufferTypeWrapPreamble(type, arg) ::= <<
+byte[] <arg.name>Data = new byte[<arg.name>.Length];
+<arg.name>.Read(<arg.name>Data, 0, <arg.name>.Length);
+
+GCHandle <arg.name>DataHandle = GCHandle.Alloc(<arg.name>Data, GCHandleType.Pinned);
+IntPtr <arg.name>DataPtr = <arg.name>DataHandle.AddrOfPinnedObject();
+>>
+dateTypeWrapPreamble(type, arg) ::= ""
 
 wrapUnmanagedTemplateName_(type) ::= "<type.resolvedType.templateName>Wrap"
 wrapUnmanaged(type, v) ::= "<(wrapUnmanagedTemplateName_(type))(type, v)>"
 primitiveTypeWrap(type, v) ::= "<v>"
 stringTypeWrap(type, v) ::= "<v>"
-userDefinedTypeWrap(type, v) ::= "<v>.Pointer"
+userDefinedTypeWrap(type, v) ::= "<v>"
 lambdaTypeWrap(type, v) ::= "<v>"
+optionalTypeWrap(type, v) ::= "<v>"
+sharedPtrTypeWrap(type, v) ::= "<v>"
+vectorTypeWrap(type, v) ::= "<v>.ToArray()"
+mapTypeWrap(type, v) ::= "IntPtr.Zero"       // TODO
+bufferTypeWrap(type, v) ::= "<v>.ToArray()"
+dateTypeWrap(type, v) ::= "<v>.ToFileTime()"
 
 unwrapUnmanagedTemplateName_(type) ::= "<type.resolvedType.templateName>Unwrap"
 unwrapUnmanaged(type, v) ::= "<(unwrapUnmanagedTemplateName_(type))(type, v)>"
-primitiveTypeUnwrap(type, v) ::= "<v>"
-stringTypeUnwrap(type, v) ::= "<v>"
-userDefinedTypeUnwrap(type, v) ::= "new <type.resolvedType.userDefinedClass.csName>(<v>)"
-lambdaUnwrap(type, v) ::= "<v>"
+primitiveTypeUnwrap(type, v) ::= "return <v>;"
+stringTypeUnwrap(type, v) ::= "return <v>;"
+userDefinedTypeUnwrap(type, v) ::= "return <v>;"
+lambdaUnwrap(type, v) ::= "return <v>;"
+optionalTypeUnwrap(type, v) ::= "return <v>;"
+sharedPtrTypeUnwrap(type, v) ::= "<optionalTypeUnwrap(type, v)>"
+vectorTypeUnwrap(type, v) ::= "return null;"    // TODO
+mapTypeUnwrap(type, v) ::= "return null;"       // TODO
+bufferTypeUnwrap(type, v) ::= "<v>; return new System.IO.MemoryStream(csretValue);"
+dateTypeUnwrap(type, v) ::= "return DateTime.FromFileTime(<v>);"
+
+translatedReturnArgsTemplateName_(type) ::= "<type.resolvedType.templateName>TranslatedReturnArgs"
+translatedReturnArgs(type) ::= "<(translatedReturnArgsTemplateName_(type))(type)>"
+bufferTypeTranslatedReturnArgs(type) ::= <%
+    [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] out byte[] csretValue, out long csretSize
+%>
+
+translatedReturnUnwrapTemplateName_(type) ::= "<type.resolvedType.templateName>TranslatedReturnUnwrap"
+translatedReturnUnwrap(type) ::= "<(translatedReturnUnwrapTemplateName_(type))(type)>"
+bufferTypeTranslatedReturnUnwrap(type) ::= <%
+    out var csretValue, out _
+%>
