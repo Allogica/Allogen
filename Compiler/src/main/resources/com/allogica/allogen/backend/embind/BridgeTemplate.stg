@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2017, Allogica
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of Allogen nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import "../Allogen.stg"
+
+implementation(class) ::= <<
+<codegen_notice()>
+
+#include \<emscripten/bind.h>
+
+<class.idlClass.includes:{include|
+#include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><endif>}>
+
+<class.usedTypes:{usedType|<if(usedType.userDefinedClass)>
+<usedType.userDefinedClass.idlClass.includes:{include|
+#include <if(include.quoted)>"<else>\<<endif><include.value><if(include.quoted)>"<\n><endif>}>
+<endif>}>
+
+using namespace emscripten;
+
+<class.constructors:externalConstructor(class); separator="\n\n">
+
+EMSCRIPTEN_BINDINGS(<class.emBindingsName>) {
+    class_\<<class.fullyQualifiedName><if(class.parent)>, base\<<class.parentClass.fullyQualifiedName>\><endif>\>("<class.emName>")
+            .smart_ptr\<std::shared_ptr\<<class.fullyQualifiedName>\>>("<class.emName>SharedPtr")
+            <if(class.properties.values)><class.properties.values:property(class); separator="\n"><endif>
+            <if(class.constructors)><class.constructors:constructor(class); separator="\n"><\ ><endif>
+            <if(class.methods)><class.methods:method(class); separator="\n"><endif>;
+}
+>>
+
+externalConstructor(constructor, class) ::= <<
+static <class.fullyQualifiedName>* Make_<class.emName>_<constructor.emID>(<constructor.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) {
+<if(constructor.body)>
+    <constructor.body>
+<else>
+    return new <class.fullyQualifiedName>(<constructor.arguments:{argument|<argument.name>}; separator=", ">);
+<endif>
+}
+>>
+
+constructor(constructor, class) ::= <%
+.constructor(&Make_<class.emName>_<constructor.emID>, allow_raw_pointers())
+%>
+
+method(method, class) ::= <%
+<if(!method.static)>
+.<if(method.static)>class_function<else>function<endif>(
+    "<method.emName>", <if(method.body)>select_overload\<<nativeType(method.returnType)>(<class.fullyQualifiedName>&<if(method.arguments)>, <endif><method.arguments:{argument|<nativeType(argument.type)>}; separator=", ">)>(
+    [](<class.fullyQualifiedName>& _allogenSelf<if(method.arguments)>, <endif><method.arguments:{argument|<nativeType(argument.type)> <argument.name>}; separator=", ">) -> <nativeType(method.returnType)> {<\n>
+    auto* wself = &_allogenSelf;<\n>
+    <method.body><\n>
+    }
+    )<else>
+    &<class.fullyQualifiedName>::<method.name>
+    <endif>
+)
+<endif>
+%>
+
+property(property, class) ::= <%
+<if(!property.getter.body)>
+.property("<property.emName>", &<class.fullyQualifiedName>::<property.getter.emName>
+<if(property.setter)>, &<class.fullyQualifiedName>::<property.setter.emName><endif>)
+<endif>
+%>
+
+lambdaTypeNative(type) ::= <% emscripten::val %>

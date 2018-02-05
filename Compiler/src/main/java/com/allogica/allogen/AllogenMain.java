@@ -32,6 +32,7 @@ package com.allogica.allogen;
 
 import com.allogica.allogen.backend.CompilerBackend;
 import com.allogica.allogen.backend.csharp.CSharpBackend;
+import com.allogica.allogen.backend.embind.EmbindBackend;
 import com.allogica.allogen.backend.java.JavaBackend;
 import com.allogica.allogen.backend.objectivec.ObjectiveCBackend;
 import com.allogica.allogen.idl.ParsedIDL;
@@ -78,6 +79,12 @@ public class AllogenMain {
             case "cs":
             case "csharp":
                 backend = new CSharpBackend();
+                break;
+
+            case "emscripten":
+            case "javascript":
+            case "js":
+                backend = new EmbindBackend();
                 break;
 
             default:

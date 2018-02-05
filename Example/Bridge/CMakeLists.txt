@@ -97,3 +97,25 @@ if(TARGET Allogen.ObjectiveC)
             PRIVATE -ObjC -all_load
     )
 endif()
+
+add_allogen_interface(Allogen.Example.Bridge.Embind.Generate
+        LANGUAGE            JavaScript
+        IDL                 ${IDLS}
+        BRIDGE_NAMESPACE    Allogen::Example::Bridge
+        
+        INCLUDE_DIRS        ${CMAKE_CURRENT_SOURCE_DIR}/IDL
+        
+        TARGET_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/JavaScript
+        BRIDGE_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Source/Embind
+)
+
+file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Source/Embind/*.cpp)
+add_library(Allogen.Example.Bridge.Embind SHARED ${SRCS})
+target_link_libraries(Allogen.Example.Bridge.Embind
+        PRIVATE Allogen.Example --bind
+)
+set_target_properties(Allogen.Example.Bridge.Embind PROPERTIES SUFFIX ".js")
+target_compile_options(Allogen.Example.Bridge.Embind PUBLIC --bind)
+target_include_directories(Allogen.Example.Bridge.Embind
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source/Embind
+)

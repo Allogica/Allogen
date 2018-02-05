@@ -51,45 +51,54 @@ public class CodegenPass implements CompilerPass<Class, Class> {
          * Generate the target language objects
          */
         final URL targetTemplateURL = compiler.getBackend().getTargetTemplateURL();
-        final STGroup targetTemplate = new STGroupFile(targetTemplateURL, "UTF-8", '<', '>');
-        targetTemplate.registerModelAdaptor(ModelObject.class, new CompilerObjectModelAdaptor());
+        if(targetTemplateURL != null) {
+            final STGroup targetTemplate = new STGroupFile(targetTemplateURL, "UTF-8", '<', '>');
+            targetTemplate.registerModelAdaptor(ModelObject.class, new CompilerObjectModelAdaptor());
 
-        final ST targetClassTemplate = targetTemplate.getInstanceOf("class");
-        targetClassTemplate.add("class", clazz);
+            final ST targetClassTemplate = targetTemplate.getInstanceOf("class");
+            targetClassTemplate.add("class", clazz);
 
-        final String targetOutputFilename = clazz.getAttribute("targetOutputFile");
-        final File targetOutputFile = new File(context.getTargetDir(), targetOutputFilename);
+            final String targetOutputFilename = clazz.getAttribute("targetOutputFile");
+            final File targetOutputFile = new File(context.getTargetDir(), targetOutputFilename);
 
-        createParentIfNotExists(targetOutputFile);
-        writeFileIfChanged(targetOutputFile, targetClassTemplate.render());
+            createParentIfNotExists(targetOutputFile);
+            writeFileIfChanged(targetOutputFile, targetClassTemplate.render());
+        }
 
         /*
          * Generate Bridged C++ header objects
          */
         final URL bridgeTemplateURL = compiler.getBackend().getBridgeTemplateURL();
-        final STGroup bridgeTemplate = new STGroupFile(bridgeTemplateURL, "UTF-8", '<', '>');
-        bridgeTemplate.registerModelAdaptor(ModelObject.class, new CompilerObjectModelAdaptor());
+        if(bridgeTemplateURL != null) {
+            final STGroup bridgeTemplate = new STGroupFile(bridgeTemplateURL, "UTF-8", '<', '>');
+            bridgeTemplate.registerModelAdaptor(ModelObject.class, new CompilerObjectModelAdaptor());
 
-        final ST bridgeHeaderClassTemplate = bridgeTemplate.getInstanceOf("header");
-        bridgeHeaderClassTemplate.add("class", clazz);
+            final String bridgeHeaderOutputFilename = clazz.getAttribute("bridgeHeaderOutputFile");
+            if(bridgeHeaderOutputFilename != null) {
+                final File bridgeHeaderOutputFile = new File(context.getBridgeDir(), bridgeHeaderOutputFilename);
 
-        final String bridgeHeaderOutputFilename = clazz.getAttribute("bridgeHeaderOutputFile");
-        final File bridgeHeaderOutputFile = new File(context.getBridgeDir(), bridgeHeaderOutputFilename);
+                final ST bridgeHeaderClassTemplate = bridgeTemplate.getInstanceOf("header");
+                bridgeHeaderClassTemplate.add("class", clazz);
 
-        createParentIfNotExists(bridgeHeaderOutputFile);
-        writeFileIfChanged(bridgeHeaderOutputFile, bridgeHeaderClassTemplate.render());
 
-        /*
-         * Generate Bridged C++ implementation objects
-         */
-        final ST bridgeImplementationClassTemplate = bridgeTemplate.getInstanceOf("implementation");
-        bridgeImplementationClassTemplate.add("class", clazz);
+                createParentIfNotExists(bridgeHeaderOutputFile);
+                writeFileIfChanged(bridgeHeaderOutputFile, bridgeHeaderClassTemplate.render());
+            }
 
-        final String bridgeImplementationOutputFilename = clazz.getAttribute("bridgeImplementationOutputFile");
-        final File bridgeImplementationOutputFile = new File(context.getBridgeDir(), bridgeImplementationOutputFilename);
+            /*
+             * Generate Bridged C++ implementation objects
+             */
+            final String bridgeImplementationOutputFilename = clazz.getAttribute("bridgeImplementationOutputFile");
+            if(bridgeImplementationOutputFilename != null) {
+                final File bridgeImplementationOutputFile = new File(context.getBridgeDir(), bridgeImplementationOutputFilename);
 
-        createParentIfNotExists(bridgeImplementationOutputFile);
-        writeFileIfChanged(bridgeImplementationOutputFile, bridgeImplementationClassTemplate.render());
+                final ST bridgeImplementationClassTemplate = bridgeTemplate.getInstanceOf("implementation");
+                bridgeImplementationClassTemplate.add("class", clazz);
+
+                createParentIfNotExists(bridgeImplementationOutputFile);
+                writeFileIfChanged(bridgeImplementationOutputFile, bridgeImplementationClassTemplate.render());
+            }
+        }
 
         return clazz;
     }
