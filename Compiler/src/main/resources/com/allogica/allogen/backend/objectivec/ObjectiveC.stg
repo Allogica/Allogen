@@ -84,7 +84,7 @@ BridgedMethod\<<class.fullyQualifiedName>, void()>::call(
 bridgedMethod(method, class) ::= <<
 return BridgedMethod\<<class.fullyQualifiedName>, <nativeType(method.returnType)>(<method.arguments:{arg|<nativeType(arg.type)>}; separator=", ">)>::call(
     self,
-    [](<class.fullyQualifiedName>* wself<if(method.arguments)>, <method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", "><endif>) {
+    [](<class.fullyQualifiedName>* wself, std::shared_ptr\<<class.fullyQualifiedName>\> wselfSharedPtr<if(method.arguments)>, <method.arguments:{argument | <nativeType(argument.type)> <argument.name>}; separator=", "><endif>) {
     <if(method.body)>
         <method.body>
     <else>

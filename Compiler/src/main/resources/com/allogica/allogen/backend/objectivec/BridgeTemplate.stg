@@ -63,6 +63,9 @@ implementation(class) ::= <<
 
 #import "<class.targetOutputFile>"
 #import "<class.bridgeHeaderOutputFile>"
+<if(class.parent.bridgeHeaderOutputFile)>
+#import "<class.parent.bridgeHeaderOutputFile>"
+<endif>
 
 using namespace Allogen::ObjectiveC;
 

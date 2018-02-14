@@ -68,10 +68,10 @@ namespace Allogen {
 			 * @return the already ObjectiveC-converted object returned by the C++ method
 			 */
 			template<typename ObjCT, typename Executor>
-			static inline void call(ObjCT* wself, Executor&& executor,
+			static inline id call(ObjCT* wself, Executor&& executor,
 									 typename Converter<Args>::ObjectiveCType... args) {
 				@autoreleasepool {
-						[wself initWithCppObject: new std::shared_ptr<R>(executor(Converter<Args>::fromObjectiveC(args)...))];
+						return [wself initWithCppObject: new std::shared_ptr<R>(executor(Converter<Args>::fromObjectiveC(args)...))];
 				}
 			}
 		};

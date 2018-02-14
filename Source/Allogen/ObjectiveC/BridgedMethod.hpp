@@ -72,9 +72,10 @@ namespace Allogen {
 			static inline typename Converter<R>::ObjectiveCType call(ObjCT* objcSelf, Executor&& executor,
 															   typename Converter<Args>::ObjectiveCType... args) {
 				@autoreleasepool {
-					return Converter<typename std::result_of<Executor(Class*, Args...)>::type>::toObjectiveC(
+					return Converter<typename std::result_of<Executor(Class*, std::shared_ptr<Class>, Args...)>::type>::toObjectiveC(
 							executor(
 									Converter<Class*>::fromObjectiveC(objcSelf),
+									Converter<std::shared_ptr<Class>>::fromObjectiveC(objcSelf),
 									Converter<Args>::fromObjectiveC(
 											std::move(args)
 									)...
@@ -134,6 +135,7 @@ namespace Allogen {
 				@autoreleasepool {
 						executor(
 								Converter<Class*>::fromObjectiveC(objcSelf),
+								Converter<std::shared_ptr<Class>>::fromObjectiveC(objcSelf),
 								Converter<Args>::fromObjectiveC(
 										std::move(args)
 								)...

@@ -79,7 +79,7 @@ function(add_allogen_interface target_name)
 
     set(module_args "")
     if(IFT_MODULE_NAME)
-        set(module_args --module ${IFT_MODULE_NAME})
+        set(module_args --module "${IFT_MODULE_NAME}")
     endif()
 
     set(idls)

@@ -220,7 +220,7 @@ namespace Allogen {
 			 *
 			 * @return the corresponding C++ type
 			 */
-			static const Type fromObjectiveC(ObjectiveCType wself) {
+			static Type fromObjectiveC(ObjectiveCType wself) {
 				return *(BridgeClass<std::shared_ptr<T>>::fromObjectiveC(wself).get());
 			}
 		};
@@ -265,7 +265,7 @@ namespace Allogen {
 			 *
 			 * @return the corresponding C++ type
 			 */
-			static const Type fromObjectiveC(ObjectiveCType wself) {
+			static Type fromObjectiveC(ObjectiveCType wself) {
 				return *(BridgeClass<std::shared_ptr<T>>::fromObjectiveC(wself));
 			}
 		};

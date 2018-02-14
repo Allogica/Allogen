@@ -342,7 +342,6 @@ namespace Allogen {
 				jobject jobject = env->AllocObject(c);
 
 				jfieldID field = env->GetFieldID(c, "pointer", "J");
-				jlong longPtr = env->GetLongField(jobject, field);
 				env->SetLongField(jobject, field, (jlong) new Type(object));
 
 				return jobject;
