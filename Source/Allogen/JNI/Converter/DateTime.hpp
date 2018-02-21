@@ -62,7 +62,7 @@ namespace Allogen {
 			 * @return the Java integer
 			 */
 			static JavaType toJava(JNIEnv* env, Type object) {
-				jclass java_util_Date = env->FindClass("java/util/Date");
+				LocalRef<jclass> java_util_Date = {env, env->FindClass("java/util/Date")};
 				jmethodID java_util_Date_ = env->GetMethodID(java_util_Date, "<init>", "(L)V");
 
 				auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(object);
@@ -78,7 +78,7 @@ namespace Allogen {
 			 * @return the C++ integer
 			 */
 			static Type fromJava(JNIEnv* env, JavaType date) {
-				jclass java_util_Date = env->FindClass("java/util/Date");
+				LocalRef<jclass> java_util_Date = {env, env->FindClass("java/util/Date")};
 				jmethodID java_util_Date_getTime = env->GetMethodID(java_util_Date, "getTime", "()L");
 
 				auto millis = std::chrono::milliseconds(env->CallLongMethod(date, java_util_Date_getTime));

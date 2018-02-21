@@ -364,11 +364,19 @@ namespace Allogen {
 			static T unwrap(T t) {
 				return t;
 			}
+
+			static T takeOwnership(T t) {
+				return t;
+			}
 		};
 
 		template<typename T>
 		struct UnwrapReference<LocalRef<T>> {
-			static T unwrap(LocalRef<T>& ref) {
+			static T unwrap(const LocalRef<T>& ref) {
+				return ref.object;
+			}
+
+			static T takeOwnership(LocalRef<T> ref) {
 				ref.owned = false;
 				return ref.object;
 			}
@@ -376,17 +384,25 @@ namespace Allogen {
 
 		template<typename T>
 		struct UnwrapReference<GlobalRef<T>> {
-			static T unwrap(GlobalRef<T>& ref) {
-				auto o = ref.object;
-				ref.object = nullptr;
-				return o;
+			static T unwrap(const GlobalRef<T>& ref) {
+				return ref.object;
+			}
+
+			static T takeOwnership(GlobalRef<T> ref) {
+				return ref.object;
 			}
 		};
 
 		template<typename T>
-		auto unwrapReference(T&& t) {
+		auto unwrapReference(const T& t) {
 			return UnwrapReference<typename std::remove_reference<typename std::remove_const<T>::type>::type>::unwrap(t);
 		}
+
+		template<typename T>
+		auto takeOwnership(T t) {
+			return UnwrapReference<typename std::remove_reference<typename std::remove_const<T>::type>::type>::takeOwnership(t);
+		}
+
 
 	}
 }

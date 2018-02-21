@@ -71,9 +71,10 @@ namespace Allogen {
 			 * @return the already java-converted object returned by the C++ method
 			 */
 			template<typename Executor>
-			static inline typename Converter<R>::JavaType call(JNIEnv* env, jobject jthis, Executor&& executor,
-															   typename Converter<Args>::JavaType&&... args) {
-				return Converter<typename std::result_of<Executor(Class*, Args...)>::type>::toJava(
+			static inline decltype(takeOwnership(std::declval<typename Converter<R>::JavaType>())) call(
+					JNIEnv* env, jobject jthis, Executor&& executor,
+					typename Converter<Args>::JavaType&&... args) {
+				return takeOwnership(Converter<typename std::result_of<Executor(Class*, Args...)>::type>::toJava(
 						env,
 						executor(
 								Converter<Class*>::fromJava(env, jthis),
@@ -81,7 +82,7 @@ namespace Allogen {
 										env, std::move(args)
 								)...
 						)
-				);
+				));
 			}
 
 			/**
@@ -96,16 +97,17 @@ namespace Allogen {
 			 * @return the already java-converted object returned by the C++ method
 			 */
 			template<typename Executor>
-			static inline typename Converter<R>::JavaType call(JNIEnv* env, Executor&& executor,
-															   typename Converter<Args>::JavaType&&... args) {
-				return Converter<typename std::result_of<Executor(Args...)>::type>::toJava(
+			static inline decltype(takeOwnership(std::declval<typename Converter<R>::JavaType>())) call(
+					JNIEnv* env, Executor&& executor,
+					typename Converter<Args>::JavaType&&... args) {
+				return takeOwnership(Converter<typename std::result_of<Executor(Args...)>::type>::toJava(
 						env,
 						executor(
 								Converter<Args>::fromJava(
 										env, std::move(args)
 								)...
 						)
-				);
+				));
 			}
 		};
 

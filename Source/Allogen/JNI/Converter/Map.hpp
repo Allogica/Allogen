@@ -65,7 +65,7 @@ namespace Allogen {
 			 * @return the converted Java array
 			 */
 			static JavaType toJava(JNIEnv* env, Type v) {
-				jclass java_util_HashMap = env->FindClass("java/util/HashMap");
+				LocalRef<jclass> java_util_HashMap = {env, env->FindClass("java/util/HashMap")};
 				jmethodID java_util_HashMap_ = env->GetMethodID(java_util_HashMap, "<init>", "(I)V");
 				jmethodID java_util_HashMap_put = env->GetMethodID(java_util_HashMap, "put",
 																   "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
@@ -75,7 +75,7 @@ namespace Allogen {
 					LocalRef<jobject> ret = {env, env->CallObjectMethod(
 							result, java_util_HashMap_put,
 							unwrapReference(Converter<KeyType>::toJava(env, entry.first)),
-							unwrapReference(Converter<ValueType>::toJava(env, entry.second))
+                            unwrapReference(Converter<ValueType>::toJava(env, entry.second))
 					)};
 				}
 				return result;
@@ -90,15 +90,15 @@ namespace Allogen {
 			 * @return the converted C++ vector
 			 */
 			static Type fromJava(JNIEnv* env, JavaType map) {
-				jclass java_util_Map = env->FindClass("java/util/Map");
+				LocalRef<jclass> java_util_Map = {env, env->FindClass("java/util/Map")};
 				jmethodID java_util_Map_entrySey = env->GetMethodID(java_util_Map, "entrySet", "()Ljava/util/Set;");
 
 				LocalRef<jobject> entrySet = {env, env->CallObjectMethod(map, java_util_Map_entrySey)};
 
-				jclass entrySetClass = env->GetObjectClass(entrySet);
+				LocalRef<jclass> entrySetClass = {env, env->GetObjectClass(entrySet)};
 				jmethodID java_util_Set_toArray = env->GetMethodID(entrySetClass, "toArray", "()[Ljava/lang/Object;");
 
-				jclass entryClass = env->FindClass("java/util/Map$Entry");
+				LocalRef<jclass> entryClass = {env, env->FindClass("java/util/Map$Entry")};
 				jmethodID entryGetKey = env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
 				jmethodID entryGetValue = env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
 

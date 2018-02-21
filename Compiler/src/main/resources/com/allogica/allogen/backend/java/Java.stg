@@ -85,7 +85,7 @@ optionalTypeRetain(type) ::= ""
 sharedPtrTypeRetain(type) ::= ""
 vectorTypeRetain(type) ::= ""
 mapTypeRetain(type) ::= ""
-bufferTypeRetain(type) ::= ".retain()"
+bufferTypeRetain(type) ::= ""
 dateTypeRetain(type) ::= ""
 
 bridgedConstructor(constructor, class) ::= <<

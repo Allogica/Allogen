@@ -93,23 +93,36 @@ public class JavaBackend extends AbstractCompilerBackend {
     @Override
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Method method) {
         method.setAttribute("javaName", method.getName());
+    }
+
+    @Override
+    public void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Method method) {
         method.setAttribute("jniSignature", createJNIMethodMangling(clazz, method));
     }
 
     @Override
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method) {
+    }
+
+    @Override
+    public void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method) {
         method.setAttribute("jniSignature", createJNIMethodMangling(clazz, method.getMethod()));
     }
 
     @Override
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Method method, MethodArgument argument) {
         if (argument.getType().getResolvedType() instanceof LambdaType) {
-            createCallbackInterface(method, argument, (LambdaType) argument.getType().getResolvedType());
+            createCallbackInterface(clazz, method, argument, argument.getType(), (LambdaType) argument.getType().getResolvedType());
         }
     }
 
     @Override
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Constructor constructor) {
+
+    }
+
+    @Override
+    public void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Constructor constructor) {
         // create a init stub method
         final Method stubInit = new Method("_init", null, constructor.getArguments());
         stubInit.setAttribute("javaName", "_init");
@@ -120,6 +133,11 @@ public class JavaBackend extends AbstractCompilerBackend {
 
     @Override
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Destructor destructor) {
+
+    }
+
+    @Override
+    public void postHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, Destructor destructor) {
         // create a init stub method
         final Method stubInit = new Method("finalize", null, new ArrayList<>());
         stubInit.setAttribute("javaName", "finalize");
@@ -129,7 +147,7 @@ public class JavaBackend extends AbstractCompilerBackend {
 
     // -----------------------------------------------------------------------------------------------------------------
 
-    private void createCallbackInterface(Method method, MethodArgument argument, LambdaType lambda) {
+    private void createCallbackInterface(Class clazz, Method method, MethodArgument argument, TypeName type, LambdaType lambda) {
         final IDLAnnotation annotation = argument.getIdlMethodArgument().getAnnotation("Callback");
 
         final String interfaceName;
@@ -145,6 +163,21 @@ public class JavaBackend extends AbstractCompilerBackend {
         argument.setAttribute("javaHasLambdaInterface", true);
         argument.setAttribute("javaLambdaInterfaceName", interfaceName);
         argument.setAttribute("javaLambdaMethodName", methodName);
+
+//        type.setAttribute("javaName", clazz.getName());
+//        type.setAttribute("jniSignature", clazz.getAttribute("javaName"));
+//
+//        type.setAttribute("javaFullyQualifiedName", clazz.getAttribute("javaPackage") + "." +
+//                clazz.getAttribute("javaName"));
+//
+//        type.setAttribute("javaClassPath", String.join("/", Arrays.stream(clazz.getNamespaces()).map(
+//                String::toLowerCase).collect(Collectors.toList())) + "/" + clazz.getAttribute("javaName"));
+//        type.setAttribute("javaSignature", "L" + String.join("/", Arrays.stream(clazz.getNamespaces()).map(
+//                String::toLowerCase).collect(Collectors.toList())) + "/" + clazz.getAttribute("javaName") + ";");
+
+        final String className = clazz.getAttribute("javaName");
+        type.setAttribute("javaFullyQualifiedName", clazz.getAttribute("javaFullyQualifiedName") + "$" +
+                interfaceName);
 
         argument.getType().setAttribute("javaLambdaInterfaceName", interfaceName);
     }
@@ -202,7 +235,13 @@ public class JavaBackend extends AbstractCompilerBackend {
                 final String javaName = ((UserDefinedType) argument.getType().getResolvedType()).getUserDefinedClass()
                         .getAttribute("javaFullyQualifiedName");
                 final String normalizedJavaName = javaName.replaceAll("\\.", "_");
-                overloadBuilder.append("L").append(normalizedJavaName).append("_");
+                overloadBuilder.append("L").append(normalizedJavaName).append("_2");
+            } else if(argument.getType().getResolvedType() instanceof LambdaType) {
+                final String javaName = argument.getType().getAttribute("javaFullyQualifiedName");
+                final String normalizedJavaName = javaName
+                        .replaceAll("\\.", "_")
+                        .replaceAll("\\$", "_00024");
+                overloadBuilder.append("L").append(normalizedJavaName).append("_2");
             } else if (argument.getType().getResolvedType() instanceof PrimitiveType) {
                 final String typeName = argument.getType().getName();
                 if (!javaSignatures.containsKey(typeName)) {
@@ -210,9 +249,6 @@ public class JavaBackend extends AbstractCompilerBackend {
                 }
                 overloadBuilder.append(javaSignatures.get(typeName));
             } else if (argument.getType().getResolvedType() instanceof StringType) {
-                if(argumentCount >= 2) {
-                    overloadBuilder.append(argumentCount);
-                }
                 overloadBuilder.append("Ljava_lang_String_2");
             } else if(argument.getType().getResolvedType() instanceof BufferType) {
                 overloadBuilder.append("Ljava_nio_ByteBuffer_2");

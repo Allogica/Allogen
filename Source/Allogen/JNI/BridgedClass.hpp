@@ -63,7 +63,7 @@ namespace Allogen {
 			/**
 			 * The Java type this converter converts from/to
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts from the C++ object to a Java object
@@ -88,6 +88,18 @@ namespace Allogen {
 			static T fromJava(JNIEnv* env, JavaType jthis) {
 				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis));
 			}
+
+			/**
+			 * Converts from the Java object to the C++ object
+			 *
+			 * @param env the JNI environment
+			 * @param jthis the Java object
+			 *
+			 * @return the corresponding C++ type
+			 */
+			static T fromJava(JNIEnv* env, jobject jthis) {
+				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis));
+			}
 		};
 
 		/**
@@ -108,7 +120,7 @@ namespace Allogen {
 			/**
 			 * The Java type this converter converts from/to
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts from the C++ object to a Java object
@@ -138,6 +150,22 @@ namespace Allogen {
 				return ptr.get();
 			}
 
+			/**
+			 * Converts from the Java object to the C++ object
+			 *
+			 * @param env the JNI environment
+			 * @param jthis the Java object
+			 *
+			 * @return the corresponding C++ type
+			 */
+			static T* fromJava(JNIEnv* env, jobject jthis) {
+				auto ptr = BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis);
+				if(ptr == nullptr) {
+					return nullptr;
+				}
+				return ptr.get();
+			}
+
 		};
 
 		/**
@@ -158,7 +186,7 @@ namespace Allogen {
 			/**
 			 * The Java type this converter converts from/to
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts from the C++ object to a Java object
@@ -183,6 +211,19 @@ namespace Allogen {
 			static T& fromJava(JNIEnv* env, JavaType jthis) {
 				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis).get());
 			}
+
+			/**
+			 * Converts from the Java object to the C++ object
+			 *
+			 * @param env the JNI environment
+			 * @param jthis the Java object
+			 *
+			 * @return the corresponding C++ type
+			 */
+			static T& fromJava(JNIEnv* env, jobject jthis) {
+				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis).get());
+			}
+
 		};
 
 		/**
@@ -203,7 +244,7 @@ namespace Allogen {
 			/**
 			 * The Java type this converter converts from/to
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts from the C++ object to a Java object
@@ -228,6 +269,18 @@ namespace Allogen {
 			static const T& fromJava(JNIEnv* env, JavaType jthis) {
 				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis).get());
 			}
+
+			/**
+			 * Converts from the Java object to the C++ object
+			 *
+			 * @param env the JNI environment
+			 * @param jthis the Java object
+			 *
+			 * @return the corresponding C++ type
+			 */
+			static const T& fromJava(JNIEnv* env, jobject jthis) {
+				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis).get());
+			}
 		};
 
 		/**
@@ -248,7 +301,7 @@ namespace Allogen {
 			/**
 			 * The Java type this converter converts from/to
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts from the C++ object to a Java object
@@ -273,9 +326,21 @@ namespace Allogen {
 			static const T& fromJava(JNIEnv* env, JavaType jthis) {
 				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis));
 			}
+
+			/**
+			 * Converts from the Java object to the C++ object
+			 *
+			 * @param env the JNI environment
+			 * @param jthis the Java object
+			 *
+			 * @return the corresponding C++ type
+			 */
+			static const T& fromJava(JNIEnv* env, jobject jthis) {
+				return *(BridgeClass<std::shared_ptr<T>>::fromJava(env, jthis));
+			}
 		};
 
-		inline jclass getClass(JNIEnv* env, std::string className) {
+		inline LocalRef<jclass> getClass(JNIEnv* env, std::string className) {
 #if defined(__ANDROID__)
 			static jobject gClassLoader;
 			static jmethodID gFindClassMethod;
@@ -283,12 +348,11 @@ namespace Allogen {
 			if(!loaded) {
 				loaded = true;
 
-				//replace with one of your classes in the line below
-				auto randomClass = env->FindClass(className.data());
-				jclass classClass = env->GetObjectClass(randomClass);
+				LocalRef<jclass> randomClass = {env, env->FindClass(className.data())};
+				LocalRef<jclass> classClass = {env, env->GetObjectClass(randomClass)};
 
-				auto classLoaderClass = env->FindClass("java/lang/ClassLoader");
-				auto getClassLoaderMethod = env->GetMethodID(classClass, "getClassLoader",
+				LocalRef<jclass> classLoaderClass = {env, env->FindClass("java/lang/ClassLoader")};
+				jmethodID getClassLoaderMethod = env->GetMethodID(classClass, "getClassLoader",
 															 "()Ljava/lang/ClassLoader;");
 				gClassLoader = env->NewGlobalRef(
 						env->CallObjectMethod(randomClass, getClassLoaderMethod));
@@ -303,9 +367,10 @@ namespace Allogen {
 				}
 			}
 
-			return static_cast<jclass>(env->CallObjectMethod(gClassLoader, gFindClassMethod, env->NewStringUTF(className.data())));
+			LocalRef<jstring> jClassName = {env, env->NewStringUTF(className.data())};
+			return {env, static_cast<jclass>(env->CallObjectMethod(gClassLoader, gFindClassMethod, unwrapReference(jClassName)))};
 #else
-			return env->FindClass(className.data());
+			return {env, env->FindClass(className.data())};
 #endif
 		}
 
@@ -327,7 +392,7 @@ namespace Allogen {
 			/**
 			 * The Java type this converter converts from/to
 			 */
-			using JavaType = jobject;
+			using JavaType = LocalRef<jobject>;
 
 			/**
 			 * Converts from the C++ object to a Java object
@@ -338,13 +403,13 @@ namespace Allogen {
 			 * @return the corresponding Java type
 			 */
 			static JavaType toJava(JNIEnv* env, Type object) {
-				jclass c = getClass(env, JAVA_CLASS_NAME<T>);
+				LocalRef<jclass> c = getClass(env, JAVA_CLASS_NAME<T>);
 				jobject jobject = env->AllocObject(c);
 
 				jfieldID field = env->GetFieldID(c, "pointer", "J");
 				env->SetLongField(jobject, field, (jlong) new Type(object));
 
-				return jobject;
+				return {env, jobject};
 			}
 
 			/**
@@ -356,7 +421,19 @@ namespace Allogen {
 			 * @return the corresponding C++ type
 			 */
 			static Type fromJava(JNIEnv* env, JavaType jthis) {
-				jclass view = env->GetObjectClass(jthis);
+				return fromJava(env, jthis.object);
+			}
+
+			/**
+			 * Converts from the Java object to the C++ object
+			 *
+			 * @param env the JNI environment
+			 * @param jthis the Java object
+			 *
+			 * @return the corresponding C++ type
+			 */
+			static Type fromJava(JNIEnv* env, jobject jthis) {
+				LocalRef<jclass> view = {env, env->GetObjectClass(jthis)};
 				jfieldID field = env->GetFieldID(view, "pointer", "J");
 				jlong longPtr = env->GetLongField(jthis, field);
 				return *reinterpret_cast<Type*>(longPtr);

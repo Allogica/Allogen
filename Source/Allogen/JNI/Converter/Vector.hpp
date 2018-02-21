@@ -70,7 +70,7 @@ namespace Allogen {
 			 * @return the converted Java array
 			 */
 			static JavaType toJava(JNIEnv* env, Vector v) {
-				jclass java_util_ArrayList = env->FindClass("java/util/ArrayList");
+				LocalRef<jclass> java_util_ArrayList = {env, env->FindClass("java/util/ArrayList")};
 				jmethodID java_util_ArrayList_ = env->GetMethodID(java_util_ArrayList, "<init>", "(I)V");
 				jmethodID java_util_ArrayList_add = env->GetMethodID(java_util_ArrayList, "add",
 				                                                     "(Ljava/lang/Object;)Z");
@@ -78,7 +78,7 @@ namespace Allogen {
 				LocalRef<jobject> result = {env, env->NewObject(java_util_ArrayList, java_util_ArrayList_, v.size())};
 				for(ContainedType& object : v) {
 					env->CallBooleanMethod(result, java_util_ArrayList_add,
-										   unwrapReference(Converter<ContainedType>::toJava(env, object)));
+                                           unwrapReference(Converter<ContainedType>::toJava(env, object)));
 				}
 				return result;
 			}
@@ -92,7 +92,7 @@ namespace Allogen {
 			 * @return the converted C++ vector
 			 */
 			static Type fromJava(JNIEnv* env, JavaType list) {
-				jclass java_util_List = env->FindClass("java/util/List");
+				LocalRef<jclass> java_util_List = {env, env->FindClass("java/util/List")};
 				jmethodID java_util_List_size = env->GetMethodID(java_util_List, "size", "()I");
 				jmethodID java_util_List_get = env->GetMethodID(java_util_List, "get",
 				                                                     "(I)Ljava/lang/Object;");

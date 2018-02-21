@@ -48,7 +48,7 @@ namespace Allogen {
 			/**
 			 * The lambda class type
 			 */
-			jclass clazz;
+			GlobalRef<jclass> clazz;
 
 			/**
 			 * The lambda method ID
@@ -69,7 +69,7 @@ namespace Allogen {
 			 * @param clazz the lambda class type
 			 * @param method the lambda method
 			 */
-			Lambda(const LocalRef<jobject>& object, jclass clazz, jmethodID method) :
+			Lambda(const LocalRef<jobject>& object, LocalRef<jclass> clazz, jmethodID method) :
 					object(object),
 					clazz(clazz),
 					method(method) {};
@@ -127,7 +127,7 @@ namespace Allogen {
 					return Lambda(nullptr, nullptr, nullptr);
 				}
 
-				jclass clazz = env->GetObjectClass(object);
+				LocalRef<jclass> clazz = {env, env->GetObjectClass(object)};
 				jmethodID method = env->GetMethodID(clazz, methodName.c_str(), signature.c_str());
 
 				if(method == nullptr) {
@@ -157,7 +157,7 @@ namespace Allogen {
 			template<typename... Args>
 			static void javaCall(JNIEnv* env, const Lambda& lambda, Args... args) {
 				LocalRef<jobject> localObject = lambda.object;
-				env->CallVoidMethod(localObject, lambda.method, UnwrapReference<Args>::unwrap(args)...);
+				env->CallVoidMethod(localObject, lambda.method, unwrapReference(args)...);
 			}
 		};
 
@@ -166,7 +166,7 @@ namespace Allogen {
 			template<typename... Args>
 			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args... args) {
 				LocalRef<jobject> localObject = lambda.object;
-				return env->CallByteMethod(localObject, lambda.method, UnwrapReference<Args>::unwrap(args)...);
+				return env->CallByteMethod(localObject, lambda.method, unwrapReference(args)...);
 			}
 		};
 
@@ -175,7 +175,7 @@ namespace Allogen {
 			template<typename... Args>
 			static auto javaCall(JNIEnv* env, const Lambda& lambda, Args... args) {
 				LocalRef<jobject> localObject = lambda.object;
-				return env->CallIntMethod(localObject, lambda.method, UnwrapReference<Args>::unwrap(args)...);
+				return env->CallIntMethod(localObject, lambda.method, unwrapReference(args)...);
 			}
 		};
 
