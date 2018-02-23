@@ -31,6 +31,7 @@
 #pragma once
 
 #include <jni.h>
+#include "Allogen/JNI/CoffeeCatch.hpp"
 
 namespace Allogen {
 	namespace JNI {
@@ -70,9 +71,17 @@ namespace Allogen {
 			template<typename Executor>
 			static inline jlong call(JNIEnv* env, Executor&& executor,
 									 typename Converter<Args>::JavaType&&... args) {
-				return reinterpret_cast<jlong>(
-						new std::shared_ptr<R>(executor(Converter<Args>::fromJava(env, args)...))
-				);
+				CoffeeCatchCleaner cleaner;
+				if (coffeecatch_inside() ||
+					(coffeecatch_setup() == 0
+					 && sigsetjmp(*coffeecatch_get_ctx(), 1) == 0)) {
+					return reinterpret_cast<jlong>(
+							new std::shared_ptr<R>(executor(Converter<Args>::fromJava(env, args)...))
+					);
+				} else {
+					CoffeeCatch::_throw(env);
+					return 0;
+				}
 			}
 		};
 

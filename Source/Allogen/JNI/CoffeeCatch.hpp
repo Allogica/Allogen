@@ -30,47 +30,38 @@
 
 #pragma once
 
-#include <jni.h>
-#include "Allogen/JNI/CoffeeCatch.hpp"
+#include <coffeecatch.h>
+#include <coffeejni.h>
+
+#include <string>
+#include <exception>
 
 namespace Allogen {
-	namespace JNI {
+    namespace JNI {
 
-		/**
-		 * This class represents a standard destructor wrapper.
-		 *
-		 * @tparam Class 	the wrapped class whose destructor is being called
-		 */
-		template<typename Class>
-		struct BridgedDestructor {
-		public:
-			/**
-			 * Calls a wrapped C++ destructor from Java code
-			 *
-			 * @tparam Executor the executor type
-			 *
-			 * @param env 		the JNI environment
-			 * @param jthis 	the "this" Java object calling the wrapped destructor
-			 * @param executor 	the code generated executor used to dispatch the destructor to
-			 * 					the C++ object
-			 */
-			template<typename Executor>
-			static inline void call(JNIEnv* env, jobject jthis, Executor&& executor) {
-				CoffeeCatchCleaner cleaner;
-				if (coffeecatch_inside() ||
-					(coffeecatch_setup() == 0
-					 && sigsetjmp(*coffeecatch_get_ctx(), 1) == 0)) {
-					jclass view = env->GetObjectClass(jthis);
-					jfieldID field = env->GetFieldID(view, "pointer", "J");
-					jlong longPtr = env->GetLongField(jthis, field);
+        struct CoffeeCatchCleaner {
+            ~CoffeeCatchCleaner() {
+                coffeecatch_cleanup();
+            }
+        };
 
-					auto ptr = reinterpret_cast<std::shared_ptr<Class>*>(longPtr);
-					executor(ptr);
-				} else {
-					CoffeeCatch::_throw(env);
-				}
-			}
-		};
+        struct CoffeeCatch {
+            static void _throw(JNIEnv* env) {
+                if(std::current_exception() != nullptr) {
+                    try {
+                        std::rethrow_exception(std::current_exception());
+                    } catch(std::exception& e) {
+                        std::string message = "C++ exception of type ";
+                        message.append(typeid(e).name());
+                        message.append(": ");
+                        message.append(e.what());
+                        coffeecatch_throw_exception(env, message.c_str());
+                    }
+                } else {
+                    coffeecatch_throw_exception(env);
+                }
+            }
+        };
 
-	}
+    }
 }
