@@ -68,7 +68,7 @@ function(add_allogen_interface target_name)
     set(import_args "")
     if(IFT_IMPORT)
         foreach(dir ${IFT_IMPORT})
-            set(import_args ${import_args} --import "${dir}")
+            set(import_args ${import_args} --import '${dir}')
         endforeach()
     endif()
     
@@ -79,7 +79,7 @@ function(add_allogen_interface target_name)
 
     set(module_args "")
     if(IFT_MODULE_NAME)
-        set(module_args --module "${IFT_MODULE_NAME}")
+        set(module_args --module '${IFT_MODULE_NAME}')
     endif()
 
     set(idls)
