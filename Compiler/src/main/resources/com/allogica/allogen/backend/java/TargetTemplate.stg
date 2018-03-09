@@ -117,11 +117,12 @@ arguments(method, class) ::= <%
 %>
 
 argument(argument, method, class) ::= "<typename(argument.type)> <argument.name>"
-
 javaLambda(method, argument) ::= <<
+<if(!argument.javaLambdaReuse)>
 public interface <argument.javaLambdaInterfaceName> {
     <typename(argument.type.resolvedType.returnType)> <argument.javaLambdaMethodName>(<argument.type.resolvedType.arguments:argument(method, method); separator=", ">);
 }
+<endif>
 >>
 
 typename(type) ::= "<type:(type.resolvedType.templateName)()>"

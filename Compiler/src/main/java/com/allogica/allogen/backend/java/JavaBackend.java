@@ -152,17 +152,21 @@ public class JavaBackend extends AbstractCompilerBackend {
 
         final String interfaceName;
         final String methodName;
+        final String reuse;
         if (annotation != null) {
             interfaceName = annotation.getProperty("interface");
             methodName = annotation.getProperty("method");
+            reuse = annotation.getProperty("reuse");
         } else {
             interfaceName = StringHelper.firstToUpper(method.getName()) + StringHelper.firstToUpper(argument.getName());
             methodName = "on" + StringHelper.firstToUpper(argument.getName());
+            reuse = null;
         }
 
         argument.setAttribute("javaHasLambdaInterface", true);
         argument.setAttribute("javaLambdaInterfaceName", interfaceName);
         argument.setAttribute("javaLambdaMethodName", methodName);
+        argument.setAttribute("javaLambdaReuse", reuse != null);
 
 //        type.setAttribute("javaName", clazz.getName());
 //        type.setAttribute("jniSignature", clazz.getAttribute("javaName"));
