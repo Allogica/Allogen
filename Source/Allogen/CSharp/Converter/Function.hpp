@@ -51,7 +51,12 @@ namespace Allogen {
 			/**
 			 * The JNI type this converter supports
 			 */
-			using CSharpType = typename Converter<R>::CSharpType(^)(typename Converter<Args>::CSharpType...);
+			using CSharpType = void*;
+
+            /**
+			 * The JNI type this converter supports
+			 */
+            using CSharpFunc = typename Converter<R>::CSharpType(*)(typename Converter<Args>::CSharpType...);
 
 			/**
 			 * Converts a C++ integer into a CSharp integer
@@ -62,13 +67,7 @@ namespace Allogen {
 			 * @return the CSharp integer
 			 */
 			static CSharpType toCSharp(Type func) {
-				return ^R(Args... args) {
-					return Converter<R>::toCSharp(func(
-							Converter<Args>::toCSharp(
-									std::move<Args>(args)
-							)...
-					));
-				};
+                return nullptr;
 			}
 
 			/**
@@ -80,13 +79,14 @@ namespace Allogen {
 			 * @return the C++ integer
 			 */
 			static Type fromCSharp(CSharpType func) {
-				return [func](Args... args) -> R {
-					return Converter<R>::fromCSharp(func(
-							Converter<Args>::toCSharp(
-									std::forward<Args>(args)
-							)...
-					));
-				};
+                return [func](Args... args) {
+                    auto csfunc = reinterpret_cast<CSharpFunc>(func);
+                    return Converter<R>::fromCSharp(csfunc(
+                            Converter<Args>::toCSharp(
+                                    std::forward<Args>(args)
+                            )...
+                    ));
+                };
 			}
 		};
 
@@ -105,7 +105,12 @@ namespace Allogen {
 			/**
 			 * The JNI type this converter supports
 			 */
-			using CSharpType = typename Converter<void>::CSharpType(^)(typename Converter<Args>::CSharpType...);
+			using CSharpType = void*;
+
+            /**
+			 * The JNI type this converter supports
+			 */
+            using CSharpFunc = void(*)(typename Converter<Args>::CSharpType...);
 
 			/**
 			 * Converts a C++ integer into a CSharp integer
@@ -116,13 +121,7 @@ namespace Allogen {
 			 * @return the CSharp integer
 			 */
 			static CSharpType toCSharp(Type func) {
-				return ^void(Args... args) {
-					func(
-							Converter<Args>::toCSharp(
-									std::move<Args>(args)
-							)...
-					);
-				};
+                return nullptr;
 			}
 
 			/**
@@ -134,14 +133,15 @@ namespace Allogen {
 			 * @return the C++ integer
 			 */
 			static Type fromCSharp(CSharpType func) {
-				return [func](Args... args) -> void {
-					func(
-							Converter<Args>::toCSharp(
-									std::forward<Args>(args)
-							)...
-					);
-				};
-			}
+                return [func](Args... args) {
+                    auto csfunc = reinterpret_cast<CSharpFunc>(func);
+                    csfunc(
+                            Converter<Args>::toCSharp(
+                                    std::forward<Args>(args)
+                            )...
+                    );
+                };
+			};
 		};
 
 	}

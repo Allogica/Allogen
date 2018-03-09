@@ -36,19 +36,21 @@ import com.allogica.allogen.backend.AbstractCompilerBackend;
 import com.allogica.allogen.idl.model.IDLAnnotation;
 import com.allogica.allogen.model.Class;
 import com.allogica.allogen.model.*;
-import com.allogica.allogen.types.LambdaType;
-import com.allogica.allogen.types.Type;
-import com.allogica.allogen.types.UserDefinedType;
+import com.allogica.allogen.types.*;
 import com.allogica.allogen.util.StringHelper;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CSharpBackend extends AbstractCompilerBackend {
+
+    private final String pInvokeDll;
+
+    public CSharpBackend(String pInvokeDll) {
+        this.pInvokeDll = pInvokeDll;
+    }
 
     @Override
     public URL getTargetTemplateURL() {
@@ -79,7 +81,11 @@ public class CSharpBackend extends AbstractCompilerBackend {
     public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz) {
         clazz.setAttribute("csNamespace", String.join(".", clazz.getNamespaces()));
         clazz.setAttribute("csName", clazz.getName());
-        clazz.setAttribute("csLibraryName", "Juice.Bridge.CSharp");
+
+        final String csFullyQualifiedName = clazz.getAttribute("csNamespace") + "." + clazz.getAttribute("csName");
+        clazz.setAttribute("csFullyQualifiedName", csFullyQualifiedName);
+
+        clazz.setAttribute("csLibraryName", pInvokeDll);
     }
 
     @Override
@@ -94,7 +100,19 @@ public class CSharpBackend extends AbstractCompilerBackend {
         clazz.setAttribute("csImports", imports);
 
         for (final Property property : clazz.getProperties().values()) {
-            property.setAttribute("csName", StringHelper.firstToUpper(property.getName()));
+            final String propName = StringHelper.firstToUpper(property.getName());
+            property.setAttribute("csName", propName);
+
+            final Method getter = property.getGetter();
+            if (getter != null) {
+                final String csName = getter.getAttribute("csName");
+                if (!csName.equals("ToString")) {
+                    getter.setAttribute("csPrivate", true);
+                }
+                if (csName.equals(propName)) {
+                    getter.setAttribute("csName", "_" + csName);
+                }
+            }
         }
     }
 
@@ -103,8 +121,15 @@ public class CSharpBackend extends AbstractCompilerBackend {
         final String csName = StringHelper.firstToUpper(method.getName());
 
         method.setAttribute("csName", csName);
-        method.setAttribute("csEntryPoint", String.join("_", clazz.getNamespaces()) + "_" +
-                clazz.getName() + "_" + method.getName());
+        method.setAttribute("csVirtual", true);
+
+        String csEntryPoint = String.join("_", clazz.getNamespaces()) + "_" +
+                clazz.getName() + "_" + method.getName();
+        if (clazz.hasOverloadForMethod(method.getName())) {
+            Stream<String> names = method.getArguments().stream().map(MethodArgument::getName);
+            csEntryPoint += "_" + String.join("_", names.toArray(String[]::new));
+        }
+        method.setAttribute("csEntryPoint", csEntryPoint);
 
         if (method.getReturnType().getName().equals("void")) {
             method.getReturnType().setAttribute("csIsVoid", true);
@@ -112,7 +137,45 @@ public class CSharpBackend extends AbstractCompilerBackend {
 
         if (csName.equals("ToString")) {
             method.setAttribute("csOverride", true);
+            method.setAttribute("csVirtual", false);
         }
+
+        if (isIgnoredType(method.getReturnType().getResolvedType(), true)) {
+            method.setAttribute("csSkip", true);
+            return;
+        }
+
+        // Translate a return buffer type into a argument
+        if (method.getReturnType().getResolvedType() instanceof BufferType) {
+            method.getReturnType().setAttribute("csTranslatedReturnType", true);
+
+//            final MethodArgument arrayArg = new MethodArgument("csretValue", new TypeName("byte[]"));
+//            arrayArg.setAttribute("csExternOnly", true);
+//            arrayArg.setAttribute("csAttributes", "MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)");
+//
+//            final MethodArgument sizeArg = new MethodArgument("csretSize", new TypeName("long"));
+//            sizeArg.setAttribute("csExternOnly", true);
+//
+//            method.getArguments().add(0, sizeArg);
+//            method.getArguments().add(0, arrayArg);
+        }
+
+        for (MethodArgument argument : method.getArguments()) {
+            if (isIgnoredType(argument.getType().getResolvedType(), false) || argument.getType().getResolvedType() instanceof BufferType) {
+                method.setAttribute("csSkip", true);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void preHandle(Compiler<?, ?> compiler, CompilerContext compilerContext, Class clazz, InheritedMethod method) {
+        method.setAttribute("csEntryPoint", String.join("_", clazz.getNamespaces()) + "_" +
+                clazz.getName() + "_" + method.getName());
+
+        method.setAttribute("csOverride", true);
+        method.setAttribute("csVirtual", false);
+        method.getMethod().setAttribute("csVirtual", true);
     }
 
     @Override
@@ -131,6 +194,13 @@ public class CSharpBackend extends AbstractCompilerBackend {
         }
 
         constructor.setAttribute("csEntryPoint", builder.toString());
+
+        for (MethodArgument argument : constructor.getArguments()) {
+            if (isIgnoredType(argument.getType().getResolvedType(), false) || argument.getType().getResolvedType() instanceof BufferType) {
+                constructor.setAttribute("csSkip", true);
+                return;
+            }
+        }
     }
 
     @Override
@@ -141,18 +211,30 @@ public class CSharpBackend extends AbstractCompilerBackend {
 
     // -----------------------------------------------------------------------------------------------------------------
 
+    private boolean isIgnoredType(Type type, boolean forReturn) {
+        if(forReturn) {
+            return (type instanceof VectorType || type instanceof MapType);
+        } else {
+            return (type instanceof VectorType || type instanceof MapType);
+        }
+    }
+
     private void createDelegate(Method method, MethodArgument argument, LambdaType lambda) {
         final IDLAnnotation annotation = argument.getIdlMethodArgument().getAnnotation("Callback");
 
         final String interfaceName;
+        final String reuse;
         if (annotation != null) {
             interfaceName = annotation.getProperty("interface");
+            reuse = annotation.getProperty("reuse");
         } else {
             interfaceName = StringHelper.firstToUpper(method.getName()) + StringHelper.firstToUpper(argument.getName());
+            reuse = null;
         }
 
         argument.setAttribute("csHasDelegate", true);
         argument.setAttribute("csDelegateName", interfaceName);
+        argument.setAttribute("csDelegateReuse", reuse != null);
 
         argument.getType().setAttribute("csDelegateName", interfaceName);
     }

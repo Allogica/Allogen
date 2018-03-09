@@ -14,7 +14,6 @@
 
 #include "Allogen/Example/Bridge/AnotherClass.hpp"
 #include "Allogen/Example/Bridge/ExampleClass.hpp"
-#include "Allogen/Example/Bridge/ExampleClass.hpp"
 
 
 ALLOGEN_BRIDGED_CLASS(Allogen::Example::ExampleClass, "allogen/example/ExampleClass")

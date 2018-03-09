@@ -97,3 +97,26 @@ if(TARGET Allogen.ObjectiveC)
             PRIVATE -ObjC -all_load
     )
 endif()
+
+if(TARGET Allogen.CSharp)
+    add_allogen_interface(Allogen.Example.Bridge.CSharp.Generate
+            LANGUAGE            CSharp
+            IDL                 ${IDLS}
+            BRIDGE_NAMESPACE    Allogen::Example::Bridge
+            
+            INCLUDE_DIRS        ${CMAKE_CURRENT_SOURCE_DIR}/IDL
+            
+            TARGET_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/CSharp
+            BRIDGE_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Source/CSharp
+    )
+    
+    file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Source/CSharp/*.cpp)
+    add_library(Allogen.Example.Bridge.CSharp SHARED ${SRCS})
+    target_link_libraries(Allogen.Example.Bridge.CSharp
+            PUBLIC  Allogen.CSharp
+            PRIVATE Allogen.Example
+    )
+    target_include_directories(Allogen.Example.Bridge.CSharp
+            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source/CSharp
+    )
+endif()

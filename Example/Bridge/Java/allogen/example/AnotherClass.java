@@ -10,8 +10,6 @@ package allogen.example;
 
 import java.util.*;
 import java.nio.ByteBuffer;
-import allogen.example.AnotherClass;
-
 
 /**
  * Calls the C++ AnotherClass() native method
@@ -23,7 +21,7 @@ public class AnotherClass {
 	 * This value should not be changed by the user and is automatically initialized by the _init
 	 * or when used as a return value from another method.
 	 */
-    private long pointer;
+    protected long pointer;
 
     /**
      * Calls the C++ (Allogen::Example::AnotherClass, std::string) native method
@@ -31,7 +29,7 @@ public class AnotherClass {
      * @param parent the parent parameter
      * @param sub the sub parameter
      */
-    public AnotherClass(AnotherClass parent, String sub) {
+    public AnotherClass(allogen.example.AnotherClass parent, String sub) {
         pointer = this._init(parent, sub);
     }
 
@@ -44,7 +42,7 @@ public class AnotherClass {
      *
      * @return a pointer to the C++ native object
      */
-    public native long _init(AnotherClass parent, String sub);
+    private native long _init(allogen.example.AnotherClass parent, String sub);
 
     /**
      * Calls the C++ (std::string) native method
@@ -63,7 +61,10 @@ public class AnotherClass {
      *
      * @return a pointer to the C++ native object
      */
-    public native long _init(String str); 
+    private native long _init(String str); 
+    protected AnotherClass(AnotherClass dummy) {
+        // DO NOT USE THIS CONSTRUCTOR! THIS IS FOR INTERNAL USE ONLY!!!
+    }
     /**
      * This method deletes the wrapped C++ object. This method should
      * not be called directly by the user, but must be called by the GC.

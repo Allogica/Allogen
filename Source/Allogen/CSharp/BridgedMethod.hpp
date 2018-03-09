@@ -69,11 +69,11 @@ namespace Allogen {
 			 * @return the already CSharp-converted object returned by the C++ method
 			 */
 			template<typename Executor>
-			static inline typename Converter<R>::CSharpType call(Class* self, Executor&& executor,
-															   typename Converter<Args>::CSharpType... args) {
+			static inline typename Converter<R>::CSharpType call(std::shared_ptr<Class>* self, Executor&& executor,
+																 typename Converter<Args>::CSharpType... args) {
 				return Converter<typename std::result_of<Executor(Class*, Args...)>::type>::toCSharp(
 						executor(
-								self,
+								self->get(),
 								Converter<Args>::fromCSharp(
 										std::move(args)
 								)...
@@ -125,10 +125,10 @@ namespace Allogen {
 			 * @param args the CSharp arguments of the method call
 			 */
 			template<typename Executor>
-			static inline void call(Class* self, Executor&& executor,
+			static inline void call(std::shared_ptr<Class>* self, Executor&& executor,
 									typename Converter<Args>::CSharpType... args) {
 				executor(
-						self,
+						self->get(),
 						Converter<Args>::fromCSharp(
 								std::move(args)
 						)...

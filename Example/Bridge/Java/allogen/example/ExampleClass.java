@@ -10,10 +10,6 @@ package allogen.example;
 
 import java.util.*;
 import java.nio.ByteBuffer;
-import allogen.example.AnotherClass;
-import allogen.example.ExampleClass;
-import allogen.example.ExampleClass;
-
 
 /**
  * Calls the C++ ExampleClass() native method
@@ -25,7 +21,7 @@ public class ExampleClass {
 	 * This value should not be changed by the user and is automatically initialized by the _init
 	 * or when used as a return value from another method.
 	 */
-    private long pointer;
+    protected long pointer;
 
     /**
      * Calls the C++ () native method
@@ -40,7 +36,7 @@ public class ExampleClass {
      *
      * @return a pointer to the C++ native object
      */
-    public native long _init();
+    private native long _init();
 
     /**
      * Calls the C++ (uint32_t) native method
@@ -59,7 +55,10 @@ public class ExampleClass {
      *
      * @return a pointer to the C++ native object
      */
-    public native long _init(int initialValue); 
+    private native long _init(int initialValue); 
+    protected ExampleClass(ExampleClass dummy) {
+        // DO NOT USE THIS CONSTRUCTOR! THIS IS FOR INTERNAL USE ONLY!!!
+    }
     /**
      * This method deletes the wrapped C++ object. This method should
      * not be called directly by the user, but must be called by the GC.
@@ -88,7 +87,7 @@ public class ExampleClass {
     /**
      * Calls the C++ copy() native method
      */
-    public native ExampleClass copy();
+    public native allogen.example.ExampleClass copy();
 
     public interface AsyncTaskCallback {
         void onCallback();
@@ -144,10 +143,10 @@ public class ExampleClass {
      *
      * @param name the name parameter
      */
-    public native AnotherClass createAnother(String name);
+    public native allogen.example.AnotherClass createAnother(String name);
 
     public interface CreateAnotherAsyncCallback {
-        void createAnother(AnotherClass another);
+        void createAnother(allogen.example.AnotherClass another);
     }
     /**
      * Calls the C++ createAnotherAsync(std::string, std::function<void(Allogen::Example::AnotherClass)> ) native method
@@ -163,7 +162,7 @@ public class ExampleClass {
      *
      * @param another the another parameter
      */
-    public native void printAnother(AnotherClass another);
+    public native void printAnother(allogen.example.AnotherClass another);
 
     public interface PrintAnotherAsyncCallback {
         void printAnother();
@@ -174,7 +173,7 @@ public class ExampleClass {
      * @param another the another parameter
      * @param callback the callback parameter
      */
-    public native void printAnotherAsync(AnotherClass another, PrintAnotherAsyncCallback callback);
+    public native void printAnotherAsync(allogen.example.AnotherClass another, PrintAnotherAsyncCallback callback);
 
 
     /**
@@ -186,5 +185,5 @@ public class ExampleClass {
     /**
      * Calls the C++ shared() native method
      */
-    public native static ExampleClass shared();
+    public native static allogen.example.ExampleClass shared();
 }

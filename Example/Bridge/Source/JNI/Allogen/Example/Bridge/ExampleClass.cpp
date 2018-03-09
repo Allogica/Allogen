@@ -42,11 +42,12 @@ namespace Allogen { namespace Example {
             }, jint(initialValue)
         );
     }
+    extern "C"
     JNIEXPORT void JNICALL
     Java_allogen_example_ExampleClass_finalize(JNIEnv* _env_, jobject _jthis_) {
-        BridgedMethod<ExampleClass, void()>::call(
+        BridgedDestructor<ExampleClass>::call(
             _env_, _jthis_,
-            [](ExampleClass *wself) {
+            [](std::shared_ptr<ExampleClass> *wself) {
                 delete wself;
             }
         );
@@ -199,7 +200,7 @@ namespace Allogen { namespace Example {
 
     extern "C"
     JNIEXPORT jint JNICALL
-    Java_allogen_example_ExampleClass_getStaticInt(JNIEnv* _env_) {
+    Java_allogen_example_ExampleClass_getStaticInt(JNIEnv* _env_, jclass) {
         return BridgedMethod<void, uint32_t()>::call(
             _env_,
             []() {
@@ -210,7 +211,7 @@ namespace Allogen { namespace Example {
 
     extern "C"
     JNIEXPORT jobject JNICALL
-    Java_allogen_example_ExampleClass_shared(JNIEnv* _env_) {
+    Java_allogen_example_ExampleClass_shared(JNIEnv* _env_, jclass) {
         return BridgedMethod<void, Allogen::Example::ExampleClass()>::call(
             _env_,
             []() {

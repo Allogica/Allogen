@@ -21,8 +21,11 @@ public class BaseClass {
 	 * This value should not be changed by the user and is automatically initialized by the _init
 	 * or when used as a return value from another method.
 	 */
-    private long pointer;
+    protected long pointer;
 
+    protected BaseClass(BaseClass dummy) {
+        // DO NOT USE THIS CONSTRUCTOR! THIS IS FOR INTERNAL USE ONLY!!!
+    }
     /**
      * This method deletes the wrapped C++ object. This method should
      * not be called directly by the user, but must be called by the GC.

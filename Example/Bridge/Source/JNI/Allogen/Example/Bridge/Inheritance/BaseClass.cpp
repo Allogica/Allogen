@@ -12,11 +12,12 @@ using namespace Allogen::JNI;
 
 namespace Allogen { namespace Example { namespace Inheritance {
 
+    extern "C"
     JNIEXPORT void JNICALL
     Java_allogen_example_inheritance_BaseClass_finalize(JNIEnv* _env_, jobject _jthis_) {
-        BridgedMethod<BaseClass, void()>::call(
+        BridgedDestructor<BaseClass>::call(
             _env_, _jthis_,
-            [](BaseClass *wself) {
+            [](std::shared_ptr<BaseClass> *wself) {
                 delete wself;
             }
         );

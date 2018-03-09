@@ -31,7 +31,7 @@
 #pragma once
 
 #include "Allogen/CSharp/Converter.hpp"
-#include <Juice/Utility/Optional.hpp>
+#include <experimental/optional>
 
 namespace Allogen {
 	namespace CSharp {
@@ -56,14 +56,13 @@ namespace Allogen {
 			/**
 			 * Converts a C++ integer into a CSharp integer
 			 *
-			 * @param env the JNI environment
 			 * @param i the C++ integer
 			 *
 			 * @return the CSharp integer
 			 */
 			static CSharpType toCSharp(Type object) {
 				if(object) {
-					return Converter<ContainedType>::toCSharp(object.value());
+					return Converter<ContainedType>::toCSharp(*object);
 				}
 				return {};
 			}
@@ -71,14 +70,13 @@ namespace Allogen {
 			/**
 			 * Converts a CSharp integer into a C++ integer
 			 *
-			 * @param env the JNI environment
 			 * @param i the CSharp integer
 			 *
 			 * @return the C++ integer
 			 */
 			static Type fromCSharp(CSharpType object) {
 				if(object) {
-					return Converter<ContainedType>::fromCSharp(object.value());
+					return Converter<ContainedType>::fromCSharp(*object);
 				}
 				return {};
 			}

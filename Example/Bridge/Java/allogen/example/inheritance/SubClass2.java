@@ -10,21 +10,30 @@ package allogen.example.inheritance;
 
 import java.util.*;
 import java.nio.ByteBuffer;
-import allogen.example.inheritance.BaseClass;
-
 
 /**
  * Calls the C++ SubClass2() native method
  */
-public class SubClass2 extends BaseClass {
+public class SubClass2 extends allogen.example.inheritance.BaseClass {
     /**
-	 * A numeric value that represents the pointer used to access the wrapped object.
-	 *
-	 * This value should not be changed by the user and is automatically initialized by the _init
-	 * or when used as a return value from another method.
-	 */
-    private long pointer;
+     * Calls the C++ () native method
+     */
+    public SubClass2() {
+        super((allogen.example.inheritance.BaseClass) null);
+        pointer = this._init();
+    }
 
+    /**
+     * This method performs the object creation. This method should only be called
+     * from the object constructor.
+     *
+     * @return a pointer to the C++ native object
+     */
+    private native long _init(); 
+    protected SubClass2(SubClass2 dummy) {
+        // DO NOT USE THIS CONSTRUCTOR! THIS IS FOR INTERNAL USE ONLY!!!
+        super((allogen.example.inheritance.BaseClass) null);
+    }
     /**
      * This method deletes the wrapped C++ object. This method should
      * not be called directly by the user, but must be called by the GC.

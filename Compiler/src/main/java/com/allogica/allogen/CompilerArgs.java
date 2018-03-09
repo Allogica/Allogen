@@ -57,6 +57,9 @@ class CompilerArgs {
     @Parameter(names = {"--module"}, required = false, description = "The file to export the module name", converter = FileConverter.class)
     File moduleFile = null;
 
+    @Parameter(names = {"--pinvokedll"}, required = false, description = "The library name to be used when generating P/Invoke calls (C# only)")
+    String pInvokeDll = null;
+
     @Parameter(required = true, converter = FileConverter.class)
     List<File> idlFiles = new ArrayList<>();
 
