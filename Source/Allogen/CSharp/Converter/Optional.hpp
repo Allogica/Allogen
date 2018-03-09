@@ -31,7 +31,14 @@
 #pragma once
 
 #include "Allogen/CSharp/Converter.hpp"
+#if __has_include(<optional>)
+#include <optional>
+namespace std::experimental {
+	using ::std::optional;
+}
+#else
 #include <experimental/optional>
+#endif
 
 namespace Allogen {
 	namespace CSharp {
@@ -42,11 +49,11 @@ namespace Allogen {
 		 * @tparam IntegralType the integral type to be converted
 		 */
 		template<typename ContainedType>
-		struct Converter<std::experimental::optional<ContainedType>> {
+		struct Converter<std::optional<ContainedType>> {
 			/**
 			 * The C++ type this converter is operating on
 			 */
-			using Type = std::experimental::optional<ContainedType>;
+			using Type = std::optional<ContainedType>;
 
 			/**
 			 * The JNI type this converter supports

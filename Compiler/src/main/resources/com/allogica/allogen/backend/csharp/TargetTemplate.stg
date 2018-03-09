@@ -62,6 +62,15 @@ namespace <class.csNamespace> {
         <class.inheritedMethods:method(class); separator="\n\n">
 
         private struct AllogenPInvoke {
+            /// <summary>
+            /// The native Interop library name
+            /// </summary>
+            #if DEBUG
+            private const string LibraryName = "<class.csLibraryName>d.dll";
+            #else
+            private const string LibraryName = "<class.csLibraryName>.dll";
+            #endif
+
             <if(class.constructors)><class.constructors:pinvokeConstructor(class); separator="\n\n"><\ ><endif>
             <if(class.destructor)><class.destructor:pinvokeDestructor(class); separator="\n\n"><\n><endif>
             <if(class.methods)><class.methods:pinvokeMethod(class); separator="\n\n"><endif>
@@ -117,7 +126,7 @@ public <class.csName>(<arguments(constructor, class)>)<if(class.parent)> : base(
 
 pinvokeConstructor(constructor, class) ::= <<
 <if(!constructor.csSkip)>
-[DllImport("<class.csLibraryName>",
+[DllImport(LibraryName,
     EntryPoint = "<constructor.csEntryPoint>",
     CallingConvention = CallingConvention.StdCall)]
 public static extern IntPtr Constructor(<constructor.arguments:{arg|<marshalAs(arg.type, false)> <unmanagedTypename(arg.type)> <arg.name>}; separator=", ">);
@@ -139,7 +148,7 @@ destructor(destructor, class) ::= <<
 >>
 
 pinvokeDestructor(destructor, class) ::= <<
-[DllImport("<class.csLibraryName>",
+[DllImport(LibraryName,
     EntryPoint = "<destructor.csEntryPoint>",
     CallingConvention = CallingConvention.StdCall)]
 public static extern void Destructor(IntPtr pointer);
@@ -162,7 +171,7 @@ method(method, class) ::= <<
 
 pinvokeMethod(method, class) ::= <<
 <if(!method.csSkip)>
-[DllImport("<class.csLibraryName>",
+[DllImport(LibraryName,
     EntryPoint = "<method.csEntryPoint>",
     CallingConvention = CallingConvention.StdCall,
     CharSet=CharSet.Ansi)]
@@ -229,7 +238,7 @@ dateType(type) ::= "System.DateTime"
 marshalAsTemplateName_(type) ::= "<type.resolvedType.templateName>MarshalAs"
 marshalAs(type, return) ::= "<if(marshalAsTemplateName_(type))><(marshalAsTemplateName_(type))(type, return)><endif>"
 userDefinedTypeMarshalAs(type, return) ::= "[<if(return)>return: <endif>MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(<type.resolvedType.userDefinedClass.csName>.Marshaller))]"
-stringTypeMarshalAs(type, return) ::= ""
+stringTypeMarshalAs(type, return) ::= "[<if(return)>return: <endif>MarshalAs(UnmanagedType.BStr)]"
 lambdaTypeMarshalAs(type, return) ::= ""
 optionalTypeMarshalAs(type, return) ::= "<marshalAs(type.resolvedType.containedType, return)>"
 sharedPtrTypeMarshalAs(type, return) ::= "<marshalAs(type.resolvedType.containedType, return)>"

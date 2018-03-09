@@ -56,7 +56,7 @@ namespace Allogen {
             /**
 			 * The JNI type this converter supports
 			 */
-            using CSharpFunc = typename Converter<R>::CSharpType(*)(typename Converter<Args>::CSharpType...);
+            using CSharpFunc = typename Converter<R>::CSharpType(__stdcall *)(typename Converter<Args>::CSharpType...);
 
 			/**
 			 * Converts a C++ integer into a CSharp integer
@@ -110,7 +110,7 @@ namespace Allogen {
             /**
 			 * The JNI type this converter supports
 			 */
-            using CSharpFunc = void(*)(typename Converter<Args>::CSharpType...);
+            using CSharpFunc = void(__stdcall *)(typename Converter<Args>::CSharpType...);
 
 			/**
 			 * Converts a C++ integer into a CSharp integer

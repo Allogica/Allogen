@@ -31,6 +31,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 namespace Allogen {
 	namespace CSharp {
@@ -62,7 +63,7 @@ namespace Allogen {
 			 *
 			 * @return the corresponding CSharp type
 			 */
-			static CSharpType toCSharp(T object) {
+			static CSharpType toCSharp(T& object) {
 				return BridgeClass<std::shared_ptr<T>>::toCSharp(std::make_shared<T>(std::move(object)));
 			}
 
@@ -73,7 +74,7 @@ namespace Allogen {
 			 *
 			 * @return the corresponding C++ type
 			 */
-			static T fromCSharp(CSharpType csthis) {
+			static T& fromCSharp(CSharpType csthis) {
 				return *(BridgeClass<std::shared_ptr<T>>::fromCSharp(csthis));
 			}
 		};

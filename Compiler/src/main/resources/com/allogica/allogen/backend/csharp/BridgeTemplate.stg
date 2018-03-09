@@ -119,7 +119,7 @@ BridgedMethod\<<class.fullyQualifiedName>, void()>::call(
     <if(destructor.body)>
         <destructor.body>
     <else>
-        delete wself;
+        // delete wself;
     <endif>
     }
 );

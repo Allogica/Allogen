@@ -14,6 +14,7 @@ find_program(Maven_EXECUTABLE NAMES mvn
         ${MAVEN_ROOT}/mvn
         /usr/bin
         /usr/local/bin
+        "C:/Program Files (x86)/Maven/bin"
 )
 
 # handle the QUIETLY and REQUIRED arguments and set Maven_FOUND to TRUE if

@@ -32,6 +32,13 @@
 
 #include <string>
 
+#if defined(WIN32)
+# define NOMINMAX
+# define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+# include <windows.h>
+# include <OleAuto.h>
+#endif
+
 namespace Allogen {
 	namespace CSharp {
 
@@ -197,9 +204,16 @@ namespace Allogen {
 			 * no memory could be allocated
 			 */
 			static char* toCSharp(const std::string& string) {
+#if defined(WIN32)
+                auto lenW = (UINT) ::MultiByteToWideChar(CP_ACP, 0, string.c_str(), string.length(), NULL, 0);
+                BSTR str = ::SysAllocStringLen(0, lenW);
+                ::MultiByteToWideChar(CP_ACP, 0, string.c_str(), string.length(), str, lenW);
+                return (char*) str;
+#else
 				auto cstr = new char[string.size() + 1];
 				memcpy(cstr, string.c_str(), string.size() + 1);
 				return cstr;
+#endif
 			}
 
 			/**
@@ -211,7 +225,16 @@ namespace Allogen {
 			 * @return the C++ string created from the CSharp string contents
 			 */
 			static std::string fromCSharp(const char* cstr) {
+#if defined(WIN32)
+				std::wstring wstr((const wchar_t*) cstr);
+				if(wstr.empty()) return std::string();
+				int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+				std::string strTo( size_needed, 0 );
+				WideCharToMultiByte                  (CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+				return strTo;
+#else
 				return std::string(cstr);
+#endif
 			}
 		};
 

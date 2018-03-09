@@ -33,11 +33,6 @@ set(ADD_ALLOGEN_INTERFACE_INCLUDED)
 
 include(CMakeParseArguments)
 
-find_package(Java 1.8)
-if(NOT Java_FOUND)
-    message("Java not found. Allogen compiler will be unavailable.")
-endif()
-
 find_package(Maven)
 if(NOT Maven_FOUND)
     message("Maven not found. Allogen compiler will be unavailable.")
@@ -61,7 +56,7 @@ function(add_allogen_interface target_name)
     set(multiValueArgs IDL IMPORT)
     cmake_parse_arguments(IFT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
-    if (NOT Java_FOUND OR NOT ALLOGEN_COMPILER)
+    if (NOT Maven_FOUND OR NOT ALLOGEN_COMPILER)
         return()
     endif ()
     
