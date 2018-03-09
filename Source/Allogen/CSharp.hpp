@@ -30,6 +30,22 @@
 
 #pragma once
 
+#if defined _WIN32 || defined __CYGWIN__
+ #define ALLOGEN_EXPORT __declspec(dllexport)
+#else
+ #if __GNUC__ >= 4
+  #define ALLOGEN_EXPORT __attribute__ ((visibility ("default")))
+ #else
+  #define ALLOGEN_EXPORT
+ #endif
+#endif
+
+#if defined _WIN32 || defined __CYGWIN__
+ #define ALLOGEN_CALL __stdcall
+#else
+ #define ALLOGEN_CALL
+#endif
+
 #include "Allogen/CSharp/BridgedClass.hpp"
 #include "Allogen/CSharp/BridgedConstructor.hpp"
 #include "Allogen/CSharp/BridgedMethod.hpp"

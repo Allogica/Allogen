@@ -68,7 +68,8 @@ namespace_end(ns) ::= "}"
 
 constructor(constructor, class) ::= <<
 <if(!constructor.csSkip)>
-extern "C" std::shared_ptr\<<class.fullyQualifiedName>\>*
+extern "C" ALLOGEN_EXPORT
+std::shared_ptr\<<class.fullyQualifiedName>\>* ALLOGEN_CALL
 <constructor.csEntryPoint>(<constructor.arguments:{argument|<typename(argument.type)> <argumentName(argument)>}; separator=", ">) {
     <bridgedConstructor(constructor, class)>
 }
@@ -77,7 +78,8 @@ extern "C" std::shared_ptr\<<class.fullyQualifiedName>\>*
 
 destructor(destructor, class) ::= <<
 <if(!class.static)>
-extern "C" void
+extern "C" ALLOGEN_EXPORT
+void ALLOGEN_CALL
 <destructor.csEntryPoint>(std::shared_ptr\<<class.fullyQualifiedName>\>* csthis) {
     <bridgedDestructor(destructor, class)>
 }
@@ -86,7 +88,8 @@ extern "C" void
 
 method(method, class) ::= <<
 <if(!method.csSkip)>
-extern "C" <if(method.returnType.csTranslatedReturnType)>void<else><typename(method.returnType)><endif>
+extern "C" ALLOGEN_EXPORT
+<if(method.returnType.csTranslatedReturnType)>void<else><typename(method.returnType)><endif> ALLOGEN_CALL
 <method.csEntryPoint>(<if(!method.static)>std::shared_ptr\<<class.fullyQualifiedName>\>* csthis<if(method.arguments || method.returnType.csTranslatedReturnType)>, <endif><endif>
 <if(method.returnType.csTranslatedReturnType)><translatedReturnArgs(method.returnType)><if(method.arguments)>, <endif><endif>
 <if(method.arguments)>
