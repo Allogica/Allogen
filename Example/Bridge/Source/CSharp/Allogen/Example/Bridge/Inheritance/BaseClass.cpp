@@ -12,17 +12,21 @@ using namespace Allogen::CSharp;
 
 namespace Allogen { namespace Example { namespace Inheritance {
 
-    extern "C" void
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
     Allogen_Example_Inheritance_BaseClass_Destructor(std::shared_ptr<Allogen::Example::Inheritance::BaseClass>* csthis) {
         BridgedMethod<Allogen::Example::Inheritance::BaseClass, void()>::call(
             csthis,
             [](Allogen::Example::Inheritance::BaseClass *wself) {
-                delete wself;
+                // delete wself;
             }
         );
     }
-    extern "C" const char*
-    Allogen_Example_Inheritance_BaseClass_getName(std::shared_ptr<Allogen::Example::Inheritance::BaseClass>* csthis) {
+
+    extern "C" ALLOGEN_EXPORT
+    const char* ALLOGEN_CALL
+    Allogen_Example_Inheritance_BaseClass_getName(std::shared_ptr<Allogen::Example::Inheritance::BaseClass>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::Inheritance::BaseClass, std::string()>::call(
             csthis,
             [](Allogen::Example::Inheritance::BaseClass *wself) {
@@ -33,8 +37,10 @@ namespace Allogen { namespace Example { namespace Inheritance {
     }
 
 
-    extern "C" void
-    Allogen_Example_Inheritance_BaseClass_fromNonvirtualBase(std::shared_ptr<Allogen::Example::Inheritance::BaseClass>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_Inheritance_BaseClass_fromNonvirtualBase(std::shared_ptr<Allogen::Example::Inheritance::BaseClass>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::Inheritance::BaseClass, void()>::call(
             csthis,
             [](Allogen::Example::Inheritance::BaseClass *wself) {

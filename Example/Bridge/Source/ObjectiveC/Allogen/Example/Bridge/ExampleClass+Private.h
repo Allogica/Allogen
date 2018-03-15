@@ -14,8 +14,6 @@
 
 #import "Allogen/Example/Bridge/AnotherClass+Private.h"
 #import "Allogen/AAnotherClass.h"
-#import "Allogen/Example/Bridge/ExampleClass+Private.h"
-#import "Allogen/AExampleClass.h"
 
 
 #include "Allogen/Example/ExampleClass.hpp"

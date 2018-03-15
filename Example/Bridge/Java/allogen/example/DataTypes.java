@@ -84,6 +84,14 @@ public class DataTypes {
 
 
     /**
+     * Calls the C++ setSharedPtr(std::shared_ptr<Allogen::Example::DummyClass> ) native method
+     *
+     * @param ptr the ptr parameter
+     */
+    public native void setSharedPtr(allogen.example.DummyClass ptr);
+
+
+    /**
      * Calls the C++ getVector() native method
      */
     public native List<String> getVector();
@@ -104,6 +112,14 @@ public class DataTypes {
 
 
     /**
+     * Calls the C++ setMap(std::map<std::string, std::string> ) native method
+     *
+     * @param m the m parameter
+     */
+    public native void setMap(Map<String, String> m);
+
+
+    /**
      * Calls the C++ getBuffer() native method
      */
     public native ByteBuffer getBuffer();
@@ -114,9 +130,19 @@ public class DataTypes {
      */
     public native Date getDate();
 
+
+    /**
+     * Calls the C++ setDate(std::chrono::system_clock::time_point) native method
+     *
+     * @param date the date parameter
+     */
+    public native void setDate(Date date);
+
+
     public interface DoAsyncWithStringTheCallback {
         void onTheCallback(String result);
     }
+
     /**
      * Calls the C++ doAsyncWithString(std::function<void(std::string)> ) native method
      *
@@ -124,9 +150,11 @@ public class DataTypes {
      */
     public native void doAsyncWithString(DoAsyncWithStringTheCallback theCallback);
 
+
     public interface DoAsyncWithOptionalTheCallback {
         void onTheCallback(int error, String result);
     }
+
     /**
      * Calls the C++ doAsyncWithOptional(std::function<void(std::experimental::optional<uint32_t> , std::experimental::optional<std::string> )> ) native method
      *
@@ -134,9 +162,11 @@ public class DataTypes {
      */
     public native void doAsyncWithOptional(DoAsyncWithOptionalTheCallback theCallback);
 
+
     public interface DoAsyncWithVectorTheCallback {
         void onTheCallback(List<String> result);
     }
+
     /**
      * Calls the C++ doAsyncWithVector(std::function<void(std::vector<std::string> )> ) native method
      *
@@ -144,9 +174,11 @@ public class DataTypes {
      */
     public native void doAsyncWithVector(DoAsyncWithVectorTheCallback theCallback);
 
+
     public interface DoAsyncWithMapTheCallback {
         void onTheCallback(Map<String, String> result);
     }
+
     /**
      * Calls the C++ doAsyncWithMap(std::function<void(std::map<std::string, std::string> )> ) native method
      *
@@ -154,9 +186,11 @@ public class DataTypes {
      */
     public native void doAsyncWithMap(DoAsyncWithMapTheCallback theCallback);
 
+
     public interface DoAsyncWithBufferTheCallback {
         void onTheCallback(ByteBuffer result);
     }
+
     /**
      * Calls the C++ doAsyncWithBuffer(std::function<void(std::vector<uint8_t>)> ) native method
      *
@@ -164,13 +198,39 @@ public class DataTypes {
      */
     public native void doAsyncWithBuffer(DoAsyncWithBufferTheCallback theCallback);
 
+
     public interface DoAsyncWithDateTheCallback {
         void onTheCallback(Date result);
     }
+
     /**
      * Calls the C++ doAsyncWithDate(std::function<void(std::chrono::system_clock::time_point)> ) native method
      *
      * @param theCallback the theCallback parameter
      */
     public native void doAsyncWithDate(DoAsyncWithDateTheCallback theCallback);
+
+
+    public interface DoAsyncAndReturnStringTheCallback {
+        String onTheCallback();
+    }
+
+    /**
+     * Calls the C++ doAsyncAndReturnString(std::function<std::string()> ) native method
+     *
+     * @param theCallback the theCallback parameter
+     */
+    public native void doAsyncAndReturnString(DoAsyncAndReturnStringTheCallback theCallback);
+
+
+    public interface DoAsyncAndReturnDateTheCallback {
+        Date onTheCallback();
+    }
+
+    /**
+     * Calls the C++ doAsyncAndReturnDate(std::function<std::chrono::system_clock::time_point()> ) native method
+     *
+     * @param theCallback the theCallback parameter
+     */
+    public native void doAsyncAndReturnDate(DoAsyncAndReturnDateTheCallback theCallback);
 }

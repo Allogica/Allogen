@@ -23,7 +23,7 @@ namespace Allogen.Example {
          * This value should not be changed by the user and is automatically initialized by the _init
          * or when used as a return value from another method.
          */
-        internal IntPtr Pointer;
+        protected IntPtr Pointer;
 
         public DataTypes(IntPtr pointer) {
             Pointer = pointer;
@@ -34,7 +34,8 @@ namespace Allogen.Example {
          */
         public DataTypes() {
             Pointer = AllogenPInvoke.Constructor();
-        } 
+        }
+         
         /**
          * This method deletes the wrapped C++ object. This method should
          * not be called directly by the user, but must be called by the GC.
@@ -50,7 +51,7 @@ namespace Allogen.Example {
         /**
          * Calls the C++ getString() native method
          */
-        public string GetString() {
+        public virtual string GetString() {
             return AllogenPInvoke.GetString(Pointer);
         }
 
@@ -60,7 +61,7 @@ namespace Allogen.Example {
          *
          * @param str the str parameter
          */
-        public void SetString(string str) {
+        public virtual void SetString([MarshalAs(UnmanagedType.BStr)] string str) {
 
             AllogenPInvoke.SetString(Pointer, str);
         }
@@ -69,24 +70,24 @@ namespace Allogen.Example {
         /**
          * Calls the C++ getEmptyOptional() native method
          */
-        public DummyClass GetEmptyOptional() {
-            System.IntPtr ptr = AllogenPInvoke.GetEmptyOptional(Pointer);if(ptr.ToInt64() == 0) return null;return new DummyClass(ptr);
+        public virtual DummyClass GetEmptyOptional() {
+            return AllogenPInvoke.GetEmptyOptional(Pointer);
         }
 
 
         /**
          * Calls the C++ getOptionalWithValue() native method
          */
-        public DummyClass GetOptionalWithValue() {
-            System.IntPtr ptr = AllogenPInvoke.GetOptionalWithValue(Pointer);if(ptr.ToInt64() == 0) return null;return new DummyClass(ptr);
+        public virtual DummyClass GetOptionalWithValue() {
+            return AllogenPInvoke.GetOptionalWithValue(Pointer);
         }
 
 
         /**
          * Calls the C++ getSharedPtr() native method
          */
-        public DummyClass GetSharedPtr() {
-            System.IntPtr ptr = AllogenPInvoke.GetSharedPtr(Pointer);if(ptr.ToInt64() == 0) return null;return new DummyClass(ptr);
+        public virtual DummyClass GetSharedPtr() {
+            return AllogenPInvoke.GetSharedPtr(Pointer);
         }
 
 
@@ -95,9 +96,9 @@ namespace Allogen.Example {
          *
          * @param ptr the ptr parameter
          */
-        public void SetSharedPtr(DummyClass ptr) {
+        public virtual void SetSharedPtr([MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(DummyClass.Marshaller))] DummyClass ptr) {
 
-            AllogenPInvoke.SetSharedPtr(Pointer, (ptr != null ? ptr.Pointer : IntPtr.Zero));
+            AllogenPInvoke.SetSharedPtr(Pointer, ptr);
         }
 
 
@@ -112,7 +113,7 @@ namespace Allogen.Example {
         /**
          * Calls the C++ getBuffer() native method
          */
-        public System.IO.MemoryStream GetBuffer() {
+        public virtual System.IO.MemoryStream GetBuffer() {
             AllogenPInvoke.GetBuffer(Pointer, out var csretValue, out _); return new System.IO.MemoryStream(csretValue);
         }
 
@@ -120,7 +121,7 @@ namespace Allogen.Example {
         /**
          * Calls the C++ getDate() native method
          */
-        public System.DateTime GetDate() {
+        public virtual System.DateTime GetDate() {
             return DateTime.FromFileTime(AllogenPInvoke.GetDate(Pointer));
         }
 
@@ -130,7 +131,7 @@ namespace Allogen.Example {
          *
          * @param date the date parameter
          */
-        public void SetDate(System.DateTime date) {
+        public virtual void SetDate( System.DateTime date) {
 
             AllogenPInvoke.SetDate(Pointer, date.ToFileTime());
         }
@@ -138,13 +139,15 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate void DoAsyncWithStringTheCallback(string result);
+
+        public delegate void DoAsyncWithStringTheCallback([MarshalAs(UnmanagedType.BStr)] string result);
+
         /**
          * Calls the C++ doAsyncWithString(std::function<void(std::string)> ) native method
          *
          * @param theCallback the theCallback parameter
          */
-        public void DoAsyncWithString(DoAsyncWithStringTheCallback theCallback) {
+        public virtual void DoAsyncWithString( DoAsyncWithStringTheCallback theCallback) {
 
             AllogenPInvoke.DoAsyncWithString(Pointer, theCallback);
         }
@@ -152,13 +155,15 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate void DoAsyncWithOptionalTheCallback(int error, string result);
+
+        public delegate void DoAsyncWithOptionalTheCallback( int error, [MarshalAs(UnmanagedType.BStr)] string result);
+
         /**
          * Calls the C++ doAsyncWithOptional(std::function<void(std::experimental::optional<uint32_t> , std::experimental::optional<std::string> )> ) native method
          *
          * @param theCallback the theCallback parameter
          */
-        public void DoAsyncWithOptional(DoAsyncWithOptionalTheCallback theCallback) {
+        public virtual void DoAsyncWithOptional( DoAsyncWithOptionalTheCallback theCallback) {
 
             AllogenPInvoke.DoAsyncWithOptional(Pointer, theCallback);
         }
@@ -166,13 +171,15 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate void DoAsyncWithVectorTheCallback(System.Collections.Generic.List<string> result);
+
+        public delegate void DoAsyncWithVectorTheCallback( System.Collections.Generic.List<string> result);
+
         /**
          * Calls the C++ doAsyncWithVector(std::function<void(std::vector<std::string> )> ) native method
          *
          * @param theCallback the theCallback parameter
          */
-        public void DoAsyncWithVector(DoAsyncWithVectorTheCallback theCallback) {
+        public virtual void DoAsyncWithVector( DoAsyncWithVectorTheCallback theCallback) {
 
             AllogenPInvoke.DoAsyncWithVector(Pointer, theCallback);
         }
@@ -180,13 +187,15 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate void DoAsyncWithMapTheCallback(System.Collections.Generic.Dictionary<string, string> result);
+
+        public delegate void DoAsyncWithMapTheCallback( System.Collections.Generic.Dictionary<string, string> result);
+
         /**
          * Calls the C++ doAsyncWithMap(std::function<void(std::map<std::string, std::string> )> ) native method
          *
          * @param theCallback the theCallback parameter
          */
-        public void DoAsyncWithMap(DoAsyncWithMapTheCallback theCallback) {
+        public virtual void DoAsyncWithMap( DoAsyncWithMapTheCallback theCallback) {
 
             AllogenPInvoke.DoAsyncWithMap(Pointer, theCallback);
         }
@@ -194,13 +203,15 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate void DoAsyncWithBufferTheCallback(System.IO.MemoryStream result);
+
+        public delegate void DoAsyncWithBufferTheCallback( System.IO.MemoryStream result);
+
         /**
          * Calls the C++ doAsyncWithBuffer(std::function<void(std::vector<uint8_t>)> ) native method
          *
          * @param theCallback the theCallback parameter
          */
-        public void DoAsyncWithBuffer(DoAsyncWithBufferTheCallback theCallback) {
+        public virtual void DoAsyncWithBuffer( DoAsyncWithBufferTheCallback theCallback) {
 
             AllogenPInvoke.DoAsyncWithBuffer(Pointer, theCallback);
         }
@@ -208,13 +219,15 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate void DoAsyncWithDateTheCallback(System.DateTime result);
+
+        public delegate void DoAsyncWithDateTheCallback( System.DateTime result);
+
         /**
          * Calls the C++ doAsyncWithDate(std::function<void(std::chrono::system_clock::time_point)> ) native method
          *
          * @param theCallback the theCallback parameter
          */
-        public void DoAsyncWithDate(DoAsyncWithDateTheCallback theCallback) {
+        public virtual void DoAsyncWithDate( DoAsyncWithDateTheCallback theCallback) {
 
             AllogenPInvoke.DoAsyncWithDate(Pointer, theCallback);
         }
@@ -222,13 +235,15 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.BStr)]
         public delegate string DoAsyncAndReturnStringTheCallback();
+
         /**
          * Calls the C++ doAsyncAndReturnString(std::function<std::string()> ) native method
          *
          * @param theCallback the theCallback parameter
          */
-        public void DoAsyncAndReturnString(DoAsyncAndReturnStringTheCallback theCallback) {
+        public virtual void DoAsyncAndReturnString( DoAsyncAndReturnStringTheCallback theCallback) {
 
             AllogenPInvoke.DoAsyncAndReturnString(Pointer, theCallback);
         }
@@ -236,81 +251,99 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
+
         public delegate System.DateTime DoAsyncAndReturnDateTheCallback();
+
         /**
          * Calls the C++ doAsyncAndReturnDate(std::function<std::chrono::system_clock::time_point()> ) native method
          *
          * @param theCallback the theCallback parameter
          */
-        public void DoAsyncAndReturnDate(DoAsyncAndReturnDateTheCallback theCallback) {
+        public virtual void DoAsyncAndReturnDate( DoAsyncAndReturnDateTheCallback theCallback) {
 
             AllogenPInvoke.DoAsyncAndReturnDate(Pointer, theCallback);
         }
 
 
         private struct AllogenPInvoke {
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            /// 
+            /// The native Interop library name
+            /// 
+            #if DEBUG
+            private const string LibraryName = "d.dll";
+            #else
+            private const string LibraryName = ".dll";
+            #endif
+
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_Constructor",
                 CallingConvention = CallingConvention.StdCall)]
-            public static extern IntPtr Constructor(); 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            public static extern IntPtr Constructor();
+             
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_Destructor",
                 CallingConvention = CallingConvention.StdCall)]
             public static extern void Destructor(IntPtr pointer);
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_getString",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+            [return: MarshalAs(UnmanagedType.BStr)]
             public static extern string GetString(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_setString",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void SetString(
                 IntPtr pointer, 
-                string str
+                [MarshalAs(UnmanagedType.BStr)] string str
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_getEmptyOptional",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
-            public static extern IntPtr GetEmptyOptional(
+            [return: MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(DummyClass.Marshaller))]
+            public static extern DummyClass GetEmptyOptional(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_getOptionalWithValue",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
-            public static extern IntPtr GetOptionalWithValue(
+            [return: MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(DummyClass.Marshaller))]
+            public static extern DummyClass GetOptionalWithValue(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_getSharedPtr",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
-            public static extern IntPtr GetSharedPtr(
+            [return: MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(DummyClass.Marshaller))]
+            public static extern DummyClass GetSharedPtr(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_setSharedPtr",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void SetSharedPtr(
                 IntPtr pointer, 
-                IntPtr ptr
+                [MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(DummyClass.Marshaller))] DummyClass ptr
             );
 
 
@@ -322,114 +355,160 @@ namespace Allogen.Example {
 
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_getBuffer",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void GetBuffer(
                 IntPtr pointer, 
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] out byte[] csretValue, out long csretSize
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_getDate",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern long GetDate(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_setDate",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void SetDate(
                 IntPtr pointer, 
-                long date
+                 long date
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_doAsyncWithString",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsyncWithString(
                 IntPtr pointer, 
-                DoAsyncWithStringTheCallback theCallback
+                 DoAsyncWithStringTheCallback theCallback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_doAsyncWithOptional",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsyncWithOptional(
                 IntPtr pointer, 
-                DoAsyncWithOptionalTheCallback theCallback
+                 DoAsyncWithOptionalTheCallback theCallback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_doAsyncWithVector",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsyncWithVector(
                 IntPtr pointer, 
-                DoAsyncWithVectorTheCallback theCallback
+                 DoAsyncWithVectorTheCallback theCallback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_doAsyncWithMap",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsyncWithMap(
                 IntPtr pointer, 
-                DoAsyncWithMapTheCallback theCallback
+                 DoAsyncWithMapTheCallback theCallback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_doAsyncWithBuffer",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsyncWithBuffer(
                 IntPtr pointer, 
-                DoAsyncWithBufferTheCallback theCallback
+                 DoAsyncWithBufferTheCallback theCallback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_doAsyncWithDate",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsyncWithDate(
                 IntPtr pointer, 
-                DoAsyncWithDateTheCallback theCallback
+                 DoAsyncWithDateTheCallback theCallback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_doAsyncAndReturnString",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsyncAndReturnString(
                 IntPtr pointer, 
-                DoAsyncAndReturnStringTheCallback theCallback
+                 DoAsyncAndReturnStringTheCallback theCallback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DataTypes_doAsyncAndReturnDate",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsyncAndReturnDate(
                 IntPtr pointer, 
-                DoAsyncAndReturnDateTheCallback theCallback
+                 DoAsyncAndReturnDateTheCallback theCallback
             );
 
+        }
+
+        public class Marshaller : ICustomMarshaler
+        {
+            public void CleanUpManagedData(object managedObj)
+            {
+
+            }
+
+            public void CleanUpNativeData(IntPtr nativeData)
+            {
+
+            }
+
+            public int GetNativeDataSize()
+            {
+                return IntPtr.Size;
+            }
+
+            public IntPtr MarshalManagedToNative(object managedObj)
+            {
+                return ((DataTypes) managedObj)?.Pointer ?? IntPtr.Zero;
+            }
+
+            public object MarshalNativeToManaged(IntPtr nativeData)
+            {
+                return nativeData.ToInt64() == 0 ? null : new DataTypes(nativeData);
+            }
+
+            private static readonly Marshaller Shared = new Marshaller();
+
+            public static ICustomMarshaler GetInstance(string cookie)
+            {
+                return Shared;
+            }
         }
     }
 }

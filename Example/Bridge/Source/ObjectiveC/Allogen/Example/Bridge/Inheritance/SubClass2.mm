@@ -8,7 +8,6 @@
 
 #import "Allogen/ASubClass2.h"
 #import "Allogen/Example/Bridge/Inheritance/SubClass2+Private.h"
-
 using namespace Allogen::ObjectiveC;
 
 @implementation ASubClass2 {
@@ -32,15 +31,15 @@ using namespace Allogen::ObjectiveC;
 -(void)doInSubclass2 {
     return BridgedMethod<Allogen::Example::Inheritance::SubClass2, void()>::call(
         self,
-        [](Allogen::Example::Inheritance::SubClass2* wself) {
+        [](Allogen::Example::Inheritance::SubClass2* wself, std::shared_ptr<Allogen::Example::Inheritance::SubClass2> wselfSharedPtr) {
             return wself->doInSubclass2();
         }
     );
 }
--(NSString*)getName {
+-(nonnull NSString*)getName {
     return BridgedMethod<Allogen::Example::Inheritance::SubClass2, std::string()>::call(
         self,
-        [](Allogen::Example::Inheritance::SubClass2* wself) {
+        [](Allogen::Example::Inheritance::SubClass2* wself, std::shared_ptr<Allogen::Example::Inheritance::SubClass2> wselfSharedPtr) {
             return wself->getName();
         }
     );
@@ -49,7 +48,7 @@ using namespace Allogen::ObjectiveC;
 -(void)fromNonvirtualBase {
     return BridgedMethod<Allogen::Example::Inheritance::SubClass2, void()>::call(
         self,
-        [](Allogen::Example::Inheritance::SubClass2* wself) {
+        [](Allogen::Example::Inheritance::SubClass2* wself, std::shared_ptr<Allogen::Example::Inheritance::SubClass2> wselfSharedPtr) {
             return wself->fromNonvirtualBase();
         }
     );

@@ -21,7 +21,7 @@ namespace Allogen.Example {
          * This value should not be changed by the user and is automatically initialized by the _init
          * or when used as a return value from another method.
          */
-        internal IntPtr Pointer;
+        protected IntPtr Pointer;
 
         public DummyClass(IntPtr pointer) {
             Pointer = pointer;
@@ -41,11 +41,55 @@ namespace Allogen.Example {
 
 
         private struct AllogenPInvoke {
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            /// 
+            /// The native Interop library name
+            /// 
+            #if DEBUG
+            private const string LibraryName = "d.dll";
+            #else
+            private const string LibraryName = ".dll";
+            #endif
+
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_DummyClass_Destructor",
                 CallingConvention = CallingConvention.StdCall)]
             public static extern void Destructor(IntPtr pointer);
 
+        }
+
+        public class Marshaller : ICustomMarshaler
+        {
+            public void CleanUpManagedData(object managedObj)
+            {
+
+            }
+
+            public void CleanUpNativeData(IntPtr nativeData)
+            {
+
+            }
+
+            public int GetNativeDataSize()
+            {
+                return IntPtr.Size;
+            }
+
+            public IntPtr MarshalManagedToNative(object managedObj)
+            {
+                return ((DummyClass) managedObj)?.Pointer ?? IntPtr.Zero;
+            }
+
+            public object MarshalNativeToManaged(IntPtr nativeData)
+            {
+                return nativeData.ToInt64() == 0 ? null : new DummyClass(nativeData);
+            }
+
+            private static readonly Marshaller Shared = new Marshaller();
+
+            public static ICustomMarshaler GetInstance(string cookie)
+            {
+                return Shared;
+            }
         }
     }
 }

@@ -12,7 +12,8 @@ using namespace Allogen::CSharp;
 
 namespace Allogen { namespace Example {
 
-    extern "C" std::shared_ptr<Allogen::Example::DataTypes>*
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::DataTypes>* ALLOGEN_CALL
     Allogen_Example_DataTypes_Constructor() {
         return BridgedConstructor<Allogen::Example::DataTypes()>::call(
             []() {
@@ -20,17 +21,22 @@ namespace Allogen { namespace Example {
             }
         );
     }
-    extern "C" void
+
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
     Allogen_Example_DataTypes_Destructor(std::shared_ptr<Allogen::Example::DataTypes>* csthis) {
         BridgedMethod<Allogen::Example::DataTypes, void()>::call(
             csthis,
             [](Allogen::Example::DataTypes *wself) {
-                delete wself;
+                // delete wself;
             }
         );
     }
-    extern "C" const char*
-    Allogen_Example_DataTypes_getString(std::shared_ptr<Allogen::Example::DataTypes>* csthis) {
+
+    extern "C" ALLOGEN_EXPORT
+    const char* ALLOGEN_CALL
+    Allogen_Example_DataTypes_getString(std::shared_ptr<Allogen::Example::DataTypes>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::DataTypes, std::string()>::call(
             csthis,
             [](Allogen::Example::DataTypes *wself) {
@@ -41,8 +47,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_setString(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_setString(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     const char* str) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::string)>::call(
             csthis,
@@ -54,8 +61,10 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" std::shared_ptr<Allogen::Example::DummyClass>*
-    Allogen_Example_DataTypes_getEmptyOptional(std::shared_ptr<Allogen::Example::DataTypes>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::DummyClass>* ALLOGEN_CALL
+    Allogen_Example_DataTypes_getEmptyOptional(std::shared_ptr<Allogen::Example::DataTypes>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::DataTypes, std::experimental::optional<Allogen::Example::DummyClass> ()>::call(
             csthis,
             [](Allogen::Example::DataTypes *wself) {
@@ -66,8 +75,10 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" std::shared_ptr<Allogen::Example::DummyClass>*
-    Allogen_Example_DataTypes_getOptionalWithValue(std::shared_ptr<Allogen::Example::DataTypes>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::DummyClass>* ALLOGEN_CALL
+    Allogen_Example_DataTypes_getOptionalWithValue(std::shared_ptr<Allogen::Example::DataTypes>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::DataTypes, std::experimental::optional<Allogen::Example::DummyClass> ()>::call(
             csthis,
             [](Allogen::Example::DataTypes *wself) {
@@ -78,8 +89,10 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" std::shared_ptr<Allogen::Example::DummyClass>*
-    Allogen_Example_DataTypes_getSharedPtr(std::shared_ptr<Allogen::Example::DataTypes>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::DummyClass>* ALLOGEN_CALL
+    Allogen_Example_DataTypes_getSharedPtr(std::shared_ptr<Allogen::Example::DataTypes>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::DataTypes, std::shared_ptr<Allogen::Example::DummyClass> ()>::call(
             csthis,
             [](Allogen::Example::DataTypes *wself) {
@@ -90,8 +103,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_setSharedPtr(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_setSharedPtr(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     std::shared_ptr<Allogen::Example::DummyClass>* ptr) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::shared_ptr<Allogen::Example::DummyClass> )>::call(
             csthis,
@@ -111,8 +125,9 @@ namespace Allogen { namespace Example {
 
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_getBuffer(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_getBuffer(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     const unsigned char** csretValue, uint64_t* csretSize
     ) {
         auto ret = BridgedMethod<Allogen::Example::DataTypes, std::vector<uint8_t>()>::call(
@@ -126,8 +141,10 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" long
-    Allogen_Example_DataTypes_getDate(std::shared_ptr<Allogen::Example::DataTypes>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    long ALLOGEN_CALL
+    Allogen_Example_DataTypes_getDate(std::shared_ptr<Allogen::Example::DataTypes>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::DataTypes, std::chrono::system_clock::time_point()>::call(
             csthis,
             [](Allogen::Example::DataTypes *wself) {
@@ -138,8 +155,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_setDate(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_setDate(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     long date) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::chrono::system_clock::time_point)>::call(
             csthis,
@@ -151,8 +169,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_doAsyncWithString(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_doAsyncWithString(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     void* theCallback) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::function<void(std::string)> )>::call(
             csthis,
@@ -164,8 +183,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_doAsyncWithOptional(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_doAsyncWithOptional(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     void* theCallback) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::function<void(std::experimental::optional<uint32_t> , std::experimental::optional<std::string> )> )>::call(
             csthis,
@@ -177,8 +197,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_doAsyncWithVector(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_doAsyncWithVector(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     void* theCallback) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::function<void(std::vector<std::string> )> )>::call(
             csthis,
@@ -190,8 +211,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_doAsyncWithMap(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_doAsyncWithMap(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     void* theCallback) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::function<void(std::map<std::string, std::string> )> )>::call(
             csthis,
@@ -203,8 +225,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_doAsyncWithBuffer(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_doAsyncWithBuffer(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     void* theCallback) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::function<void(std::vector<uint8_t>)> )>::call(
             csthis,
@@ -216,8 +239,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_doAsyncWithDate(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_doAsyncWithDate(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     void* theCallback) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::function<void(std::chrono::system_clock::time_point)> )>::call(
             csthis,
@@ -229,8 +253,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_doAsyncAndReturnString(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_doAsyncAndReturnString(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     void* theCallback) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::function<std::string()> )>::call(
             csthis,
@@ -242,8 +267,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_DataTypes_doAsyncAndReturnDate(std::shared_ptr<Allogen::Example::DataTypes>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_DataTypes_doAsyncAndReturnDate(std::shared_ptr<Allogen::Example::DataTypes>* csthis, 
     void* theCallback) {
         return BridgedMethod<Allogen::Example::DataTypes, void(std::function<std::chrono::system_clock::time_point()> )>::call(
             csthis,

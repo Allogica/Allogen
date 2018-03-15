@@ -16,7 +16,7 @@ namespace Allogen.Example.Inheritance {
     /**
      * Calls the C++ SubClass1() native method
      */
-    public class SubClass1 : BaseClass {
+    public class SubClass1 : Allogen.Example.Inheritance.BaseClass {
         public SubClass1(IntPtr pointer) : base(pointer) {
             Pointer = pointer;
         }
@@ -26,7 +26,8 @@ namespace Allogen.Example.Inheritance {
          */
         public SubClass1() : base(IntPtr.Zero) {
             Pointer = AllogenPInvoke.Constructor();
-        } 
+        }
+         
         /**
          * This method deletes the wrapped C++ object. This method should
          * not be called directly by the user, but must be called by the GC.
@@ -42,7 +43,7 @@ namespace Allogen.Example.Inheritance {
         /**
          * Calls the C++ doInSubclass1() native method
          */
-        public void DoInSubclass1() {
+        public virtual void DoInSubclass1() {
             AllogenPInvoke.DoInSubclass1(Pointer);
         }
 
@@ -63,40 +64,88 @@ namespace Allogen.Example.Inheritance {
 
 
         private struct AllogenPInvoke {
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            /// 
+            /// The native Interop library name
+            /// 
+            #if DEBUG
+            private const string LibraryName = "d.dll";
+            #else
+            private const string LibraryName = ".dll";
+            #endif
+
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_Inheritance_SubClass1_Constructor",
                 CallingConvention = CallingConvention.StdCall)]
-            public static extern IntPtr Constructor(); 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            public static extern IntPtr Constructor();
+             
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_Inheritance_SubClass1_Destructor",
                 CallingConvention = CallingConvention.StdCall)]
             public static extern void Destructor(IntPtr pointer);
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_Inheritance_SubClass1_doInSubclass1",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoInSubclass1(
                 IntPtr pointer
             );
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_Inheritance_SubClass1_getName",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+            [return: MarshalAs(UnmanagedType.BStr)]
             public static extern string GetName(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_Inheritance_SubClass1_fromNonvirtualBase",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void FromNonvirtualBase(
                 IntPtr pointer
             );
 
+        }
+
+        public new class Marshaller : ICustomMarshaler
+        {
+            public void CleanUpManagedData(object managedObj)
+            {
+
+            }
+
+            public void CleanUpNativeData(IntPtr nativeData)
+            {
+
+            }
+
+            public int GetNativeDataSize()
+            {
+                return IntPtr.Size;
+            }
+
+            public IntPtr MarshalManagedToNative(object managedObj)
+            {
+                return ((SubClass1) managedObj)?.Pointer ?? IntPtr.Zero;
+            }
+
+            public object MarshalNativeToManaged(IntPtr nativeData)
+            {
+                return nativeData.ToInt64() == 0 ? null : new SubClass1(nativeData);
+            }
+
+            private static readonly Marshaller Shared = new Marshaller();
+
+            public static ICustomMarshaler GetInstance(string cookie)
+            {
+                return Shared;
+            }
         }
     }
 }

@@ -32,7 +32,7 @@
 /**
  * Calls the C++ getName() native method
  */
--(NSString*)getName;
+-(nonnull NSString*)getName;
 
 /**
  * Calls the C++ fromNonvirtualBase() native method

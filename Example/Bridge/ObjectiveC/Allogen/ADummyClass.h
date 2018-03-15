@@ -6,14 +6,18 @@
  * interface declaration file and regenerate the bridge code.
  */
 
-#pragma once
-
-#include <Allogen/CSharp.hpp>
-
-#include "Allogen/Example/ExampleClass.hpp"
-
-#include "Allogen/Example/Bridge/AnotherClass.hpp"
-#include "Allogen/Example/Bridge/ExampleClass.hpp"
+#import <Foundation/Foundation.h>
 
 
-ALLOGEN_BRIDGED_CLASS(Allogen::Example::ExampleClass)
+/**
+ * Calls the C++ DummyClass() native method
+ */
+@interface ADummyClass : NSObject
+
+/**
+ * Calls the C++ () native method
+ */
+-(void)dealloc;
+
+
+@end

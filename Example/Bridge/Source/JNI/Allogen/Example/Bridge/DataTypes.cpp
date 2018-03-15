@@ -88,6 +88,18 @@ namespace Allogen { namespace Example {
     }
 
     extern "C"
+    JNIEXPORT void JNICALL
+    Java_allogen_example_DataTypes_setSharedPtr(JNIEnv* _env_, jobject _jthis_,
+            jobject ptr) {
+        return BridgedMethod<DataTypes, void(std::shared_ptr<Allogen::Example::DummyClass> )>::call(
+            _env_, _jthis_,
+            [](DataTypes *wself, std::shared_ptr<Allogen::Example::DummyClass>  ptr) {
+                return wself->setSharedPtr(ptr);
+            }, LocalRef<jobject>(_env_, jobject(ptr), false)
+        );
+    }
+
+    extern "C"
     JNIEXPORT jobject JNICALL
     Java_allogen_example_DataTypes_getVector(JNIEnv* _env_, jobject _jthis_) {
         return BridgedMethod<DataTypes, std::vector<std::string> ()>::call(
@@ -122,6 +134,18 @@ namespace Allogen { namespace Example {
     }
 
     extern "C"
+    JNIEXPORT void JNICALL
+    Java_allogen_example_DataTypes_setMap(JNIEnv* _env_, jobject _jthis_,
+            jobject m) {
+        return BridgedMethod<DataTypes, void(std::map<std::string, std::string> )>::call(
+            _env_, _jthis_,
+            [](DataTypes *wself, std::map<std::string, std::string>  m) {
+                return wself->setMap(m);
+            }, LocalRef<jobject>(_env_, jobject(m), false)
+        );
+    }
+
+    extern "C"
     JNIEXPORT jobject JNICALL
     Java_allogen_example_DataTypes_getBuffer(JNIEnv* _env_, jobject _jthis_) {
         return BridgedMethod<DataTypes, std::vector<uint8_t>()>::call(
@@ -129,7 +153,7 @@ namespace Allogen { namespace Example {
             [](DataTypes *wself) {
                 return wself->getBuffer();
             }
-        ).retain();
+        );
     }
 
     extern "C"
@@ -140,6 +164,18 @@ namespace Allogen { namespace Example {
             [](DataTypes *wself) {
                 return wself->getDate();
             }
+        );
+    }
+
+    extern "C"
+    JNIEXPORT void JNICALL
+    Java_allogen_example_DataTypes_setDate(JNIEnv* _env_, jobject _jthis_,
+            jobject date) {
+        return BridgedMethod<DataTypes, void(std::chrono::system_clock::time_point)>::call(
+            _env_, _jthis_,
+            [](DataTypes *wself, std::chrono::system_clock::time_point date) {
+                return wself->setDate(date);
+            }, LocalRef<jobject>(_env_, jobject(date), false)
         );
     }
 
@@ -212,6 +248,30 @@ namespace Allogen { namespace Example {
             [](DataTypes *wself, std::function<void(std::chrono::system_clock::time_point)>  theCallback) {
                 return wself->doAsyncWithDate(theCallback);
             }, Lambda::make(_env_, {_env_, theCallback, false}, "onTheCallback", "(Ljava/util/Date;)V") 
+        );
+    }
+
+    extern "C"
+    JNIEXPORT void JNICALL
+    Java_allogen_example_DataTypes_doAsyncAndReturnString(JNIEnv* _env_, jobject _jthis_,
+            jobject theCallback) {
+        return BridgedMethod<DataTypes, void(std::function<std::string()> )>::call(
+            _env_, _jthis_,
+            [](DataTypes *wself, std::function<std::string()>  theCallback) {
+                return wself->doAsyncAndReturnString(theCallback);
+            }, Lambda::make(_env_, {_env_, theCallback, false}, "onTheCallback", "()Ljava/lang/String;") 
+        );
+    }
+
+    extern "C"
+    JNIEXPORT void JNICALL
+    Java_allogen_example_DataTypes_doAsyncAndReturnDate(JNIEnv* _env_, jobject _jthis_,
+            jobject theCallback) {
+        return BridgedMethod<DataTypes, void(std::function<std::chrono::system_clock::time_point()> )>::call(
+            _env_, _jthis_,
+            [](DataTypes *wself, std::function<std::chrono::system_clock::time_point()>  theCallback) {
+                return wself->doAsyncAndReturnDate(theCallback);
+            }, Lambda::make(_env_, {_env_, theCallback, false}, "onTheCallback", "()Ljava/util/Date;") 
         );
     }
 

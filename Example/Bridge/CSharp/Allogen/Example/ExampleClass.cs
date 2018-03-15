@@ -23,9 +23,9 @@ namespace Allogen.Example {
          * This value should not be changed by the user and is automatically initialized by the _init
          * or when used as a return value from another method.
          */
-        internal IntPtr Pointer;
+        protected IntPtr Pointer;
 
-        public int aInteger {
+        public int AInteger {
         get => GetInteger();
         set => SetInteger(value);
         }
@@ -41,14 +41,16 @@ namespace Allogen.Example {
             Pointer = AllogenPInvoke.Constructor();
         }
 
+
         /**
          * Calls the C++ (uint32_t) native method
          *
          * @param initialValue the initialValue parameter
          */
-        public ExampleClass(int initialValue) {
+        public ExampleClass( int initialValue) {
             Pointer = AllogenPInvoke.Constructor(initialValue);
-        } 
+        }
+         
         /**
          * This method deletes the wrapped C++ object. This method should
          * not be called directly by the user, but must be called by the GC.
@@ -66,7 +68,7 @@ namespace Allogen.Example {
          *
          * @param aInteger the aInteger parameter
          */
-        public void SetInteger(int aInteger) {
+        public virtual void SetInteger( int aInteger) {
 
             AllogenPInvoke.SetInteger(Pointer, aInteger);
         }
@@ -75,7 +77,7 @@ namespace Allogen.Example {
         /**
          * Calls the C++ getInteger() native method
          */
-        public int GetInteger() {
+        protected virtual int GetInteger() {
             return AllogenPInvoke.GetInteger(Pointer);
         }
 
@@ -83,20 +85,22 @@ namespace Allogen.Example {
         /**
          * Calls the C++ copy() native method
          */
-        public ExampleClass Copy() {
-            return new ExampleClass(AllogenPInvoke.Copy(Pointer));
+        public virtual ExampleClass Copy() {
+            return AllogenPInvoke.Copy(Pointer);
         }
 
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
+
         public delegate void AsyncTaskCallback();
+
         /**
          * Calls the C++ doAsync(std::function<void()> ) native method
          *
          * @param callback the callback parameter
          */
-        public void DoAsync(AsyncTaskCallback callback) {
+        public virtual void DoAsync( AsyncTaskCallback callback) {
 
             AllogenPInvoke.DoAsync(Pointer, callback);
         }
@@ -104,13 +108,15 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate int AsyncTaskCallback2(short a, short b);
+
+        public delegate int AsyncTaskCallback2( short a,  short b);
+
         /**
          * Calls the C++ anotherCallback(std::function<uint32_t(uint16_t, uint16_t)> ) native method
          *
          * @param callback the callback parameter
          */
-        public int AnotherCallback(AsyncTaskCallback2 callback) {
+        public virtual int AnotherCallback( AsyncTaskCallback2 callback) {
 
             return AllogenPInvoke.AnotherCallback(Pointer, callback);
         }
@@ -118,7 +124,9 @@ namespace Allogen.Example {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate int AsyncTaskCallback3(short a, short b);
+
+        public delegate int AsyncTaskCallback3( short a,  short b);
+
         /**
          * Calls the C++ virtualCallback(std::function<uint32_t(uint16_t, uint16_t)> , uint16_t, uint16_t) native method
          *
@@ -126,7 +134,7 @@ namespace Allogen.Example {
          * @param a the a parameter
          * @param b the b parameter
          */
-        public int VirtualCallback(AsyncTaskCallback3 callback, short a, short b) {
+        public virtual int VirtualCallback( AsyncTaskCallback3 callback,  short a,  short b) {
 
             return AllogenPInvoke.VirtualCallback(Pointer, callback, a, b);
         }
@@ -137,7 +145,7 @@ namespace Allogen.Example {
          *
          * @param a the a parameter
          */
-        public int TestingIfs(short a) {
+        public virtual int TestingIfs( short a) {
 
             return AllogenPInvoke.TestingIfs(Pointer, a);
         }
@@ -148,7 +156,7 @@ namespace Allogen.Example {
          *
          * @param name the name parameter
          */
-        public void SayHello(string name) {
+        public virtual void SayHello([MarshalAs(UnmanagedType.BStr)] string name) {
 
             AllogenPInvoke.SayHello(Pointer, name);
         }
@@ -159,22 +167,24 @@ namespace Allogen.Example {
          *
          * @param name the name parameter
          */
-        public AnotherClass CreateAnother(string name) {
+        public virtual AnotherClass CreateAnother([MarshalAs(UnmanagedType.BStr)] string name) {
 
-            return new AnotherClass(AllogenPInvoke.CreateAnother(Pointer, name));
+            return AllogenPInvoke.CreateAnother(Pointer, name);
         }
 
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
-        public delegate void CreateAnotherAsyncCallback(AnotherClass another);
+
+        public delegate void CreateAnotherAsyncCallback([MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(AnotherClass.Marshaller))] AnotherClass another);
+
         /**
          * Calls the C++ createAnotherAsync(std::string, std::function<void(Allogen::Example::AnotherClass)> ) native method
          *
          * @param name the name parameter
          * @param callback the callback parameter
          */
-        public void CreateAnotherAsync(string name, CreateAnotherAsyncCallback callback) {
+        public virtual void CreateAnotherAsync([MarshalAs(UnmanagedType.BStr)] string name,  CreateAnotherAsyncCallback callback) {
 
             AllogenPInvoke.CreateAnotherAsync(Pointer, name, callback);
         }
@@ -185,24 +195,26 @@ namespace Allogen.Example {
          *
          * @param another the another parameter
          */
-        public void PrintAnother(AnotherClass another) {
+        public virtual void PrintAnother([MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(AnotherClass.Marshaller))] AnotherClass another) {
 
-            AllogenPInvoke.PrintAnother(Pointer, another.Pointer);
+            AllogenPInvoke.PrintAnother(Pointer, another);
         }
 
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet=CharSet.Ansi)]
+
         public delegate void PrintAnotherAsyncCallback();
+
         /**
          * Calls the C++ printAnotherAsync(Allogen::Example::AnotherClass, std::function<void()> ) native method
          *
          * @param another the another parameter
          * @param callback the callback parameter
          */
-        public void PrintAnotherAsync(AnotherClass another, PrintAnotherAsyncCallback callback) {
+        public virtual void PrintAnotherAsync([MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(AnotherClass.Marshaller))] AnotherClass another,  PrintAnotherAsyncCallback callback) {
 
-            AllogenPInvoke.PrintAnotherAsync(Pointer, another.Pointer, callback);
+            AllogenPInvoke.PrintAnotherAsync(Pointer, another, callback);
         }
 
 
@@ -218,158 +230,222 @@ namespace Allogen.Example {
          * Calls the C++ shared() native method
          */
         public static ExampleClass Shared() {
-            return new ExampleClass(AllogenPInvoke.Shared());
+            return AllogenPInvoke.Shared();
         }
 
 
         private struct AllogenPInvoke {
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            /// 
+            /// The native Interop library name
+            /// 
+            #if DEBUG
+            private const string LibraryName = "d.dll";
+            #else
+            private const string LibraryName = ".dll";
+            #endif
+
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_Constructor",
                 CallingConvention = CallingConvention.StdCall)]
             public static extern IntPtr Constructor();
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_Constructor_initialValue",
                 CallingConvention = CallingConvention.StdCall)]
-            public static extern IntPtr Constructor(int initialValue); 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            public static extern IntPtr Constructor( int initialValue);
+             
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_Destructor",
                 CallingConvention = CallingConvention.StdCall)]
             public static extern void Destructor(IntPtr pointer);
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_setInteger",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void SetInteger(
                 IntPtr pointer, 
-                int aInteger
+                 int aInteger
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_getInteger",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern int GetInteger(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_copy",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
-            public static extern IntPtr Copy(
+            [return: MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(ExampleClass.Marshaller))]
+            public static extern ExampleClass Copy(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_doAsync",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void DoAsync(
                 IntPtr pointer, 
-                AsyncTaskCallback callback
+                 AsyncTaskCallback callback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_anotherCallback",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern int AnotherCallback(
                 IntPtr pointer, 
-                AsyncTaskCallback2 callback
+                 AsyncTaskCallback2 callback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_virtualCallback",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern int VirtualCallback(
                 IntPtr pointer, 
-                AsyncTaskCallback3 callback, short a, short b
+                 AsyncTaskCallback3 callback,
+                 short a,
+                 short b
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_testingIfs",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern int TestingIfs(
                 IntPtr pointer, 
-                short a
+                 short a
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_sayHello",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void SayHello(
                 IntPtr pointer, 
-                string name
+                [MarshalAs(UnmanagedType.BStr)] string name
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_createAnother",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
-            public static extern IntPtr CreateAnother(
+            [return: MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(AnotherClass.Marshaller))]
+            public static extern AnotherClass CreateAnother(
                 IntPtr pointer, 
-                string name
+                [MarshalAs(UnmanagedType.BStr)] string name
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_createAnotherAsync",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void CreateAnotherAsync(
                 IntPtr pointer, 
-                string name, CreateAnotherAsyncCallback callback
+                [MarshalAs(UnmanagedType.BStr)] string name,
+                 CreateAnotherAsyncCallback callback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_printAnother",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void PrintAnother(
                 IntPtr pointer, 
-                IntPtr another
+                [MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(AnotherClass.Marshaller))] AnotherClass another
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_printAnotherAsync",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void PrintAnotherAsync(
                 IntPtr pointer, 
-                IntPtr another, PrintAnotherAsyncCallback callback
+                [MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(AnotherClass.Marshaller))] AnotherClass another,
+                 PrintAnotherAsyncCallback callback
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_getStaticInt",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern int GetStaticInt(
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_ExampleClass_shared",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
-            public static extern IntPtr Shared(
+            [return: MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(ExampleClass.Marshaller))]
+            public static extern ExampleClass Shared(
             );
 
+        }
+
+        public class Marshaller : ICustomMarshaler
+        {
+            public void CleanUpManagedData(object managedObj)
+            {
+
+            }
+
+            public void CleanUpNativeData(IntPtr nativeData)
+            {
+
+            }
+
+            public int GetNativeDataSize()
+            {
+                return IntPtr.Size;
+            }
+
+            public IntPtr MarshalManagedToNative(object managedObj)
+            {
+                return ((ExampleClass) managedObj)?.Pointer ?? IntPtr.Zero;
+            }
+
+            public object MarshalNativeToManaged(IntPtr nativeData)
+            {
+                return nativeData.ToInt64() == 0 ? null : new ExampleClass(nativeData);
+            }
+
+            private static readonly Marshaller Shared = new Marshaller();
+
+            public static ICustomMarshaler GetInstance(string cookie)
+            {
+                return Shared;
+            }
         }
     }
 }

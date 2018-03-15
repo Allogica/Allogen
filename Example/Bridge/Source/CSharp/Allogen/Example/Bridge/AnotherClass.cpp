@@ -12,7 +12,8 @@ using namespace Allogen::CSharp;
 
 namespace Allogen { namespace Example {
 
-    extern "C" std::shared_ptr<Allogen::Example::AnotherClass>*
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::AnotherClass>* ALLOGEN_CALL
     Allogen_Example_AnotherClass_Constructor_parent_sub(std::shared_ptr<Allogen::Example::AnotherClass>* parent, const char* sub) {
         return BridgedConstructor<Allogen::Example::AnotherClass(Allogen::Example::AnotherClass, std::string)>::call(
             [](Allogen::Example::AnotherClass parent, std::string sub) {
@@ -21,7 +22,9 @@ namespace Allogen { namespace Example {
         );
     }
 
-    extern "C" std::shared_ptr<Allogen::Example::AnotherClass>*
+
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::AnotherClass>* ALLOGEN_CALL
     Allogen_Example_AnotherClass_Constructor_str(const char* str) {
         return BridgedConstructor<Allogen::Example::AnotherClass(std::string)>::call(
             [](std::string str) {
@@ -29,17 +32,22 @@ namespace Allogen { namespace Example {
             }, str
         );
     }
-    extern "C" void
+
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
     Allogen_Example_AnotherClass_Destructor(std::shared_ptr<Allogen::Example::AnotherClass>* csthis) {
         BridgedMethod<Allogen::Example::AnotherClass, void()>::call(
             csthis,
             [](Allogen::Example::AnotherClass *wself) {
-                delete wself;
+                // delete wself;
             }
         );
     }
-    extern "C" const char*
-    Allogen_Example_AnotherClass_getName(std::shared_ptr<Allogen::Example::AnotherClass>* csthis) {
+
+    extern "C" ALLOGEN_EXPORT
+    const char* ALLOGEN_CALL
+    Allogen_Example_AnotherClass_getName(std::shared_ptr<Allogen::Example::AnotherClass>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::AnotherClass, std::string()>::call(
             csthis,
             [](Allogen::Example::AnotherClass *wself) {
@@ -50,8 +58,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_AnotherClass_setName(std::shared_ptr<Allogen::Example::AnotherClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_AnotherClass_setName(std::shared_ptr<Allogen::Example::AnotherClass>* csthis, 
     const char* newName) {
         return BridgedMethod<Allogen::Example::AnotherClass, void(std::string)>::call(
             csthis,

@@ -23,7 +23,7 @@ namespace Allogen.Example {
          * This value should not be changed by the user and is automatically initialized by the _init
          * or when used as a return value from another method.
          */
-        internal IntPtr Pointer;
+        protected IntPtr Pointer;
 
         public AnotherClass(IntPtr pointer) {
             Pointer = pointer;
@@ -35,18 +35,20 @@ namespace Allogen.Example {
          * @param parent the parent parameter
          * @param sub the sub parameter
          */
-        public AnotherClass(AnotherClass parent, string sub) {
-            Pointer = AllogenPInvoke.Constructor(parent.Pointer, sub);
+        public AnotherClass([MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(AnotherClass.Marshaller))] AnotherClass parent, [MarshalAs(UnmanagedType.BStr)] string sub) {
+            Pointer = AllogenPInvoke.Constructor(parent, sub);
         }
+
 
         /**
          * Calls the C++ (std::string) native method
          *
          * @param str the str parameter
          */
-        public AnotherClass(string str) {
+        public AnotherClass([MarshalAs(UnmanagedType.BStr)] string str) {
             Pointer = AllogenPInvoke.Constructor(str);
-        } 
+        }
+         
         /**
          * This method deletes the wrapped C++ object. This method should
          * not be called directly by the user, but must be called by the GC.
@@ -62,7 +64,7 @@ namespace Allogen.Example {
         /**
          * Calls the C++ getName() native method
          */
-        public string GetName() {
+        public virtual string GetName() {
             return AllogenPInvoke.GetName(Pointer);
         }
 
@@ -72,45 +74,93 @@ namespace Allogen.Example {
          *
          * @param newName the newName parameter
          */
-        public void SetName(string newName) {
+        public virtual void SetName([MarshalAs(UnmanagedType.BStr)] string newName) {
 
             AllogenPInvoke.SetName(Pointer, newName);
         }
 
 
         private struct AllogenPInvoke {
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            /// 
+            /// The native Interop library name
+            /// 
+            #if DEBUG
+            private const string LibraryName = "d.dll";
+            #else
+            private const string LibraryName = ".dll";
+            #endif
+
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_AnotherClass_Constructor_parent_sub",
                 CallingConvention = CallingConvention.StdCall)]
-            public static extern IntPtr Constructor(IntPtr parent, string sub);
+            public static extern IntPtr Constructor([MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(AnotherClass.Marshaller))] AnotherClass parent, [MarshalAs(UnmanagedType.BStr)] string sub);
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_AnotherClass_Constructor_str",
                 CallingConvention = CallingConvention.StdCall)]
-            public static extern IntPtr Constructor(string str); 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            public static extern IntPtr Constructor([MarshalAs(UnmanagedType.BStr)] string str);
+             
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_AnotherClass_Destructor",
                 CallingConvention = CallingConvention.StdCall)]
             public static extern void Destructor(IntPtr pointer);
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_AnotherClass_getName",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+            [return: MarshalAs(UnmanagedType.BStr)]
             public static extern string GetName(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_AnotherClass_setName",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void SetName(
                 IntPtr pointer, 
-                string newName
+                [MarshalAs(UnmanagedType.BStr)] string newName
             );
 
+        }
+
+        public class Marshaller : ICustomMarshaler
+        {
+            public void CleanUpManagedData(object managedObj)
+            {
+
+            }
+
+            public void CleanUpNativeData(IntPtr nativeData)
+            {
+
+            }
+
+            public int GetNativeDataSize()
+            {
+                return IntPtr.Size;
+            }
+
+            public IntPtr MarshalManagedToNative(object managedObj)
+            {
+                return ((AnotherClass) managedObj)?.Pointer ?? IntPtr.Zero;
+            }
+
+            public object MarshalNativeToManaged(IntPtr nativeData)
+            {
+                return nativeData.ToInt64() == 0 ? null : new AnotherClass(nativeData);
+            }
+
+            private static readonly Marshaller Shared = new Marshaller();
+
+            public static ICustomMarshaler GetInstance(string cookie)
+            {
+                return Shared;
+            }
         }
     }
 }

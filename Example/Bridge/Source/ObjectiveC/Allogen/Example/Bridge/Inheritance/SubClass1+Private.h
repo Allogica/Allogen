@@ -12,9 +12,6 @@
 
 #import "Allogen/ASubClass1.h"
 
-#import "Allogen/Example/Bridge/Inheritance/BaseClass+Private.h"
-#import "Allogen/ABaseClass.h"
-
 
 #include "Allogen/Example/Inheritance/Inheritance.hpp"
 

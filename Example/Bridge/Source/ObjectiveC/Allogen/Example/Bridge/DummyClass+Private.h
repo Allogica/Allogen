@@ -8,11 +8,17 @@
 
 #pragma once
 
-#include <Allogen/CSharp.hpp>
+#include <Allogen/ObjectiveC.hpp>
+
+#import "Allogen/ADummyClass.h"
+
 
 #include "Allogen/Example/DataTypes.hpp"
 
-#include "Allogen/Example/Bridge/DummyClass.hpp"
 
+ALLOGEN_BRIDGED_CLASS(Allogen::Example::DummyClass, ADummyClass)
 
-ALLOGEN_BRIDGED_CLASS(Allogen::Example::DataTypes)
+@interface ADummyClass()
+-(id)initWithCppObject:(std::shared_ptr<Allogen::Example::DummyClass>*)cppObject;
+-(std::shared_ptr<Allogen::Example::DummyClass>*)toCppObject;
+@end

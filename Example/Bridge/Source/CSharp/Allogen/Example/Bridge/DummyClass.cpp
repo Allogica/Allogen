@@ -12,14 +12,16 @@ using namespace Allogen::CSharp;
 
 namespace Allogen { namespace Example {
 
-    extern "C" void
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
     Allogen_Example_DummyClass_Destructor(std::shared_ptr<Allogen::Example::DummyClass>* csthis) {
         BridgedMethod<Allogen::Example::DummyClass, void()>::call(
             csthis,
             [](Allogen::Example::DummyClass *wself) {
-                delete wself;
+                // delete wself;
             }
         );
     }
+
 
 }}

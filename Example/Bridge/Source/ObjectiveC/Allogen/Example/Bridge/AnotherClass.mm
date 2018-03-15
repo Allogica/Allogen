@@ -8,14 +8,13 @@
 
 #import "Allogen/AAnotherClass.h"
 #import "Allogen/Example/Bridge/AnotherClass+Private.h"
-
 using namespace Allogen::ObjectiveC;
 
 @implementation AAnotherClass {
     std::shared_ptr<Allogen::Example::AnotherClass>* _cppObject;
 }
 
--(nonnull id)initWithParent:(AAnotherClass*)parent sub:(NSString*)sub {
+-(nonnull id)initWithParent:(nonnull AAnotherClass*)parent sub:(nonnull NSString*)sub {
     if(self) {
         BridgedConstructor<Allogen::Example::AnotherClass(Allogen::Example::AnotherClass, std::string)>::call(
             self,
@@ -27,7 +26,7 @@ using namespace Allogen::ObjectiveC;
     return self;
 }
 
--(nonnull id)initWithStr:(NSString*)str {
+-(nonnull id)initWithStr:(nonnull NSString*)str {
     if(self) {
         BridgedConstructor<Allogen::Example::AnotherClass(std::string)>::call(
             self,
@@ -41,19 +40,19 @@ using namespace Allogen::ObjectiveC;
 -(void)dealloc {
     delete _cppObject;
 }
--(NSString*)getName {
+-(nonnull NSString*)getName {
     return BridgedMethod<Allogen::Example::AnotherClass, std::string()>::call(
         self,
-        [](Allogen::Example::AnotherClass* wself) {
+        [](Allogen::Example::AnotherClass* wself, std::shared_ptr<Allogen::Example::AnotherClass> wselfSharedPtr) {
             return wself->getName();
         }
     );
 }
 
--(void)setName:(NSString*)newName {
+-(void)setName:(nonnull NSString*)newName {
     return BridgedMethod<Allogen::Example::AnotherClass, void(std::string)>::call(
         self,
-        [](Allogen::Example::AnotherClass* wself, std::string newName) {
+        [](Allogen::Example::AnotherClass* wself, std::shared_ptr<Allogen::Example::AnotherClass> wselfSharedPtr, std::string newName) {
             return wself->setName(newName);
         }, newName
     );

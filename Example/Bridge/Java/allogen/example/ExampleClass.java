@@ -89,9 +89,11 @@ public class ExampleClass {
      */
     public native allogen.example.ExampleClass copy();
 
+
     public interface AsyncTaskCallback {
         void onCallback();
     }
+
     /**
      * Calls the C++ doAsync(std::function<void()> ) native method
      *
@@ -99,9 +101,11 @@ public class ExampleClass {
      */
     public native void doAsync(AsyncTaskCallback callback);
 
+
     public interface AsyncTaskCallback2 {
         int onCallback(short a, short b);
     }
+
     /**
      * Calls the C++ anotherCallback(std::function<uint32_t(uint16_t, uint16_t)> ) native method
      *
@@ -109,9 +113,11 @@ public class ExampleClass {
      */
     public native int anotherCallback(AsyncTaskCallback2 callback);
 
+
     public interface AsyncTaskCallback3 {
         int onCallback(short a, short b);
     }
+
     /**
      * Calls the C++ virtualCallback(std::function<uint32_t(uint16_t, uint16_t)> , uint16_t, uint16_t) native method
      *
@@ -145,9 +151,11 @@ public class ExampleClass {
      */
     public native allogen.example.AnotherClass createAnother(String name);
 
+
     public interface CreateAnotherAsyncCallback {
         void createAnother(allogen.example.AnotherClass another);
     }
+
     /**
      * Calls the C++ createAnotherAsync(std::string, std::function<void(Allogen::Example::AnotherClass)> ) native method
      *
@@ -164,9 +172,11 @@ public class ExampleClass {
      */
     public native void printAnother(allogen.example.AnotherClass another);
 
+
     public interface PrintAnotherAsyncCallback {
         void printAnother();
     }
+
     /**
      * Calls the C++ printAnotherAsync(Allogen::Example::AnotherClass, std::function<void()> ) native method
      *

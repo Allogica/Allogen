@@ -8,8 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import "Allogen/AAnotherClass.h"
-
 
 /**
  * Calls the C++ AnotherClass() native method
@@ -22,14 +20,14 @@
  * @param parent the parent parameter
  * @param sub the sub parameter
  */
--(nonnull id)initWithParent:(AAnotherClass*)parent sub:(NSString*)sub;
+-(nonnull id)initWithParent:(nonnull AAnotherClass*)parent sub:(nonnull NSString*)sub;
 
 /**
  * Calls the C++ (std::string) native method
  *
  * @param str the str parameter
  */
--(nonnull id)initWithStr:(NSString*)str; 
+-(nonnull id)initWithStr:(nonnull NSString*)str; 
 /**
  * Calls the C++ () native method
  */
@@ -38,13 +36,13 @@
 /**
  * Calls the C++ getName() native method
  */
--(NSString*)getName;
+-(nonnull NSString*)getName;
 
 /**
  * Calls the C++ setName(std::string) native method
  *
  * @param newName the newName parameter
  */
--(void)setName:(NSString*)newName;
+-(void)setName:(nonnull NSString*)newName;
 
 @end

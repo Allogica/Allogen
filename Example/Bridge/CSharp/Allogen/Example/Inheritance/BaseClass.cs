@@ -21,7 +21,7 @@ namespace Allogen.Example.Inheritance {
          * This value should not be changed by the user and is automatically initialized by the _init
          * or when used as a return value from another method.
          */
-        internal IntPtr Pointer;
+        protected IntPtr Pointer;
 
         public BaseClass(IntPtr pointer) {
             Pointer = pointer;
@@ -56,28 +56,74 @@ namespace Allogen.Example.Inheritance {
 
 
         private struct AllogenPInvoke {
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            /// 
+            /// The native Interop library name
+            /// 
+            #if DEBUG
+            private const string LibraryName = "d.dll";
+            #else
+            private const string LibraryName = ".dll";
+            #endif
+
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_Inheritance_BaseClass_Destructor",
                 CallingConvention = CallingConvention.StdCall)]
             public static extern void Destructor(IntPtr pointer);
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_Inheritance_BaseClass_getName",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+            [return: MarshalAs(UnmanagedType.BStr)]
             public static extern string GetName(
                 IntPtr pointer
             );
 
 
-            [DllImport("Allogen.Example.Bridge.CSharp",
+            [DllImport(LibraryName,
                 EntryPoint = "Allogen_Example_Inheritance_BaseClass_fromNonvirtualBase",
                 CallingConvention = CallingConvention.StdCall,
                 CharSet=CharSet.Ansi)]
+
             public static extern void FromNonvirtualBase(
                 IntPtr pointer
             );
 
+        }
+
+        public class Marshaller : ICustomMarshaler
+        {
+            public void CleanUpManagedData(object managedObj)
+            {
+
+            }
+
+            public void CleanUpNativeData(IntPtr nativeData)
+            {
+
+            }
+
+            public int GetNativeDataSize()
+            {
+                return IntPtr.Size;
+            }
+
+            public IntPtr MarshalManagedToNative(object managedObj)
+            {
+                return ((BaseClass) managedObj)?.Pointer ?? IntPtr.Zero;
+            }
+
+            public object MarshalNativeToManaged(IntPtr nativeData)
+            {
+                return nativeData.ToInt64() == 0 ? null : new BaseClass(nativeData);
+            }
+
+            private static readonly Marshaller Shared = new Marshaller();
+
+            public static ICustomMarshaler GetInstance(string cookie)
+            {
+                return Shared;
+            }
         }
     }
 }

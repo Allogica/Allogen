@@ -31,10 +31,12 @@ include(CompileAllogenInterface)
 file(GLOB_RECURSE IDLS ${CMAKE_CURRENT_SOURCE_DIR}/IDL/*.i)
 # Conditionally enable the Java bridge based on JNI presence
 if(TARGET Allogen.JNI)
-    add_allogen_interface(Allogen.Example.Bridge.JNI.Generate
+    add_allogen_interface(
             LANGUAGE            Java
             IDL                 ${IDLS}
             BRIDGE_NAMESPACE    Allogen::Example::Bridge
+        
+            MODULE_NAME         ${CMAKE_CURRENT_BINARY_DIR}/JNI.allogenmodule
             
             INCLUDE_DIRS        ${CMAKE_CURRENT_SOURCE_DIR}/IDL
             
@@ -43,7 +45,9 @@ if(TARGET Allogen.JNI)
     )
     
     file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Source/JNI/*.cpp)
-    add_library(Allogen.Example.Bridge.JNI SHARED ${SRCS})
+    add_library(Allogen.Example.Bridge.JNI SHARED
+            ${CMAKE_CURRENT_BINARY_DIR}/JNI.allogenmodule
+            ${SRCS})
     target_link_libraries(Allogen.Example.Bridge.JNI
             PUBLIC  Allogen.JNI
             PRIVATE Allogen.Example
@@ -61,6 +65,8 @@ if(TARGET Allogen.ObjectiveC)
             LANGUAGE            ObjectiveC
             IDL                 ${IDLS}
             BRIDGE_NAMESPACE    Allogen::Example::Bridge
+        
+            MODULE_NAME         ${CMAKE_CURRENT_BINARY_DIR}/ObjectiveC.allogenmodule
             
             INCLUDE_DIRS        ${CMAKE_CURRENT_SOURCE_DIR}/IDL
             
@@ -69,7 +75,9 @@ if(TARGET Allogen.ObjectiveC)
     )
     
     file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Source/ObjectiveC/*.mm)
-    add_library(Allogen.Example.Bridge.ObjectiveC SHARED ${SRCS})
+    add_library(Allogen.Example.Bridge.ObjectiveC SHARED
+            ${CMAKE_CURRENT_BINARY_DIR}/ObjectiveC.allogenmodule
+            ${SRCS})
     target_include_directories(Allogen.Example.Bridge.ObjectiveC
             PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source/ObjectiveC
             PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ObjectiveC
@@ -103,6 +111,8 @@ if(TARGET Allogen.CSharp)
             LANGUAGE            CSharp
             IDL                 ${IDLS}
             BRIDGE_NAMESPACE    Allogen::Example::Bridge
+        
+            MODULE_NAME         ${CMAKE_CURRENT_BINARY_DIR}/CSharp.allogenmodule
             
             INCLUDE_DIRS        ${CMAKE_CURRENT_SOURCE_DIR}/IDL
             
@@ -111,7 +121,9 @@ if(TARGET Allogen.CSharp)
     )
     
     file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Source/CSharp/*.cpp)
-    add_library(Allogen.Example.Bridge.CSharp SHARED ${SRCS})
+    add_library(Allogen.Example.Bridge.CSharp SHARED
+            ${CMAKE_CURRENT_BINARY_DIR}/CSharp.allogenmodule
+            ${SRCS})
     target_link_libraries(Allogen.Example.Bridge.CSharp
             PUBLIC  Allogen.CSharp
             PRIVATE Allogen.Example

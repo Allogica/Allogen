@@ -12,7 +12,8 @@ using namespace Allogen::CSharp;
 
 namespace Allogen { namespace Example { namespace Inheritance {
 
-    extern "C" std::shared_ptr<Allogen::Example::Inheritance::SubClass2>*
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::Inheritance::SubClass2>* ALLOGEN_CALL
     Allogen_Example_Inheritance_SubClass2_Constructor() {
         return BridgedConstructor<Allogen::Example::Inheritance::SubClass2()>::call(
             []() {
@@ -20,17 +21,22 @@ namespace Allogen { namespace Example { namespace Inheritance {
             }
         );
     }
-    extern "C" void
+
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
     Allogen_Example_Inheritance_SubClass2_Destructor(std::shared_ptr<Allogen::Example::Inheritance::SubClass2>* csthis) {
         BridgedMethod<Allogen::Example::Inheritance::SubClass2, void()>::call(
             csthis,
             [](Allogen::Example::Inheritance::SubClass2 *wself) {
-                delete wself;
+                // delete wself;
             }
         );
     }
-    extern "C" void
-    Allogen_Example_Inheritance_SubClass2_doInSubclass2(std::shared_ptr<Allogen::Example::Inheritance::SubClass2>* csthis) {
+
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_Inheritance_SubClass2_doInSubclass2(std::shared_ptr<Allogen::Example::Inheritance::SubClass2>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::Inheritance::SubClass2, void()>::call(
             csthis,
             [](Allogen::Example::Inheritance::SubClass2 *wself) {
@@ -40,8 +46,10 @@ namespace Allogen { namespace Example { namespace Inheritance {
 
     }
 
-    extern "C" const char*
-    Allogen_Example_Inheritance_SubClass2_getName(std::shared_ptr<Allogen::Example::Inheritance::SubClass2>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    const char* ALLOGEN_CALL
+    Allogen_Example_Inheritance_SubClass2_getName(std::shared_ptr<Allogen::Example::Inheritance::SubClass2>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::Inheritance::SubClass2, std::string()>::call(
             csthis,
             [](Allogen::Example::Inheritance::SubClass2 *wself) {
@@ -52,8 +60,10 @@ namespace Allogen { namespace Example { namespace Inheritance {
     }
 
 
-    extern "C" void
-    Allogen_Example_Inheritance_SubClass2_fromNonvirtualBase(std::shared_ptr<Allogen::Example::Inheritance::SubClass2>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_Inheritance_SubClass2_fromNonvirtualBase(std::shared_ptr<Allogen::Example::Inheritance::SubClass2>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::Inheritance::SubClass2, void()>::call(
             csthis,
             [](Allogen::Example::Inheritance::SubClass2 *wself) {

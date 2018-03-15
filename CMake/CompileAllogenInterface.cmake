@@ -50,13 +50,14 @@ if (NOT ALLOGEN_COMPILER)
     endif ()
 endif ()
 
-function(add_allogen_interface target_name)
-    set(options)
-    set(oneValueArgs LANGUAGE TARGET_DIR BRIDGE_DIR BRIDGE_NAMESPACE MODULE_NAME PINVOKE_DLL)
+function(add_allogen_interface)
+    set(options )
+    set(oneValueArgs TARGET LANGUAGE TARGET_DIR BRIDGE_DIR BRIDGE_NAMESPACE MODULE_NAME PINVOKE_DLL)
     set(multiValueArgs IDL IMPORT)
     cmake_parse_arguments(IFT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
     if (NOT Maven_FOUND OR NOT ALLOGEN_COMPILER)
+        file(WRITE ${IFT_MODULE_NAME} "")
         return()
     endif ()
     
@@ -88,11 +89,15 @@ function(add_allogen_interface target_name)
         list(APPEND args --pinvokedll ${IFT_PINVOKE_DLL})
     endif()
     
-    add_custom_target(${target_name} SOURCES ${IFT_IDL}
-            DEPENDS ${IFT_IDL}
-            COMMAND ${Maven_EXECUTABLE} compile exec:java -f ${ALLOGEN_COMPILER}
-            -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${module_args} ${args} ${import_args} ${idls}\"
+    add_custom_command(
+            OUTPUT ${IFT_MODULE_NAME}
+            COMMAND ${Maven_EXECUTABLE} compile exec:java
+                -f ${ALLOGEN_COMPILER}
+                -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${module_args} ${args} ${import_args} ${idls}\"
             COMMENT "Compiling Allogen interface files..."
-    )
-
+            DEPENDS ${IFT_IDL} ${IFT_IMPORT})
+    if(IFT_TARGET)
+        add_custom_target(${IFT_TARGET}
+                DEPENDS ${IFT_MODULE_NAME})
+    endif()
 endfunction()

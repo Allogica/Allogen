@@ -8,7 +8,6 @@
 
 #import "Allogen/ABaseClass.h"
 #import "Allogen/Example/Bridge/Inheritance/BaseClass+Private.h"
-
 using namespace Allogen::ObjectiveC;
 
 @implementation ABaseClass {
@@ -18,10 +17,10 @@ using namespace Allogen::ObjectiveC;
 -(void)dealloc {
     delete _cppObject;
 }
--(NSString*)getName {
+-(nonnull NSString*)getName {
     return BridgedMethod<Allogen::Example::Inheritance::BaseClass, std::string()>::call(
         self,
-        [](Allogen::Example::Inheritance::BaseClass* wself) {
+        [](Allogen::Example::Inheritance::BaseClass* wself, std::shared_ptr<Allogen::Example::Inheritance::BaseClass> wselfSharedPtr) {
             return wself->getName();
         }
     );
@@ -30,7 +29,7 @@ using namespace Allogen::ObjectiveC;
 -(void)fromNonvirtualBase {
     return BridgedMethod<Allogen::Example::Inheritance::BaseClass, void()>::call(
         self,
-        [](Allogen::Example::Inheritance::BaseClass* wself) {
+        [](Allogen::Example::Inheritance::BaseClass* wself, std::shared_ptr<Allogen::Example::Inheritance::BaseClass> wselfSharedPtr) {
             return wself->fromNonvirtualBase();
         }
     );

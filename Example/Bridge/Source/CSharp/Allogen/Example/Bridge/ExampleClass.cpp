@@ -12,7 +12,8 @@ using namespace Allogen::CSharp;
 
 namespace Allogen { namespace Example {
 
-    extern "C" std::shared_ptr<Allogen::Example::ExampleClass>*
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::ExampleClass>* ALLOGEN_CALL
     Allogen_Example_ExampleClass_Constructor() {
         return BridgedConstructor<Allogen::Example::ExampleClass()>::call(
             []() {
@@ -21,7 +22,9 @@ namespace Allogen { namespace Example {
         );
     }
 
-    extern "C" std::shared_ptr<Allogen::Example::ExampleClass>*
+
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::ExampleClass>* ALLOGEN_CALL
     Allogen_Example_ExampleClass_Constructor_initialValue(uint32_t initialValue) {
         return BridgedConstructor<Allogen::Example::ExampleClass(uint32_t)>::call(
             [](uint32_t initialValue) {
@@ -39,17 +42,21 @@ namespace Allogen { namespace Example {
             }, initialValue
         );
     }
-    extern "C" void
+
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
     Allogen_Example_ExampleClass_Destructor(std::shared_ptr<Allogen::Example::ExampleClass>* csthis) {
         BridgedMethod<Allogen::Example::ExampleClass, void()>::call(
             csthis,
             [](Allogen::Example::ExampleClass *wself) {
-                delete wself;
+                // delete wself;
             }
         );
     }
-    extern "C" void
-    Allogen_Example_ExampleClass_setInteger(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_ExampleClass_setInteger(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     uint32_t aInteger) {
         return BridgedMethod<Allogen::Example::ExampleClass, void(uint32_t)>::call(
             csthis,
@@ -61,8 +68,10 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" uint32_t
-    Allogen_Example_ExampleClass_getInteger(std::shared_ptr<Allogen::Example::ExampleClass>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    uint32_t ALLOGEN_CALL
+    Allogen_Example_ExampleClass_getInteger(std::shared_ptr<Allogen::Example::ExampleClass>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::ExampleClass, uint32_t()>::call(
             csthis,
             [](Allogen::Example::ExampleClass *wself) {
@@ -73,8 +82,10 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" std::shared_ptr<Allogen::Example::ExampleClass>*
-    Allogen_Example_ExampleClass_copy(std::shared_ptr<Allogen::Example::ExampleClass>* csthis) {
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::ExampleClass>* ALLOGEN_CALL
+    Allogen_Example_ExampleClass_copy(std::shared_ptr<Allogen::Example::ExampleClass>* csthis
+    ) {
         return BridgedMethod<Allogen::Example::ExampleClass, Allogen::Example::ExampleClass()>::call(
             csthis,
             [](Allogen::Example::ExampleClass *wself) {
@@ -85,8 +96,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_ExampleClass_doAsync(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_ExampleClass_doAsync(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     void* callback) {
         return BridgedMethod<Allogen::Example::ExampleClass, void(std::function<void()> )>::call(
             csthis,
@@ -98,8 +110,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" uint32_t
-    Allogen_Example_ExampleClass_anotherCallback(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    uint32_t ALLOGEN_CALL
+    Allogen_Example_ExampleClass_anotherCallback(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     void* callback) {
         return BridgedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint16_t, uint16_t)> )>::call(
             csthis,
@@ -111,8 +124,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" uint32_t
-    Allogen_Example_ExampleClass_virtualCallback(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    uint32_t ALLOGEN_CALL
+    Allogen_Example_ExampleClass_virtualCallback(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     void* callback, uint16_t a, uint16_t b) {
         return BridgedMethod<Allogen::Example::ExampleClass, uint32_t(std::function<uint32_t(uint16_t, uint16_t)> , uint16_t, uint16_t)>::call(
             csthis,
@@ -124,8 +138,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" uint32_t
-    Allogen_Example_ExampleClass_testingIfs(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    uint32_t ALLOGEN_CALL
+    Allogen_Example_ExampleClass_testingIfs(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     uint16_t a) {
         return BridgedMethod<Allogen::Example::ExampleClass, uint32_t(uint16_t)>::call(
             csthis,
@@ -141,8 +156,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_ExampleClass_sayHello(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_ExampleClass_sayHello(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     const char* name) {
         return BridgedMethod<Allogen::Example::ExampleClass, void(std::string)>::call(
             csthis,
@@ -154,8 +170,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" std::shared_ptr<Allogen::Example::AnotherClass>*
-    Allogen_Example_ExampleClass_createAnother(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::AnotherClass>* ALLOGEN_CALL
+    Allogen_Example_ExampleClass_createAnother(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     const char* name) {
         return BridgedMethod<Allogen::Example::ExampleClass, Allogen::Example::AnotherClass(std::string)>::call(
             csthis,
@@ -167,8 +184,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_ExampleClass_createAnotherAsync(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_ExampleClass_createAnotherAsync(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     const char* name, void* callback) {
         return BridgedMethod<Allogen::Example::ExampleClass, void(std::string, std::function<void(Allogen::Example::AnotherClass)> )>::call(
             csthis,
@@ -180,8 +198,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_ExampleClass_printAnother(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_ExampleClass_printAnother(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     std::shared_ptr<Allogen::Example::AnotherClass>* another) {
         return BridgedMethod<Allogen::Example::ExampleClass, void(Allogen::Example::AnotherClass)>::call(
             csthis,
@@ -193,8 +212,9 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" void
-    Allogen_Example_ExampleClass_printAnotherAsync(std::shared_ptr<Allogen::Example::ExampleClass>* csthis,
+    extern "C" ALLOGEN_EXPORT
+    void ALLOGEN_CALL
+    Allogen_Example_ExampleClass_printAnotherAsync(std::shared_ptr<Allogen::Example::ExampleClass>* csthis, 
     std::shared_ptr<Allogen::Example::AnotherClass>* another, void* callback) {
         return BridgedMethod<Allogen::Example::ExampleClass, void(Allogen::Example::AnotherClass, std::function<void()> )>::call(
             csthis,
@@ -206,8 +226,10 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" uint32_t
-    Allogen_Example_ExampleClass_getStaticInt() {
+    extern "C" ALLOGEN_EXPORT
+    uint32_t ALLOGEN_CALL
+    Allogen_Example_ExampleClass_getStaticInt(
+    ) {
         return BridgedMethod<void, uint32_t()>::call(
             []() {
                 return 100;
@@ -216,8 +238,10 @@ namespace Allogen { namespace Example {
     }
 
 
-    extern "C" std::shared_ptr<Allogen::Example::ExampleClass>*
-    Allogen_Example_ExampleClass_shared() {
+    extern "C" ALLOGEN_EXPORT
+    std::shared_ptr<Allogen::Example::ExampleClass>* ALLOGEN_CALL
+    Allogen_Example_ExampleClass_shared(
+    ) {
         return BridgedMethod<void, Allogen::Example::ExampleClass()>::call(
             []() {
                 static Allogen::Example::ExampleClass shared;

@@ -8,8 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "Allogen/AAnotherClass.h"
-#import "Allogen/AExampleClass.h"
+@class AAnotherClass;
 
 
 /**
@@ -49,21 +48,21 @@
 /**
  * Calls the C++ copy() native method
  */
--(AExampleClass*)copy;
+-(nonnull AExampleClass*)copy;
 
 /**
  * Calls the C++ doAsync(std::function<void()> ) native method
  *
  * @param callback the callback parameter
  */
--(void)doAsync:(void(^)() )callback;
+-(void)doAsync:(void(^ _Nonnull)())callback;
 
 /**
  * Calls the C++ anotherCallback(std::function<uint32_t(uint16_t, uint16_t)> ) native method
  *
  * @param callback the callback parameter
  */
--(uint32_t)anotherCallback:(uint32_t(^)(uint16_t, uint16_t) )callback;
+-(uint32_t)anotherCallback:(uint32_t(^ _Nonnull)(uint16_t a, uint16_t b))callback;
 
 /**
  * Calls the C++ virtualCallback(std::function<uint32_t(uint16_t, uint16_t)> , uint16_t, uint16_t) native method
@@ -72,7 +71,7 @@
  * @param a the a parameter
  * @param b the b parameter
  */
--(uint32_t)virtualCallback:(uint32_t(^)(uint16_t, uint16_t) )callback a:(uint16_t)a b:(uint16_t)b;
+-(uint32_t)virtualCallback:(uint32_t(^ _Nonnull)(uint16_t a, uint16_t b))callback a:(uint16_t)a b:(uint16_t)b;
 
 /**
  * Calls the C++ testingIfs(uint16_t) native method
@@ -86,14 +85,14 @@
  *
  * @param name the name parameter
  */
--(void)sayHello:(NSString*)name;
+-(void)sayHello:(nonnull NSString*)name;
 
 /**
  * Calls the C++ createAnother(std::string) native method
  *
  * @param name the name parameter
  */
--(AAnotherClass*)createAnother:(NSString*)name;
+-(nonnull AAnotherClass*)createAnother:(nonnull NSString*)name;
 
 /**
  * Calls the C++ createAnotherAsync(std::string, std::function<void(Allogen::Example::AnotherClass)> ) native method
@@ -101,14 +100,14 @@
  * @param name the name parameter
  * @param callback the callback parameter
  */
--(void)createAnotherAsync:(NSString*)name callback:(void(^)(AAnotherClass*) )callback;
+-(void)createAnotherAsync:(nonnull NSString*)name callback:(void(^ _Nonnull)(AAnotherClass* _Nonnull another))callback;
 
 /**
  * Calls the C++ printAnother(Allogen::Example::AnotherClass) native method
  *
  * @param another the another parameter
  */
--(void)printAnother:(AAnotherClass*)another;
+-(void)printAnother:(nonnull AAnotherClass*)another;
 
 /**
  * Calls the C++ printAnotherAsync(Allogen::Example::AnotherClass, std::function<void()> ) native method
@@ -116,7 +115,7 @@
  * @param another the another parameter
  * @param callback the callback parameter
  */
--(void)printAnotherAsync:(AAnotherClass*)another callback:(void(^)() )callback;
+-(void)printAnotherAsync:(nonnull AAnotherClass*)another callback:(void(^ _Nonnull)())callback;
 
 /**
  * Calls the C++ getStaticInt() native method
@@ -126,6 +125,6 @@
 /**
  * Calls the C++ shared() native method
  */
-+(AExampleClass*)shared;
++(nonnull AExampleClass*)shared;
 
 @end
