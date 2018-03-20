@@ -215,7 +215,7 @@ public class CSharpBackend extends AbstractCompilerBackend {
         if(forReturn) {
             return (type instanceof VectorType || type instanceof MapType);
         } else {
-            return (type instanceof VectorType || type instanceof MapType);
+            return (type instanceof MapType);
         }
     }
 

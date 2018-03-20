@@ -82,6 +82,7 @@ extern "C" ALLOGEN_EXPORT
 void ALLOGEN_CALL
 <destructor.csEntryPoint>(std::shared_ptr\<<class.fullyQualifiedName>\>* csthis) {
     <bridgedDestructor(destructor, class)>
+    delete csthis;
 }
 <endif>
 >>
@@ -113,16 +114,14 @@ return BridgedConstructor\<<class.fullyQualifiedName>(<constructor.arguments:{ar
 >>
 
 bridgedDestructor(destructor, class) ::= <<
+<if(destructor.body)>
 BridgedMethod\<<class.fullyQualifiedName>, void()>::call(
     csthis,
     [](<class.fullyQualifiedName> *wself) {
-    <if(destructor.body)>
         <destructor.body>
-    <else>
-        // delete wself;
-    <endif>
     }
 );
+<endif>
 >>
 
 bridgedMethod(method, class) ::= <<
