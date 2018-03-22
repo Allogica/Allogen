@@ -56,7 +56,7 @@ function(add_allogen_interface)
     set(multiValueArgs IDL IMPORT)
     cmake_parse_arguments(IFT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
-    if (NOT Maven_FOUND OR NOT ALLOGEN_COMPILER)
+    if (NOT Maven_FOUND OR NOT ALLOGEN_COMPILER OR ${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
         file(WRITE ${IFT_MODULE_NAME} "")
         return()
     endif ()
@@ -64,7 +64,10 @@ function(add_allogen_interface)
     set(import_args "")
     if(IFT_IMPORT)
         foreach(dir ${IFT_IMPORT})
-            set(import_args ${import_args} --import '${dir}')
+            if(NOT IS_ABSOLUTE ${dir})
+                set(dir ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
+            endif()
+            set(import_args ${import_args} --import $<SHELL_PATH:${dir}>)
         endforeach()
     endif()
     
@@ -80,8 +83,11 @@ function(add_allogen_interface)
 
     set(idls)
     foreach(idl ${IFT_IDL})
-        string(REPLACE " " "\\ " idl_repl ${idl})
-        list(APPEND idls '${idl_repl}')
+        #string(REPLACE " " "\\ " idl_repl ${idl})
+        if(NOT IS_ABSOLUTE ${idl})
+            set(dir ${CMAKE_CURRENT_SOURCE_DIR}/${idl})
+        endif()
+        list(APPEND idls $<SHELL_PATH:${idl}>)
     endforeach()
     
     set(args "")
@@ -89,11 +95,23 @@ function(add_allogen_interface)
         list(APPEND args --pinvokedll ${IFT_PINVOKE_DLL})
     endif()
     
+    if(NOT IS_ABSOLUTE ${IFT_TARGET_DIR})
+        set(IFT_TARGET_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${IFT_TARGET_DIR})
+    endif()
+
+    if(NOT IS_ABSOLUTE ${IFT_BRIDGE_DIR})
+        set(IFT_BRIDGE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${IFT_BRIDGE_DIR})
+    endif()
+    
+#        MESSAGE(${Maven_EXECUTABLE} compile exec:java
+#                -f $<SHELL_PATH:${ALLOGEN_COMPILER}>
+#                -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir $<SHELL_PATH:${IFT_TARGET_DIR}> --bridge-dir $<SHELL_PATH:${IFT_BRIDGE_DIR}> ${ns_attr} ${module_args} ${args} ${import_args} ${idls}\")
+        
     add_custom_command(
             OUTPUT ${IFT_MODULE_NAME}
             COMMAND ${Maven_EXECUTABLE} compile exec:java
-                -f ${ALLOGEN_COMPILER}
-                -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '${IFT_TARGET_DIR}' --bridge-dir '${IFT_BRIDGE_DIR}' ${ns_attr} ${module_args} ${args} ${import_args} ${idls}\"
+                -f $<SHELL_PATH:${ALLOGEN_COMPILER}>
+                -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir $<SHELL_PATH:${IFT_TARGET_DIR}> --bridge-dir $<SHELL_PATH:${IFT_BRIDGE_DIR}> ${ns_attr} ${module_args} ${args} ${import_args} ${idls}\"
             COMMENT "Compiling Allogen interface files..."
             DEPENDS ${IFT_IDL} ${IFT_IMPORT})
     if(IFT_TARGET)
