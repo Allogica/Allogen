@@ -31,11 +31,65 @@
 #pragma once
 
 #include "Allogen/JNI/Converter.hpp"
-#include <experimental/optional>
 
+#if __has_include(<optional>)
+#include <optional>
 namespace Allogen {
 	namespace JNI {
+		/**
+		 * A converter specialization for C++ integral types
+		 *
+		 * @tparam IntegralType the integral type to be converted
+		 */
+		template<typename ContainedType>
+		struct Converter<std::optional<ContainedType>> {
+			/**
+			 * The C++ type this converter is operating on
+			 */
+			using Type = std::optional<ContainedType>;
 
+			/**
+			 * The JNI type this converter supports
+			 */
+			using JavaType = typename Converter<ContainedType>::JavaType;
+
+			/**
+			 * Converts a C++ integer into a Java integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the C++ integer
+			 *
+			 * @return the Java integer
+			 */
+			static JavaType toJava(JNIEnv* env, Type object) {
+				if(object) {
+					return Converter<ContainedType>::toJava(env, *object);
+				}
+				return {};
+			}
+
+			/**
+			 * Converts a Java integer into a C++ integer
+			 *
+			 * @param env the JNI environment
+			 * @param i the Java integer
+			 *
+			 * @return the C++ integer
+			 */
+			static Type fromJava(JNIEnv* env, JavaType object) {
+				if(object) {
+					return Converter<ContainedType>::fromJava(env, object);
+				}
+				return {};
+			}
+		};
+	}
+}
+#elif __has_include(<experimental/optional>)
+#include <experimental/optional>
+namespace std { using std::experimental::optional; }
+namespace Allogen {
+	namespace JNI {
 		/**
 		 * A converter specialization for C++ integral types
 		 *
@@ -83,6 +137,6 @@ namespace Allogen {
 				return {};
 			}
 		};
-
 	}
 }
+#endif

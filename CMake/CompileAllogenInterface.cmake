@@ -67,7 +67,7 @@ function(add_allogen_interface)
             if(NOT IS_ABSOLUTE ${dir})
                 set(dir ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
             endif()
-            set(import_args ${import_args} --import $<SHELL_PATH:${dir}>)
+            set(import_args ${import_args} --import '$<SHELL_PATH:${dir}>')
         endforeach()
     endif()
     
@@ -78,7 +78,7 @@ function(add_allogen_interface)
 
     set(module_args "")
     if(IFT_MODULE_NAME)
-        set(module_args --module '${IFT_MODULE_NAME}')
+        set(module_args --module '$<SHELL_PATH:${IFT_MODULE_NAME}>')
     endif()
 
     set(idls)
@@ -87,7 +87,7 @@ function(add_allogen_interface)
         if(NOT IS_ABSOLUTE ${idl})
             set(dir ${CMAKE_CURRENT_SOURCE_DIR}/${idl})
         endif()
-        list(APPEND idls $<SHELL_PATH:${idl}>)
+        list(APPEND idls '$<SHELL_PATH:${idl}>')
     endforeach()
     
     set(args "")
@@ -111,7 +111,7 @@ function(add_allogen_interface)
             OUTPUT ${IFT_MODULE_NAME}
             COMMAND ${Maven_EXECUTABLE} compile exec:java
                 -f $<SHELL_PATH:${ALLOGEN_COMPILER}>
-                -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir $<SHELL_PATH:${IFT_TARGET_DIR}> --bridge-dir $<SHELL_PATH:${IFT_BRIDGE_DIR}> ${ns_attr} ${module_args} ${args} ${import_args} ${idls}\"
+                -Dexec.args=\"--target '${IFT_LANGUAGE}' --target-dir '$<SHELL_PATH:${IFT_TARGET_DIR}>' --bridge-dir '$<SHELL_PATH:${IFT_BRIDGE_DIR}>' ${ns_attr} ${module_args} ${args} ${import_args} ${idls}\"
             COMMENT "Compiling Allogen interface files..."
             DEPENDS ${IFT_IDL} ${IFT_IMPORT})
     if(IFT_TARGET)

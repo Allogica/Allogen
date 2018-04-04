@@ -63,6 +63,8 @@ javaSignatureTypes ::= [
     "float": "F",   "double": "D"
 ]
 
+optionalTypeNative(type) ::= <% std::optional\<<nativeType(type.resolvedType.containedType)>> %>
+
 javaSignatureTemplateName_(type) ::= "<type.resolvedType.templateName>JavaSignature"
 javaSignature(type) ::= "<(javaSignatureTemplateName_(type))(type)>"
 
