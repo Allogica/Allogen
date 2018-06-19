@@ -31,13 +31,13 @@
 #pragma once
 
 #include "Allogen/CSharp/Converter.hpp"
-#if __has_include(<optional>)
-#include <optional>
-namespace std::experimental {
-	using ::std::optional;
+#if __has_include(<experimental/optional>)
+#include <experimental/optional>
+namespace std {
+	using ::std::experimental::optional;
 }
 #else
-#include <experimental/optional>
+#include <optional>
 #endif
 
 namespace Allogen {

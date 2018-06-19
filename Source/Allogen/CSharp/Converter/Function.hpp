@@ -33,6 +33,12 @@
 #include "Allogen/CSharp/Converter.hpp"
 #include <functional>
 
+#if defined(_MSC_VER)
+# define ALLOGEN_CALLING_CONVENTION __stdcall
+#else
+# define ALLOGEN_CALLING_CONVENTION
+#endif
+
 namespace Allogen {
 	namespace CSharp {
 
@@ -56,7 +62,7 @@ namespace Allogen {
             /**
 			 * The JNI type this converter supports
 			 */
-            using CSharpFunc = typename Converter<R>::CSharpType(__stdcall *)(typename Converter<Args>::CSharpType...);
+            using CSharpFunc = typename Converter<R>::CSharpType(ALLOGEN_CALLING_CONVENTION *)(typename Converter<Args>::CSharpType...);
 
 			/**
 			 * Converts a C++ integer into a CSharp integer
@@ -110,7 +116,7 @@ namespace Allogen {
             /**
 			 * The JNI type this converter supports
 			 */
-            using CSharpFunc = void(__stdcall *)(typename Converter<Args>::CSharpType...);
+            using CSharpFunc = void(ALLOGEN_CALLING_CONVENTION *)(typename Converter<Args>::CSharpType...);
 
 			/**
 			 * Converts a C++ integer into a CSharp integer

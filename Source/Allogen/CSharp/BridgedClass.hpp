@@ -49,7 +49,7 @@ namespace Allogen {
 			/**
 			 * The C++ type being converted
 			 */
-			using Type = T&;
+			using Type = T;
 
 			/**
 			 * The CSharp type this converter converts from/to
@@ -63,7 +63,7 @@ namespace Allogen {
 			 *
 			 * @return the corresponding CSharp type
 			 */
-			static CSharpType toCSharp(T& object) {
+			static CSharpType toCSharp(T object) {
 				return BridgeClass<std::shared_ptr<T>>::toCSharp(std::make_shared<T>(std::move(object)));
 			}
 

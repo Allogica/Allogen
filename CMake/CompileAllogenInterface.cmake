@@ -56,10 +56,10 @@ function(add_allogen_interface)
     set(multiValueArgs IDL IMPORT)
     cmake_parse_arguments(IFT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
-#    if (NOT Maven_FOUND OR NOT ALLOGEN_COMPILER OR ${CMAKE_GENERATOR} MATCHES "Visual Studio")
+    if (NOT Maven_FOUND OR NOT ALLOGEN_COMPILER OR ${CMAKE_GENERATOR} MATCHES "Visual Studio")
         file(WRITE ${IFT_MODULE_NAME} "")
         return()
-#    endif ()
+    endif ()
     
     set(import_args "")
     if(IFT_IMPORT)
