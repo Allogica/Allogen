@@ -205,9 +205,9 @@ namespace Allogen {
 			 */
 			static char* toCSharp(const std::string& string) {
 #if defined(WIN32)
-                auto lenW = (UINT) ::MultiByteToWideChar(CP_ACP, 0, string.c_str(), string.length(), NULL, 0);
+                auto lenW = (UINT) ::MultiByteToWideChar(CP_ACP, 0, string.c_str(), (int) string.length(), NULL, 0);
                 BSTR str = ::SysAllocStringLen(0, lenW);
-                ::MultiByteToWideChar(CP_ACP, 0, string.c_str(), string.length(), str, lenW);
+                ::MultiByteToWideChar(CP_ACP, 0, string.c_str(), (int) string.length(), str, lenW);
                 return (char*) str;
 #else
 				auto cstr = new char[string.size() + 1];

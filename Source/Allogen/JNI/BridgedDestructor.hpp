@@ -56,19 +56,23 @@ namespace Allogen {
 			 */
 			template<typename Executor>
 			static inline void call(JNIEnv* env, jobject jthis, Executor&& executor) {
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
 				CoffeeCatchCleaner cleaner;
 				if (coffeecatch_inside() ||
 					(coffeecatch_setup() == 0
 					 && sigsetjmp(*coffeecatch_get_ctx(), 1) == 0)) {
+#endif
 					jclass view = env->GetObjectClass(jthis);
 					jfieldID field = env->GetFieldID(view, "pointer", "J");
 					jlong longPtr = env->GetLongField(jthis, field);
 
 					auto ptr = reinterpret_cast<std::shared_ptr<Class>*>(longPtr);
 					executor(ptr);
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
 				} else {
 					CoffeeCatch::_throw(env);
 				}
+#endif
 			}
 		};
 

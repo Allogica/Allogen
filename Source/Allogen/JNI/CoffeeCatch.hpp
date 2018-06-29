@@ -30,6 +30,8 @@
 
 #pragma once
 
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
+
 #include <coffeecatch.h>
 #include <coffeejni.h>
 
@@ -65,3 +67,5 @@ namespace Allogen {
 
     }
 }
+
+#endif

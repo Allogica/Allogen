@@ -41,7 +41,10 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Android"
+        OR ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 find_package(JNI)
+endif()
 if(JNI_FOUND)
     add_library(Allogen.JNI STATIC
             Vendor/CoffeeCatch/coffeecatch.c
@@ -52,6 +55,8 @@ if(JNI_FOUND)
             PUBLIC    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/CoffeeCatch)
     target_link_libraries(Allogen.JNI
             PUBLIC    ${JNI_LIBRARIES})
+    target_compile_definitions(Allogen.JNI
+            PUBLIC    ALLOGEN_JNI_USE_COFFEECATCH)
 endif()
 
 # Objective-C bridges are only available on Apple platforms. For now at least.

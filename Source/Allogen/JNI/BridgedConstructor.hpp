@@ -71,17 +71,21 @@ namespace Allogen {
 			template<typename Executor>
 			static inline jlong call(JNIEnv* env, Executor&& executor,
 									 typename Converter<Args>::JavaType&&... args) {
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
 				CoffeeCatchCleaner cleaner;
 				if (coffeecatch_inside() ||
 					(coffeecatch_setup() == 0
 					 && sigsetjmp(*coffeecatch_get_ctx(), 1) == 0)) {
+#endif
 					return reinterpret_cast<jlong>(
 							new std::shared_ptr<R>(executor(Converter<Args>::fromJava(env, args)...))
 					);
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
 				} else {
 					CoffeeCatch::_throw(env);
 					return 0;
 				}
+#endif
 			}
 		};
 

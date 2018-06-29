@@ -75,10 +75,12 @@ namespace Allogen {
 			static inline decltype(takeOwnership(std::declval<typename Converter<R>::JavaType>())) call(
 					JNIEnv* env, jobject jthis, Executor&& executor,
 					typename Converter<Args>::JavaType&&... args) {
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
 				CoffeeCatchCleaner cleaner;
 				if (coffeecatch_inside() ||
 					(coffeecatch_setup() == 0
 					 && sigsetjmp(*coffeecatch_get_ctx(), 1) == 0)) {
+#endif
 					return takeOwnership(Converter<typename std::result_of<Executor(Class*, Args...)>::type>::toJava(
 							env,
 							executor(
@@ -88,10 +90,12 @@ namespace Allogen {
 									)...
 							)
 					));
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
 				} else {
 					CoffeeCatch::_throw(env);
 					return {};
 				}
+#endif
 			}
 
 			/**
@@ -109,10 +113,12 @@ namespace Allogen {
 			static inline decltype(takeOwnership(std::declval<typename Converter<R>::JavaType>())) call(
 					JNIEnv* env, Executor&& executor,
 					typename Converter<Args>::JavaType&&... args) {
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 CoffeeCatchCleaner cleaner;
                 if (coffeecatch_inside() ||
 					(coffeecatch_setup() == 0
 					 && sigsetjmp(*coffeecatch_get_ctx(), 1) == 0)) {
+#endif
                     return takeOwnership(Converter<typename std::result_of<Executor(Args...)>::type>::toJava(
                             env,
                             executor(
@@ -121,10 +127,12 @@ namespace Allogen {
                                     )...
                             )
                     ));
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 } else {
                     CoffeeCatch::_throw(env);
                     return {};
                 }
+#endif
 			}
 		};
 
@@ -150,10 +158,12 @@ namespace Allogen {
 			template<typename Executor>
 			static inline void call(JNIEnv* env, jobject jthis, Executor&& executor,
 									typename Converter<Args>::JavaType&&... args) {
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 CoffeeCatchCleaner cleaner;
                 if (coffeecatch_inside() ||
 					(coffeecatch_setup() == 0
 					 && sigsetjmp(*coffeecatch_get_ctx(), 1) == 0)) {
+#endif
                     executor(
                             Converter<Class*>::fromJava(env, jthis),
                             Converter<Args>::fromJava(
@@ -161,9 +171,11 @@ namespace Allogen {
                             )...
 
                     );
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 } else {
                     CoffeeCatch::_throw(env);
                 }
+#endif
 			}
 
 			/**
@@ -178,19 +190,23 @@ namespace Allogen {
 			template<typename Executor>
 			static inline void call(JNIEnv* env, Executor&& executor,
 									typename Converter<Args>::JavaType&&... args) {
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 CoffeeCatchCleaner cleaner;
                 if (coffeecatch_inside() ||
 					(coffeecatch_setup() == 0
 					 && sigsetjmp(*coffeecatch_get_ctx(), 1) == 0)) {
+#endif
                     executor(
                             Converter<Args>::fromJava(
                                     env, std::move(args)
                             )...
 
                     );
+#if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 } else {
                     CoffeeCatch::_throw(env);
                 }
+#endif
 			}
 		};
 	}

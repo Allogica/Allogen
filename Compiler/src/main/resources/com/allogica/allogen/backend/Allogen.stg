@@ -84,7 +84,7 @@ lambdaTypeNative(type) ::= <% std::function\<<if(type.resolvedType.returnType)><
 lambdaTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
 lambdaTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"
 
-optionalTypeNative(type) ::= <% std::experimental::optional\<<nativeType(type.resolvedType.containedType)>> %>
+optionalTypeNative(type) ::= <% std::optional\<<nativeType(type.resolvedType.containedType)>> %>
 //optionalTypeNative(type) ::= <% <nativeType(type.resolvedType.containedType)>* %>
 optionalTypeArgumentName(argument) ::= "<primitiveTypeArgumentName(argument)>"
 optionalTypeForwardArgument(argument) ::= "<userDefinedTypeForwardArgument(argument)>"

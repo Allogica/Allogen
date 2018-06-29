@@ -63,8 +63,12 @@ namespace Allogen {
 			 *
 			 * @return the corresponding CSharp type
 			 */
-			static CSharpType toCSharp(T object) {
-				return BridgeClass<std::shared_ptr<T>>::toCSharp(std::make_shared<T>(std::move(object)));
+			static CSharpType toCSharp(const T& object) {
+			    if constexpr(std::is_abstract_v<T> || !std::is_copy_constructible_v<T>) {
+			        return nullptr;
+			    } else {
+                    return BridgeClass<std::shared_ptr<T>>::toCSharp(std::make_shared<T>(std::move(object)));
+                }
 			}
 
 			/**
