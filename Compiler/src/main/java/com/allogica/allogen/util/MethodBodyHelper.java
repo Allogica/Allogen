@@ -38,9 +38,12 @@ import java.util.stream.Collectors;
 public class MethodBodyHelper {
 
     public static String trimMethodBody(String body) {
+        final String lineSeparator = System.lineSeparator();
         body = body.substring(2, body.length() - 2);
-        body = String.join("\n", Arrays.stream(body.split("\n")).map(String::trim).collect(Collectors.toList()));
-        body = body.substring(0, body.length() - 1);
+        body = String.join(lineSeparator, Arrays.stream(body.split("\n"))
+                .map(String::trim)
+                .filter(str -> str.length() != 0)
+                .collect(Collectors.toList()));
         return body;
     }
 

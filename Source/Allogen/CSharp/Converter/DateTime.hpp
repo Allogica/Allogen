@@ -61,8 +61,9 @@ namespace Allogen {
              * @return the CSharp integer
              */
             static CSharpType toCSharp(Type object) {
-                return std::chrono::duration_cast<std::chrono::microseconds>(
-                        object).count() * 10 + 116444736000000000;
+                return static_cast<CSharpType>(
+                        std::chrono::duration_cast<std::chrono::microseconds>(object).count()
+                        * 10 + 116444736000000000);
             }
 
             /**
