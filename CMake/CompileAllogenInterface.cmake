@@ -32,10 +32,11 @@ endif ()
 set(ADD_ALLOGEN_INTERFACE_INCLUDED)
 
 include(CMakeParseArguments)
-
-find_package(Maven)
-if(NOT Maven_FOUND)
-    message("Maven not found. Allogen compiler will be unavailable.")
+if(NOT ANDROID)
+    find_package(Maven)
+    if(NOT Maven_FOUND)
+        message("Maven not found. Allogen compiler will be unavailable.")
+    endif()
 endif()
 
 if (NOT ALLOGEN_COMPILER)

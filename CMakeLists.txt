@@ -41,22 +41,27 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Android"
-        OR ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 find_package(JNI)
-endif()
 if(JNI_FOUND)
-    add_library(Allogen.JNI STATIC
-            Vendor/CoffeeCatch/coffeecatch.c
-            Vendor/CoffeeCatch/coffeejni.c)
+#    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR
+#            ${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
+#            ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#        add_library(Allogen.JNI STATIC
+#                Vendor/CoffeeCatch/coffeecatch.c
+#                Vendor/CoffeeCatch/coffeejni.c)
+#        target_include_directories(Allogen.JNI
+#                PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/CoffeeCatch
+#                PUBLIC ${JNI_INCLUDE_DIRS})
+#        target_compile_definitions(Allogen.JNI
+#                PUBLIC    ALLOGEN_JNI_USE_COFFEECATCH)
+#    else()
+        add_library(Allogen.JNI INTERFACE)
+#    endif()
     target_include_directories(Allogen.JNI
             INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Source
-            PUBLIC    ${JNI_INCLUDE_DIRS}
-            PUBLIC    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/CoffeeCatch)
+            INTERFACE ${JNI_INCLUDE_DIRS})
     target_link_libraries(Allogen.JNI
-            PUBLIC    ${JNI_LIBRARIES})
-    target_compile_definitions(Allogen.JNI
-            PUBLIC    ALLOGEN_JNI_USE_COFFEECATCH)
+            INTERFACE ${JNI_LIBRARIES})
 endif()
 
 # Objective-C bridges are only available on Apple platforms. For now at least.

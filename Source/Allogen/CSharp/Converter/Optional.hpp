@@ -82,7 +82,7 @@ namespace Allogen {
 			 * @return the C++ integer
 			 */
 			static Type fromCSharp(CSharpType object) {
-				if(object == nullptr) {
+				if(object) {
 					return Converter<ContainedType>::fromCSharp(object);
 				}
 				return {};

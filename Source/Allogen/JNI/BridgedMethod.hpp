@@ -74,7 +74,7 @@ namespace Allogen {
 			template<typename Executor>
 			static inline decltype(takeOwnership(std::declval<typename Converter<R>::JavaType>())) call(
 					JNIEnv* env, jobject jthis, Executor&& executor,
-					typename Converter<Args>::JavaType&&... args) {
+					typename Converter<Args>::JavaType... args) {
 #if defined(ALLOGEN_JNI_USE_COFFEECATCH)
 				CoffeeCatchCleaner cleaner;
 				if (coffeecatch_inside() ||
@@ -112,7 +112,7 @@ namespace Allogen {
 			template<typename Executor>
 			static inline decltype(takeOwnership(std::declval<typename Converter<R>::JavaType>())) call(
 					JNIEnv* env, Executor&& executor,
-					typename Converter<Args>::JavaType&&... args) {
+					typename Converter<Args>::JavaType... args) {
 #if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 CoffeeCatchCleaner cleaner;
                 if (coffeecatch_inside() ||
@@ -157,7 +157,7 @@ namespace Allogen {
 			 */
 			template<typename Executor>
 			static inline void call(JNIEnv* env, jobject jthis, Executor&& executor,
-									typename Converter<Args>::JavaType&&... args) {
+									typename Converter<Args>::JavaType... args) {
 #if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 CoffeeCatchCleaner cleaner;
                 if (coffeecatch_inside() ||
@@ -189,7 +189,7 @@ namespace Allogen {
 			 */
 			template<typename Executor>
 			static inline void call(JNIEnv* env, Executor&& executor,
-									typename Converter<Args>::JavaType&&... args) {
+									typename Converter<Args>::JavaType... args) {
 #if defined(ALLOGEN_JNI_USE_COFFEECATCH)
                 CoffeeCatchCleaner cleaner;
                 if (coffeecatch_inside() ||

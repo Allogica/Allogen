@@ -25,8 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define NDK_DEBUG 0
-
 #if defined(__ANDROID__)
 #define USE_UNWIND
 //#define USE_CORKSCREW
