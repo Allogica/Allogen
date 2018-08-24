@@ -235,30 +235,35 @@ public class JavaBackend extends AbstractCompilerBackend {
         int argumentCount = 0;
         for (final MethodArgument argument : method.getArguments()) {
             argumentCount++;
-            if (argument.getType().getResolvedType() instanceof UserDefinedType) {
-                final String javaName = ((UserDefinedType) argument.getType().getResolvedType()).getUserDefinedClass()
+            Type type = argument.getType().getResolvedType();
+            if(type instanceof SharedPtrType) {
+                type = ((SharedPtrType) type).getContainedType().getResolvedType();
+            }
+
+            if (type instanceof UserDefinedType) {
+                final String javaName = ((UserDefinedType) type).getUserDefinedClass()
                         .getAttribute("javaFullyQualifiedName");
                 final String normalizedJavaName = javaName.replaceAll("\\.", "_");
                 overloadBuilder.append("L").append(normalizedJavaName).append("_2");
-            } else if(argument.getType().getResolvedType() instanceof LambdaType) {
+            } else if(type instanceof LambdaType) {
                 final String javaName = argument.getType().getAttribute("javaFullyQualifiedName");
                 final String normalizedJavaName = javaName
                         .replaceAll("\\.", "_")
                         .replaceAll("\\$", "_00024");
                 overloadBuilder.append("L").append(normalizedJavaName).append("_2");
-            } else if (argument.getType().getResolvedType() instanceof PrimitiveType) {
+            } else if (type instanceof PrimitiveType) {
                 final String typeName = argument.getType().getName();
                 if (!javaSignatures.containsKey(typeName)) {
                     throw new RuntimeException(String.format("Java backend does not support '%s'", typeName));
                 }
                 overloadBuilder.append(javaSignatures.get(typeName));
-            } else if (argument.getType().getResolvedType() instanceof StringType) {
+            } else if (type instanceof StringType) {
                 overloadBuilder.append("Ljava_lang_String_2");
-            } else if(argument.getType().getResolvedType() instanceof BufferType) {
+            } else if(type instanceof BufferType) {
                 overloadBuilder.append("Ljava_nio_ByteBuffer_2");
-            } else if(argument.getType().getResolvedType() instanceof VectorType) {
+            } else if(type instanceof VectorType) {
                 overloadBuilder.append("Ljava_util_List_2");
-            } else if(argument.getType().getResolvedType() instanceof MapType) {
+            } else if(type instanceof MapType) {
                 overloadBuilder.append("Ljava_util_Map_2");
             }
         }

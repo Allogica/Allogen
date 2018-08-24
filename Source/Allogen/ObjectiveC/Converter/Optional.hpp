@@ -31,13 +31,13 @@
 #pragma once
 
 #include "Allogen/ObjectiveC/Converter.hpp"
-#if __has_include(<experimental/optional>)
+#if __has_include(<optional>)
+#include <optional>
+#else
 #include <experimental/optional>
 namespace std {
 	using ::std::experimental::optional;
 }
-#else
-#include <optional>
 #endif
 
 namespace Allogen {
