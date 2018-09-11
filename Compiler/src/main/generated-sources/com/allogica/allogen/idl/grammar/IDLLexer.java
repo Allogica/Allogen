@@ -1,4 +1,4 @@
-// Generated from com\allogica\allogen\idl\grammar\IDL.g4 by ANTLR 4.7
+// Generated from com/allogica/allogen/idl/grammar/IDL.g4 by ANTLR 4.7
 package com.allogica.allogen.idl.grammar;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

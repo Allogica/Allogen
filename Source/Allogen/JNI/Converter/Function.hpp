@@ -210,11 +210,11 @@ namespace Allogen {
 			 *
 			 * @return the Java object
 			 */
-			static JavaType toJava(JNIEnv* env, Type i) {
-				JavaVM* vm;
-				env->GetJavaVM(&vm);
-//				return i;
-			}
+//			static JavaType toJava(JNIEnv* env, Type i) {
+//				JavaVM* vm;
+//				env->GetJavaVM(&vm);
+////				return i;
+//			}
 
 			/**
 			 * Converts a Java object into a C++ lambda function

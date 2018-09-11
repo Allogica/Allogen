@@ -31,6 +31,7 @@
 #pragma once
 
 #include <string>
+#include <cstring>
 
 #if defined(WIN32)
 # define NOMINMAX

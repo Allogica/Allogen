@@ -31,6 +31,7 @@
 #pragma once
 
 #include <jni.h>
+#include <stdexcept>
 
 namespace Allogen {
 	namespace JNI {

@@ -304,17 +304,17 @@ namespace Allogen {
 		};
 
 #define ALLOGEN_BRIDGED_CLASS(ClassName)                                                               					\
-template<> struct ::Allogen::CSharp::Converter<ClassName>   : public ::Allogen::CSharp::BridgeClass<ClassName>   {};    \
-template<> struct ::Allogen::CSharp::Converter<ClassName*>  : public ::Allogen::CSharp::BridgeClass<ClassName*>  {};    \
-template<> struct ::Allogen::CSharp::Converter<ClassName&>  : public ::Allogen::CSharp::BridgeClass<ClassName&>  {};    \
-template<> struct ::Allogen::CSharp::Converter<ClassName&&> : public ::Allogen::CSharp::BridgeClass<ClassName&&> {};    \
-template<> struct ::Allogen::CSharp::Converter<std::shared_ptr<ClassName>> :                                            \
+template<> struct Allogen::CSharp::Converter<ClassName>   : public ::Allogen::CSharp::BridgeClass<ClassName>   {};    \
+template<> struct Allogen::CSharp::Converter<ClassName*>  : public ::Allogen::CSharp::BridgeClass<ClassName*>  {};    \
+template<> struct Allogen::CSharp::Converter<ClassName&>  : public ::Allogen::CSharp::BridgeClass<ClassName&>  {};    \
+template<> struct Allogen::CSharp::Converter<ClassName&&> : public ::Allogen::CSharp::BridgeClass<ClassName&&> {};    \
+template<> struct Allogen::CSharp::Converter<std::shared_ptr<ClassName>> :                                            \
                 public ::Allogen::CSharp::BridgeClass<std::shared_ptr<ClassName>> {};                                   \
-template<> struct ::Allogen::CSharp::Converter<std::shared_ptr<ClassName>*> :                                           \
+template<> struct Allogen::CSharp::Converter<std::shared_ptr<ClassName>*> :                                           \
                 public ::Allogen::CSharp::BridgeClass<std::shared_ptr<ClassName>*> {};                                  \
-template<> struct ::Allogen::CSharp::Converter<std::shared_ptr<ClassName>&> :                                          	\
+template<> struct Allogen::CSharp::Converter<std::shared_ptr<ClassName>&> :                                          	\
                 public ::Allogen::CSharp::BridgeClass<std::shared_ptr<ClassName>&> {};                                  \
-template<> struct ::Allogen::CSharp::Converter<std::shared_ptr<ClassName>&&> :                                          \
+template<> struct Allogen::CSharp::Converter<std::shared_ptr<ClassName>&&> :                                          \
                 public ::Allogen::CSharp::BridgeClass<std::shared_ptr<ClassName>&&> {};                                 \
 
 	}

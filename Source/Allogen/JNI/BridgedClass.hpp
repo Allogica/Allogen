@@ -443,17 +443,17 @@ namespace Allogen {
 
 #define ALLOGEN_BRIDGED_CLASS(ClassName, JavaClassName)                                                      		\
 template<> constexpr const char ::Allogen::JNI::JAVA_CLASS_NAME<ClassName>[] = JavaClassName;                       \
-template<> struct ::Allogen::JNI::Converter<ClassName>   : public ::Allogen::JNI::BridgeClass<ClassName>   {};    	\
-template<> struct ::Allogen::JNI::Converter<ClassName*>  : public ::Allogen::JNI::BridgeClass<ClassName*>  {};    	\
-template<> struct ::Allogen::JNI::Converter<ClassName&>  : public ::Allogen::JNI::BridgeClass<ClassName&>  {};    	\
-template<> struct ::Allogen::JNI::Converter<ClassName&&> : public ::Allogen::JNI::BridgeClass<ClassName&&> {};   	\
-template<> struct ::Allogen::JNI::Converter<std::shared_ptr<ClassName>> : 											\
+template<> struct Allogen::JNI::Converter<ClassName>   : public ::Allogen::JNI::BridgeClass<ClassName>   {};    	\
+template<> struct Allogen::JNI::Converter<ClassName*>  : public ::Allogen::JNI::BridgeClass<ClassName*>  {};    	\
+template<> struct Allogen::JNI::Converter<ClassName&>  : public ::Allogen::JNI::BridgeClass<ClassName&>  {};    	\
+template<> struct Allogen::JNI::Converter<ClassName&&> : public ::Allogen::JNI::BridgeClass<ClassName&&> {};      	\
+template<> struct Allogen::JNI::Converter<std::shared_ptr<ClassName>> : 											\
 				public ::Allogen::JNI::BridgeClass<std::shared_ptr<ClassName>> {};									\
-template<> struct ::Allogen::JNI::Converter<std::shared_ptr<ClassName>*> : 											\
+template<> struct Allogen::JNI::Converter<std::shared_ptr<ClassName>*> : 											\
 				public ::Allogen::JNI::BridgeClass<std::shared_ptr<ClassName>*> {};									\
-template<> struct ::Allogen::JNI::Converter<std::shared_ptr<ClassName>&> : 											\
+template<> struct Allogen::JNI::Converter<std::shared_ptr<ClassName>&> : 											\
 				public ::Allogen::JNI::BridgeClass<std::shared_ptr<ClassName>&> {};									\
-template<> struct ::Allogen::JNI::Converter<std::shared_ptr<ClassName>&&> : 										\
+template<> struct Allogen::JNI::Converter<std::shared_ptr<ClassName>&&> : 										    \
 				public ::Allogen::JNI::BridgeClass<std::shared_ptr<ClassName>&&> {};								\
 
 	}

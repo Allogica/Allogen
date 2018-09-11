@@ -72,11 +72,11 @@ namespace Allogen {
 				typename Converter<ContainedType>::CSharpType* arr =
 						new typename Converter<ContainedType>::CSharpType[vec.size()];
 
-				for(int i = 0; i<vec.size(); i++) {
+				for(size_t i = 0; i<vec.size(); i++) {
 					arr[i] = Converter<ContainedType>::toCSharp(vec[i]);
 				}
 
-				return { arr, vec.size() };
+				return { arr, static_cast<std::uint64_t>(vec.size()) };
 			}
 
 			/**
@@ -89,8 +89,8 @@ namespace Allogen {
 			 */
 			static Type fromCSharp(CSharpType object) {
 				Type vec;
-				vec.reserve(object.second);
-				for(int i = 0; i<object.second; i++) {
+				vec.reserve(static_cast<size_t>(object.second));
+				for(std::uint64_t i = 0; i < object.second; i++) {
 					vec.push_back(Converter<ContainedType>::fromCSharp(object.first[i]));
 				}
 				return vec;

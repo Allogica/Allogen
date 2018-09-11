@@ -41,7 +41,10 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 
-find_package(JNI)
+if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND
+        NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    find_package(JNI)
+endif()
 if(JNI_FOUND)
 #    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR
 #            ${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
