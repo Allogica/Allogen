@@ -36,8 +36,6 @@ class(class) ::= <<
 using System;
 using System.Runtime.InteropServices;
 
-<class.csImports:{import|using <import>;<\n>}>
-
 namespace <class.csNamespace> {
     <documentation(class)>
     public class <class.csName><if(class.parent)> : <class.parentClass.csFullyQualifiedName><endif> {
@@ -96,12 +94,12 @@ namespace <class.csNamespace> {
 
             public IntPtr MarshalManagedToNative(object managedObj)
             {
-                return ((<class.name>) managedObj)?.Pointer ?? IntPtr.Zero;
+                return ((<class.csFullyQualifiedName>) managedObj)?.Pointer ?? IntPtr.Zero;
             }
 
             public object MarshalNativeToManaged(IntPtr nativeData)
             {
-                return nativeData.ToInt64() == 0 ? null : new <class.name>(nativeData);
+                return nativeData.ToInt64() == 0 ? null : new <class.csFullyQualifiedName>(nativeData);
             }
 
             private static readonly Marshaller Shared = new Marshaller();
@@ -225,7 +223,7 @@ public delegate <typename(argument.type.resolvedType.returnType)> <argument.csDe
 >>
 
 primitiveType(type) ::= "<csTypeMapping.(type.name)>"
-userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.csName>"
+userDefinedType(type) ::= "<type.resolvedType.userDefinedClass.csFullyQualifiedName>"
 stringType(type) ::= "string"
 lambdaType(type) ::= "<type.csDelegateName>"
 optionalType(type) ::= "<typename(type.resolvedType.containedType)>"
@@ -237,7 +235,7 @@ dateType(type) ::= "System.DateTime"
 
 marshalAsTemplateName_(type) ::= "<type.resolvedType.templateName>MarshalAs"
 marshalAs(type, return) ::= "<if(marshalAsTemplateName_(type))><(marshalAsTemplateName_(type))(type, return)><endif>"
-userDefinedTypeMarshalAs(type, return) ::= "[<if(return)>return: <endif>MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(<type.resolvedType.userDefinedClass.csName>.Marshaller))]"
+userDefinedTypeMarshalAs(type, return) ::= "[<if(return)>return: <endif>MarshalAs(UnmanagedType. CustomMarshaler, MarshalTypeRef=typeof(<type.resolvedType.userDefinedClass.csFullyQualifiedName>.Marshaller))]"
 stringTypeMarshalAs(type, return) ::= "[<if(return)>return: <endif>MarshalAs(UnmanagedType.BStr)]"
 lambdaTypeMarshalAs(type, return) ::= ""
 optionalTypeMarshalAs(type, return) ::= "<marshalAs(type.resolvedType.containedType, return)>"
@@ -251,7 +249,7 @@ unmanagedTypenameTemplateName_(type) ::= "<type.resolvedType.templateName>Unmana
 unmanagedTypename(type) ::= "<(unmanagedTypenameTemplateName_(type))(type)>"
 primitiveTypeUnmanangedTypename(type) ::= "<csTypeMapping.(type.name)>"
 stringTypeUnmanangedTypename(type) ::= "string"
-userDefinedTypeUnmanangedTypename(type) ::= "<type.resolvedType.userDefinedClass.csName>"
+userDefinedTypeUnmanangedTypename(type) ::= "<type.resolvedType.userDefinedClass.csFullyQualifiedName>"
 lambdaTypeUnmanangedTypename(type) ::= "<type.csDelegateName>"
 optionalTypeUnmanangedTypename(type) ::= "<unmanagedTypename(type.resolvedType.containedType)>"
 sharedPtrTypeUnmanangedTypename(type) ::= "<unmanagedTypename(type.resolvedType.containedType)>"
