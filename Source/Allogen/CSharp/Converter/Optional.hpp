@@ -31,7 +31,7 @@
 #pragma once
 
 #include "Allogen/CSharp/Converter.hpp"
-#if __has_include(<optional>)
+#if __has_include(<optional>) && !defined(__APPLE__)
 #include <optional>
 #else
 #include <experimental/optional>

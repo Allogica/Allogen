@@ -32,7 +32,7 @@
 
 #include "Allogen/JNI/Converter.hpp"
 
-#if __has_include(<optional>)
+#if __has_include(<optional>)&& !defined(__APPLE__)
 #include <optional>
 namespace Allogen {
 	namespace JNI {
