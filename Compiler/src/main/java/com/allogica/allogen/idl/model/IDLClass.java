@@ -31,7 +31,6 @@
 package com.allogica.allogen.idl.model;
 
 import com.allogica.allogen.idl.grammar.IDLParser;
-import org.omg.CORBA.IDLType;
 
 import java.util.ArrayList;
 import java.util.List;
